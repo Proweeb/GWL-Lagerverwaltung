@@ -2,8 +2,6 @@
 
 ## 🚀 Overview
 
-## 🚀 Overview
-
 The **GW Lagerverwaltung App** (`GWL`) is a **React Native Expo application** designed for **warehouse management**.
 
 It allows users to:  
