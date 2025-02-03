@@ -69,9 +69,7 @@ cd GW-Lagerverwaltung/GWL
    npx expo start
 ```
 
-### 4️⃣ **Run App off physical device**
-
-4️⃣ Run App on a Physical Device
+### 4️⃣ **Run App on a Physical Device**
 Set up Android Studio following the React Native Environment Setup Guide.
 
 Enable Developer Mode on your device and connect it via USB 🔌.
