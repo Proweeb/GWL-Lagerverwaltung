@@ -45,7 +45,7 @@ It allows users to:
 ├── 📂 Assets # Images and Screenshots of App UI
 ├── 📂 Docs # Documentation
 ├── 📂 Other # Important but Unassignable Files (e.g., API Docs, Configs)
-├── 📜 README.md # Overview of Rep
+├── 📜 README.md # Overview of Repo
 ```
 
 ---
