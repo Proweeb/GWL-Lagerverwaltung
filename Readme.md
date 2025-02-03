@@ -32,21 +32,23 @@ It allows users to:
 
 ## 📂 Folder Structure
 
+```sh
 📦 GW-Lagerverwaltung # Main Project Folder (GitHub Repository)
-┣ 📂 GWL # Expo React Native App (Actual Codebase)
-┃ ┣ 📂 src # Source Code
-┃ ┃ ┣ 📂layout #Navigation and Screens
-┃ ┃ ┣ 📂 components # Reusable UI Components
-┃ ┃ ┣ 📂 store # Zustand Global State Management
-┃ ┃ ┣ 📂 utils # Helper Functions (File Handling, Date Formatting, etc.)
-┃ ┃ ┣ 📜 App.js # Main App Entry
-┃ ┣ 📜 app.json # Expo Config
-┃ ┣ 📜 package.json # Dependencies & Scripts
-┃ ┣ 📜 .gitignore # Git Ignore File
-┣ 📂 Assets # Images and Screenshots of App UI
-┣ 📂 Docs # Documentation
-┣ 📂 Other # Important but Unassignable Files (e.g., API Docs, Configs)
-┣ 📜 README.md # Overview of Repo
+├── 📂 GWL # Expo React Native App (Actual Codebase)
+│   ├── 📂 src # Source Code
+│   │   ├── 📂 layout # Navigation and Screens
+│   │   ├── 📂 components # Reusable UI Components
+│   │   ├── 📂 store # Zustand Global State Management
+│   │   ├── 📂 utils # Helper Functions (File Handling, Date Formatting, etc.)
+│   │   ├── 📜 App.js # Main App Entry
+│   ├── 📜 app.json # Expo Config
+│   ├── 📜 package.json # Dependencies & Scripts
+│   ├── 📜 .gitignore # Git Ignore File
+├── 📂 Assets # Images and Screenshots of App UI
+├── 📂 Docs # Documentation
+├── 📂 Other # Important but Unassignable Files (e.g., API Docs, Configs)
+├── 📜 README.md # Overview of Rep
+```
 
 ---
 
