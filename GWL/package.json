@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.2",
+    "@nozbe/watermelondb": "^0.27.1",
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/native": "^7.0.14",
     "expo": "~52.0.31",
@@ -32,7 +33,8 @@
     "react-native-reanimated": "~3.16.1",
     "react-native-safe-area-context": "4.12.0",
     "react-native-screens": "~4.4.0",
-    "react-native-vision-camera": "^4.6.3"
+    "react-native-vision-camera": "^4.6.3",
+    "undefined": "@nozbe/watermelondb/hooks"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
