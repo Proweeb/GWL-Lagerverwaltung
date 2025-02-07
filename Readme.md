@@ -33,12 +33,10 @@ It allows users to:
 ```sh
 📦 GW-Lagerverwaltung # Main Project Folder (GitHub Repository)
 ├── 📂 GWL # Expo React Native App (Actual Codebase)
-│   ├── 📂 src # Source Code
-│   │   ├── 📂 layout # Navigation and Screens
-│   │   ├── 📂 components # Reusable UI Components
+│   ├──📂 app  # Navigation and Screens
+│   ├── 📂 components # Reusable UI Components
 │   │   ├── 📂 store # Zustand Global State Management
 │   │   ├── 📂 utils # Helper Functions (File Handling, Date Formatting, etc.)
-│   │   ├── 📜 App.js # Main App Entry
 │   ├── 📜 app.json # Expo Config
 │   ├── 📜 package.json # Dependencies & Scripts
 │   ├── 📜 .gitignore # Git Ignore File
@@ -72,6 +70,7 @@ cd GW-Lagerverwaltung/GWL
 ```
 
 ### 4️⃣ **Run App on a Physical Device**
+
 Set up Android Studio following the React Native Environment Setup Guide.
 
 Enable Developer Mode on your device and connect it via USB 🔌.
