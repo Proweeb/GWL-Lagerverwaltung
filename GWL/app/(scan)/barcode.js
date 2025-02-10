@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Text, View, TouchableOpacity } from "react-native";
+import { Text, View, TouchableOpacity, TextInput } from "react-native";
 import {
   Camera,
   useCameraDevice,
@@ -15,7 +15,7 @@ import { Audio } from "expo-av";
 
 // Check for Haptics Support
 
-export default function iventurscreen() {
+export default function BarcodeScreen() {
   const camera = useRef(null);
   const [switched, setSwitch] = useState("back");
   const [scannedCodes, setScannedCodes] = useState(new Set()); // Track scanned QR codes
@@ -109,6 +109,7 @@ export default function iventurscreen() {
           padding: 8,
           backgroundColor: styles.white,
           boxShadow: styles.boxShadow,
+          elevation: 4,
           borderRadius: 13,
         }}
       >
@@ -167,29 +168,33 @@ export default function iventurscreen() {
           paddingTop: 20,
         }}
       >
-        <TouchableOpacity
+        <View
           style={{
             marginLeft: 0,
             width: "75%",
             height: 40,
-            boxShadow: styles.boxShadow,
+            boxShadow: "0 4 4 0 rgba(0,0,0,0.5) inset",
             borderRadius: 10,
             alignItems: "center",
             justifyContent: "center",
+            backgroundColor: styles.white,
+            elevation: 2,
           }}
         >
-          <Text style={{ textAlign: "center", fontSize: 20 }}>{shownCode}</Text>
-        </TouchableOpacity>
+          <TextInput style={{ textAlign: "center", fontSize: 20 }}>
+            {shownCode}
+          </TextInput>
+        </View>
         <TouchableOpacity
           style={{
             marginLeft: 10,
             width: 40,
             height: 40,
-            boxShadow: styles.boxShadow,
             borderRadius: 10,
             backgroundColor: styles.lightBlue,
             justifyContent: "center",
             alignItems: "center",
+            elevation: 2,
           }}
         >
           <Ionicons name={"checkbox-outline"} size={20} />

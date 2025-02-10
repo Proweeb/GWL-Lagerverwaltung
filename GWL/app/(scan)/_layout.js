@@ -1,14 +1,19 @@
-import { Tabs } from "expo-router";
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
+import { View, Text, Easing } from "react-native";
 import { request, PERMISSIONS } from "react-native-permissions";
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { useCameraPermission } from "react-native-vision-camera";
+import { isFabric } from "react-native-gesture-handler/src/utils";
 import TopTabNavigation from "../../components/utils/TopTabNavigation/TopTabNavigation";
-import { Easing, View, Text } from "react-native";
-import { useNavigation } from "expo-router";
+import BarcodeScreen from "./barcode";
+import QrCodeScreen from "./qrcode";
+
+const Tab = createMaterialTopTabNavigator();
 
 export default function Layout() {
   const { hasPermission } = useCameraPermission();
   useEffect(() => {
+    console.log(global._IS_FABRIC);
     request(PERMISSIONS.ANDROID.CAMERA).then((status) => console.log(status));
   }, []);
 
@@ -22,7 +27,7 @@ export default function Layout() {
   }
 
   return (
-    <Tabs
+    <Tab.Navigator
       screenOptions={{
         transitionSpec: {
           animation: "timing",
@@ -31,14 +36,20 @@ export default function Layout() {
             easing: Easing.inOut(Easing.ease),
           },
         },
-        animation: "shift",
-        headerShown: false,
         tabBarPosition: "top",
       }}
       tabBar={(props) => <TopTabNavigation {...props} />}
     >
-      <Tabs.Screen name="barcode" options={{ title: "Barcode" }} />
-      <Tabs.Screen name="qrcode" options={{ title: "Qrcode" }} />
-    </Tabs>
+      <Tab.Screen
+        name="Barcode"
+        component={BarcodeScreen}
+        screenOptions={{ title: "Barcodr" }}
+      />
+      <Tab.Screen
+        name="QR Code"
+        component={QrCodeScreen}
+        screenOptions={{ title: "Qrcode" }}
+      />
+    </Tab.Navigator>
   );
 }

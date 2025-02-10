@@ -11,6 +11,7 @@ export default function Layout() {
     console.log("Background Color:", styles.backgroundColor);
     SystemUI.setBackgroundColorAsync(styles.backgroundColor);
     NavigationBar.setBackgroundColorAsync(styles.backgroundColor);
+    console.log("Fabric Enabled:", global?.nativeFabricUIManager);
   }, []); // ✅ Run only once
 
   return (
