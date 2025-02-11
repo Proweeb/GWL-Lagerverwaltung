@@ -1,9 +1,9 @@
-import { Stack } from "expo-router";
+import { createStackNavigator } from "@react-navigation/stack";
 import { styles } from "../../../components/styles";
-
-export default function Layout() {
+const Stack = createStackNavigator();
+export default function ArtikelEntnehmenNavigator() {
   return (
-    <Stack>
+    <Stack.Navigator>
       {/* Tab Navigator */}
       <Stack.Screen
         name="index"
@@ -14,6 +14,6 @@ export default function Layout() {
           statusBarStyle: "dark",
         }}
       />
-    </Stack>
+    </Stack.Navigator>
   );
 }

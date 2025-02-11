@@ -1,7 +1,7 @@
 import { Text, View } from "react-native";
 import { styles } from "../../components/styles";
 
-export default function SettingsScreen() {
+export default function LogsScreen() {
   return (
     <View
       style={{

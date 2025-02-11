@@ -101,14 +101,14 @@ async function addArtikel() {
 }
 
 // Pass `addArtikel` and `deleteLastArtikel` as props
-const FinalScreen = () => (
+const HomeScreen = () => (
   <EnhancedIndexScreen
     addArtikel={addArtikel}
     deleteLastArtikel={deleteLastArtikel}
   />
 );
 
-export default FinalScreen;
+export default HomeScreen;
 
 const styles = StyleSheet.create({
   container: {

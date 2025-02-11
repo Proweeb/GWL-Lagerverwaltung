@@ -24,11 +24,11 @@ export const CustomTabBar = ({ state, descriptors, navigation }) => {
           const { options } = descriptors[route.key];
           const isFocused = state.index === index;
           const iconName = {
-            index: "home",
-            backup: "settings-backup-restore",
-            inventur: "inventory",
-            waren: "content-paste",
-            settings: "settings",
+            Home: "home",
+            Backup: "settings-backup-restore",
+            Inventur: "inventory",
+            Waren: "content-paste",
+            logs: "settings",
           }[route.name];
 
           return (
