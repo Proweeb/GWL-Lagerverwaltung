@@ -13,17 +13,11 @@ export async function createArtikel(artikelData) {
       artikel.ablaufdatum = artikelData.ablaufdatum;
       artikel.menge = artikelData.menge;
       artikel.mindestmenge = artikelData.mindestmenge;
+      artikel.fach = artikelData.fach;
     });
 
-    console.log("✅ Neuer Artikel gespeichert:", newArtikel);
+    console.log("✅ Neuer Artikel gespeichert:", newArtikel.artikelGwid);
   });
-
-  // Fetch and log all Artikel by gwid
-  const newlyadded = await database
-    .get("artikel")
-    .query(Artikel.where("artikelGwid", artikelData.artikelGwid))
-    .fetch();
-  console.log("✅ Neuer Artikel gespeichert:", newlyadded);
 }
 
 // Read an Artikel by ID
@@ -43,7 +37,6 @@ export async function getAllArtikel() {
 // Update an Artikel by ID
 export async function updateArtikel(id, artikelData) {
   await database.write(async () => {
-    const artikel = await database.get("artikel").find(id);
     await artikel.update((artikel) => {
       artikel.regalId = artikelData.regalId || artikel.regalId;
       artikel.artikelGwid = artikelData.artikelGwid || artikel.artikelGwid;

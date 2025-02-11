@@ -8,13 +8,15 @@ export const CustomTabBar = ({ state, descriptors, navigation }) => {
       style={{
         flexDirection: "row",
         backgroundColor: styles.white,
-        margin: 0,
+        marginBottom: 5,
+        marginHorizontal: 15,
         borderRadius: 20,
         padding: 5,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.3,
         shadowRadius: 3,
+        elevation: 1,
       }}
     >
       {state.routes.map((route, index) => {

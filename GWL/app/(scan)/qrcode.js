@@ -15,7 +15,7 @@ import { Audio } from "expo-av";
 
 // Check for Haptics Support
 
-export default function iventurscreen() {
+export default function QrCodeScreen() {
   const camera = useRef(null);
   const [switched, setSwitch] = useState("back");
   const [scannedCodes, setScannedCodes] = useState(new Set()); // Track scanned QR codes
@@ -109,6 +109,7 @@ export default function iventurscreen() {
           backgroundColor: styles.white,
           boxShadow: styles.boxShadow,
           borderRadius: 13,
+          elevation: 4,
         }}
       >
         <View
@@ -171,10 +172,11 @@ export default function iventurscreen() {
             marginLeft: 0,
             width: "75%",
             height: 40,
-            boxShadow: styles.boxShadow,
+            elevation: 2,
             borderRadius: 10,
             alignItems: "center",
             justifyContent: "center",
+            backgroundColor: styles.white,
           }}
         >
           <Text style={{ textAlign: "center", fontSize: 20 }}>{shownCode}</Text>
@@ -184,7 +186,7 @@ export default function iventurscreen() {
             marginLeft: 10,
             width: 40,
             height: 40,
-            boxShadow: styles.boxShadow,
+            elevation: 2,
             borderRadius: 10,
             backgroundColor: styles.lightBlue,
             justifyContent: "center",

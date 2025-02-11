@@ -10,6 +10,7 @@ import { database } from "../../database/database";
 import Artikel from "../../database/models/Artikel";
 import { Ionicons } from "@expo/vector-icons";
 import { withObservables } from "@nozbe/watermelondb/react";
+import { createArtikel } from "../../database/DataMapper/HelperArtikel";
 
 // Component to render each Artikel
 const ArtikelItem = ({ artikel }) => (
@@ -54,25 +55,6 @@ const enhance = withObservables([], () => ({
 const EnhancedIndexScreen = enhance(IndexScreen);
 
 // Function to add a new Artikel
-const addArtikel = async () => {
-  try {
-    await database.write(async () => {
-      await database.get("artikel").create((artikel) => {
-        artikel.regalId = "123";
-        artikel.artikelGwid = "gwid123";
-        artikel.artikelFirmenId = "firmenid123";
-        artikel.beschreibung = "Test Artikel Beschreibung";
-        artikel.kunde = "Kunde Test";
-        artikel.ablaufdatum = new Date().getTime();
-        artikel.menge = 10;
-        artikel.mindestmenge = 5;
-      });
-    });
-    console.log("Artikel added!");
-  } catch (error) {
-    console.error("Error adding Artikel: ", error);
-  }
-};
 
 // Function to delete the last Artikel
 const deleteLastArtikel = async () => {
@@ -93,6 +75,30 @@ const deleteLastArtikel = async () => {
     console.error("Error deleting last Artikel: ", error);
   }
 };
+
+// Function to add a new Artikel
+async function addArtikel() {
+  try {
+    // Define the artikelData object with test values
+    const artikelData = {
+      regalId: "123", // Regal ID (foreign key)
+      artikelGwid: "gwid123", // Artikel GWID (unique identifier)
+      artikelFirmenId: "firmenid123", // Firmen ID (company identifier)
+      beschreibung: "Test Artikel Beschreibung", // Artikel description
+      kunde: "Kunde Test", // Kunde (customer)
+      ablaufdatum: new Date().getTime(), // Ablaufdatum (expiry date as timestamp)
+      menge: 10, // Menge (quantity)
+      mindestmenge: 5, // Mindestmenge (minimum quantity)
+      fach: "yrmom",
+    };
+
+    // Call the function to add the Artikel to the database
+    await createArtikel(artikelData);
+    console.log("✅ Artikel added!");
+  } catch (error) {
+    console.error("Error adding Artikel: ", error);
+  }
+}
 
 // Pass `addArtikel` and `deleteLastArtikel` as props
 const FinalScreen = () => (
