@@ -43,12 +43,12 @@ export default function Layout() {
       <Tab.Screen
         name="Barcode"
         component={BarcodeScreen}
-        screenOptions={{ title: "Barcodr" }}
+        options={{ title: "Barcode" }}
       />
       <Tab.Screen
         name="QR Code"
         component={QrCodeScreen}
-        screenOptions={{ title: "Qrcode" }}
+        ptions={{ title: "Qrcode" }}
       />
     </Tab.Navigator>
   );

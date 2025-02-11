@@ -8,24 +8,22 @@ import { DatabaseProvider } from "@nozbe/watermelondb/react";
 
 export default function Layout() {
   useEffect(() => {
-    console.log("Background Color:", styles.backgroundColor);
     SystemUI.setBackgroundColorAsync(styles.backgroundColor);
     NavigationBar.setBackgroundColorAsync(styles.backgroundColor);
-    console.log("Fabric Enabled:", global?.nativeFabricUIManager);
   }, []); // ✅ Run only once
 
   return (
     <DatabaseProvider database={database}>
-      <Stack>
-        {/* Tab Navigator */}
-        <Stack.Screen
-          name="(tabs)"
-          options={{
-            headerShown: false,
-            statusBarBackgroundColor: styles.backgroundColor,
-            statusBarStyle: "dark",
-          }}
-        />
+      <Stack
+        initialRouteName="tabs"
+        screenOptions={{
+          statusBarBackgroundColor: styles.backgroundColor,
+          statusBarStyle: "dark",
+          headerShown: false, // No header on this screen
+        }}
+      >
+        {/* Main Tab Navigator */}
+        <Stack.Screen name="(tabs)" />
 
         {/* Hidden Screens */}
         <Stack.Screen
@@ -37,11 +35,12 @@ export default function Layout() {
             title: "Scan Item",
             headerTitleStyle: [styles.header],
             headerBackButtonMenuEnabled: false,
-            presentation: "card",
             headerShadowVisible: false,
             headerBackVisible: false,
           }}
         />
+
+        <Stack.Screen name="(actions)" />
       </Stack>
     </DatabaseProvider>
   );

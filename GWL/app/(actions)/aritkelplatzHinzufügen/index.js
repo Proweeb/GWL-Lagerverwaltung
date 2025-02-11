@@ -1,7 +1,7 @@
 import { Text, View } from "react-native";
-import { styles } from "../../components/styles";
+import { styles } from "../../../components/styles";
 
-export default function WarenScreen() {
+export default function IndexScreen() {
   return (
     <View
       style={{
@@ -11,7 +11,7 @@ export default function WarenScreen() {
         backgroundColor: styles.backgroundColor,
       }}
     >
-      <Text>👤 Profile Screen</Text>
+      <Text>LAgerplatz </Text>
     </View>
   );
 }

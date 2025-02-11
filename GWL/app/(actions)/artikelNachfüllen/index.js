@@ -1,7 +1,7 @@
 import { Text, View } from "react-native";
-import { styles } from "../../components/styles";
+import { styles } from "../../../components/styles";
 
-export default function WarenScreen() {
+export default function IndexScreen() {
   return (
     <View
       style={{
