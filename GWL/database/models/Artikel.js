@@ -1,5 +1,5 @@
 import { Model } from "@nozbe/watermelondb";
-import { field, relation } from "@nozbe/watermelondb/decorators";
+import { children, field, relation } from "@nozbe/watermelondb/decorators";
 
 class Artikel extends Model {
   static table = "artikel";
@@ -17,6 +17,7 @@ class Artikel extends Model {
 
   // Define the relation to Regal
   @relation("regale", "regal_id") regal;
+  @children("logs") log;
 }
 
 export default Artikel;

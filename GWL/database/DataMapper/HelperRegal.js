@@ -6,7 +6,8 @@ export async function createRegal(regalData) {
   await database.write(async () => {
     const newRegal = await database.get("regale").create((regal) => {
       regal.id = regalData.id;
-      regal.name = regalData.name;
+      regal.regalname = regalData.regalname;
+      regal.fachname = regalData.fachname;
     });
 
     console.log("✅ Neuer Regal gespeichert:", newRegal);
@@ -32,7 +33,7 @@ export async function updateRegal(id, regalData) {
   await database.write(async () => {
     const regal = await database.get("regale").find(id);
     await regal.update((regal) => {
-      regal.name = regalData.name || regal.name;
+      regal.regalname = regalData.regalname || regal.regalname;
     });
 
     console.log("✅ Regal aktualisiert:", regal);

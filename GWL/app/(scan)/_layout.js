@@ -31,10 +31,11 @@ export default function Layout() {
             easing: Easing.inOut(Easing.ease),
           },
         },
-        animation: "shift",
         headerShown: false,
-        tabBarPosition: "top",
+       
+       
       }}
+    
       tabBar={(props) => <TopTabNavigation {...props} />}
     >
       <Tabs.Screen name="barcode" options={{ title: "Barcode" }} />
