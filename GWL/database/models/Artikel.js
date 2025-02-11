@@ -5,7 +5,6 @@ class Artikel extends Model {
   static table = "artikel";
 
   // Columns in the table
-  @field("fach") fach;
   @field("gwid") gwid;
   @field("firmenId") firmenId;
   @field("beschreibung") beschreibung;

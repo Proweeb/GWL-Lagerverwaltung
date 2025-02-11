@@ -13,7 +13,6 @@ export async function createArtikel(artikelData) {
       artikel.ablaufdatum = artikelData.ablaufdatum;
       artikel.menge = artikelData.menge;
       artikel.mindestmenge = artikelData.mindestmenge;
-      artikel.fach = artikelData.fach;
     });
 
     console.log("✅ Neuer Artikel gespeichert:", newArtikel.artikelGwid);
@@ -40,8 +39,7 @@ export async function updateArtikel(id, artikelData) {
     await artikel.update((artikel) => {
       artikel.regalId = artikelData.regalId || artikel.regalId;
       artikel.artikelGwid = artikelData.artikelGwid || artikel.artikelGwid;
-      artikel.artikelFirmenId =
-        artikelData.artikelFirmenId || artikel.artikelFirmenId;
+      artikel.artikelFirmenId = artikelData.artikelFirmenId || artikel.artikelFirmenId;
       artikel.beschreibung = artikelData.beschreibung || artikel.beschreibung;
       artikel.kunde = artikelData.kunde || artikel.kunde;
       artikel.ablaufdatum = artikelData.ablaufdatum || artikel.ablaufdatum;

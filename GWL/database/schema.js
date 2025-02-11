@@ -7,13 +7,13 @@ export const lagerSchema = appSchema({
       name: "regale",
       columns: [
         { name: "regal_id", type: "string", isIndexed: true },
-        { name: "name", type: "string",isIndexed: true},
+        { name: "fach_name", type: "string", isIndexed: true },
+        { name: "regal_name", type: "string",isIndexed: true},
       ],
     }),
     tableSchema({
       name: "artikel",
       columns: [
-        { name: "fach", type: "string" },
         { name: "gwid", type: "number", isIndexed: true },
         { name: "firmenId", type: "string" },
         { name: "beschreibung", type: "string" },
