@@ -1,9 +1,9 @@
 import { Text, View } from "react-native";
 
-export default function SettingsScreen() {
+export default function InventurScreen() {
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text>🏠 Home Screen</Text>
+      <Text>👤 Profile Screen</Text>
     </View>
   );
 }

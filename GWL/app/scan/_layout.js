@@ -1,26 +1,28 @@
-import { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { View, Text, Easing } from "react-native";
-import { request, PERMISSIONS } from "react-native-permissions";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import { request, PERMISSIONS } from "react-native-permissions";
 import { useCameraPermission } from "react-native-vision-camera";
-import { isFabric } from "react-native-gesture-handler/src/utils";
-import TopTabNavigation from "../../components/utils/TopTabNavigation/TopTabNavigation";
+
 import BarcodeScreen from "./barcode";
 import QrCodeScreen from "./qrcode";
 
+import TopTabNavigation from "../../components/utils/TopTabNavigation/TopTabNavigation";
+
+// Create Tab Navigator
 const Tab = createMaterialTopTabNavigator();
 
-export default function Layout() {
+export default function TopTabNavigator() {
   const { hasPermission } = useCameraPermission();
+
   useEffect(() => {
-    console.log(global._IS_FABRIC);
-    request(PERMISSIONS.ANDROID.CAMERA).then((status) => console.log(status));
+    request(PERMISSIONS.ANDROID.CAMERA).then((status) => {});
   }, []);
 
   // If permission is not granted, show a message
   if (!hasPermission) {
     return (
-      <View>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Text>Requesting Camera Permission...</Text>
       </View>
     );
@@ -28,7 +30,9 @@ export default function Layout() {
 
   return (
     <Tab.Navigator
+      tabBar={(props) => <TopTabNavigation {...props} />}
       screenOptions={{
+        tabBarPosition: "top",
         transitionSpec: {
           animation: "timing",
           config: {
@@ -36,19 +40,17 @@ export default function Layout() {
             easing: Easing.inOut(Easing.ease),
           },
         },
-        tabBarPosition: "top",
       }}
-      tabBar={(props) => <TopTabNavigation {...props} />}
     >
       <Tab.Screen
         name="Barcode"
         component={BarcodeScreen}
-        screenOptions={{ title: "Barcodr" }}
+        options={{ title: "Barcode" }}
       />
       <Tab.Screen
         name="QR Code"
         component={QrCodeScreen}
-        screenOptions={{ title: "Qrcode" }}
+        options={{ title: "QR Code" }}
       />
     </Tab.Navigator>
   );
