@@ -70,19 +70,20 @@ export default function BottomTabNavigator() {
           headerRight: () => (
             <TouchableOpacity
               style={{
-                width: 40,
-                height: 40,
+                width: "30%",
+
                 justifyContent: "center",
                 alignItems: "center",
-                marginRight: 15,
+                padding: 5,
+                overflow: "hidden",
               }}
             >
               <Image
                 source={require("../../assets/adaptive-icon.png")}
                 style={{
-                  width: 30,
-                  height: 30,
-                  resizeMode: "center",
+                  width: "99%",
+
+                  resizeMode: "contain",
                 }}
               />
             </TouchableOpacity>

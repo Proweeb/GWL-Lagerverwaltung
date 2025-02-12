@@ -18,7 +18,7 @@ export const styles = {
   },
 
   subHeader: {
-    fontSize: 14,
+    fontSize: 18,
     fontFamily: "inter",
     fontWeight: "700",
     textAlign: "left",

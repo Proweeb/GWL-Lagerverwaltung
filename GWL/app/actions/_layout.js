@@ -29,7 +29,7 @@ export default function AktionenNavigator() {
       <Stack.Screen
         name="ArtikelPlatzHinzufügenNavigator"
         component={ArtikelPlatzHinzufügenNavigator}
-        options={{ title: "Lagerplatz mit Artikel hinzufügen" }}
+        options={{ title: "Lagerplatz&Artikel" }}
       />
       <Stack.Screen
         name="ArtikelNachfüllenNavigator"
