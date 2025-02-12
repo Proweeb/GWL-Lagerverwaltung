@@ -1,7 +1,7 @@
 import { Text, View } from "react-native";
 import { styles } from "../../../components/styles";
 
-export default function IndexScreen() {
+export default function TestScreen() {
   return (
     <View
       style={{
@@ -11,7 +11,7 @@ export default function IndexScreen() {
         backgroundColor: styles.backgroundColor,
       }}
     >
-      <Text>👤 Profile Screen</Text>
+      <Text>Testing </Text>
     </View>
   );
 }

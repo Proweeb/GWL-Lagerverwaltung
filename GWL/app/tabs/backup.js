@@ -14,15 +14,35 @@ export default function BackupScreen() {
       }}
     >
       <Pressable
-        onPress={() => navigation.navigate("Actions")}
+        onPress={() =>
+          navigation.navigate("Actions", {
+            screen: "ArtikelPlatzHinzufügenNavigator",
+            params: { screen: "Test" },
+          })
+        }
         style={{
           padding: 20,
-          backgroundColor: styles.white,
+          backgroundColor: styles.yellow,
           elevation: 7,
           borderRadius: 5,
         }}
       >
-        <Text>👤 Go to Scan Navigator</Text>
+        <Text>👤 Go to Test in ArtikelPlatzHinzufügen</Text>
+      </Pressable>
+      <Pressable
+        onPress={() =>
+          navigation.navigate("Actions", {
+            screen: "LagerNavigator",
+          })
+        }
+        style={{
+          padding: 20,
+          backgroundColor: styles.yellow,
+          elevation: 7,
+          borderRadius: 5,
+        }}
+      >
+        <Text>👤 Go to</Text>
       </Pressable>
     </View>
   );

@@ -4,7 +4,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import PlatzHinzufügenNavigator from "./platzHinzufügen/_layout";
 import ArtikelPlatzHinzufügenNavigator from "./artikelPlatzHinzufügen/_layout";
 import ArtikelNachfüllenNavigator from "./artikelNachfüllen/_layout";
-import ArtikelEinlagernNavigator from "./artikelHinzufügen/_layout";
+import ArtikelEinlagernNavigator from "./artikelEinlagern/_layout";
 import ArtikelEntnehmenNavigator from "./artikelEntnehmen/_layout";
 import LagerNavigator from "./lager/_layout";
 
@@ -13,11 +13,11 @@ const Stack = createStackNavigator();
 export default function AktionenNavigator() {
   return (
     <Stack.Navigator
-      initialRouteName="LagerScreen"
+      initialRouteName="LagerNavigator"
       screenOptions={{ headerShown: false }}
     >
       <Stack.Screen
-        name="LagerScreen"
+        name="LagerNavigator"
         component={LagerNavigator}
         options={{ title: "Lager verwalten" }}
       />

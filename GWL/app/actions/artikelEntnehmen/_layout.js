@@ -1,18 +1,16 @@
+import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
-import { styles } from "../../../components/styles";
+import IndexScreen from "./index"; // The main screen inside artikelEntnehmen
+
 const Stack = createStackNavigator();
+
 export default function ArtikelEntnehmenNavigator() {
   return (
     <Stack.Navigator>
-      {/* Tab Navigator */}
       <Stack.Screen
         name="index"
-        options={{
-          title: "Artikel Entnehmen",
-          headerShown: true,
-          statusBarBackgroundColor: styles.backgroundColor,
-          statusBarStyle: "dark",
-        }}
+        component={IndexScreen}
+        options={{ title: "Artikel Entnehmen" }}
       />
     </Stack.Navigator>
   );
