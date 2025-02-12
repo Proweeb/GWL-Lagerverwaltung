@@ -22,6 +22,9 @@ export const lagerSchema = appSchema({
         { name: "kunde", type: "string" },
         { name: "regal_id", type: "string" },
         { name: "ablaufdatum", type: "number" },
+        { name: "high", type: "number" },
+        { name: "status", type: "string" },
+
       ],
     }),
     tableSchema({

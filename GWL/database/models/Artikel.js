@@ -13,6 +13,8 @@ class Artikel extends Model {
   @field("kunde") kunde;
   @field("regal_id") regal_id;
   @field("ablaufdatum") ablaufdatum; // Store as timestamp (milliseconds)
+  @field("high") high;
+  @field("status") status;
 
   // Define the relation to Regal
   @relation("regale", "regal_id") regal;
