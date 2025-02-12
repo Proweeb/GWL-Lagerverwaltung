@@ -22,7 +22,22 @@ export default function BackupScreen() {
           borderRadius: 5,
         }}
       >
-        <Text>👤 Go to Scan Navigator</Text>
+        <Text>👤 Go to Test in ArtikelPlatzHinzufügen</Text>
+      </Pressable>
+      <Pressable
+        onPress={() =>
+          navigation.navigate("Actions", {
+            screen: "ArtikelEinlagernNavigator",
+          })
+        }
+        style={{
+          padding: 20,
+          backgroundColor: styles.yellow,
+          elevation: 7,
+          borderRadius: 5,
+        }}
+      >
+        <Text>👤 Go to</Text>
       </Pressable>
     </View>
   );
