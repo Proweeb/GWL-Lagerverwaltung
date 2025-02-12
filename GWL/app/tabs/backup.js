@@ -22,7 +22,7 @@ export default function BackupScreen() {
           borderRadius: 5,
         }}
       >
-        <Text>👤 Go to Test in ArtikelPlatzHinzufügen</Text>
+        <Text>👤 Go to Actions</Text>
       </Pressable>
       <Pressable
         onPress={() =>

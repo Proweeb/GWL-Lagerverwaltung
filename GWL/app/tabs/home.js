@@ -125,13 +125,68 @@ function HomeScreen() {
         containerFlex={0.7}
         title={"Benachrichtungen"}
       />
-      <HomeWidget flexValue={0.9} containerFlex={1} title={"Aktionen"} />
+      <HomeWidget
+        flexValue={0.9}
+        containerFlex={1}
+        title={"Aktionen"}
+        containerStyle={{
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-around",
+            width: "100%",
+          }}
+        >
+          <View>
+            <Ionicons name="alarm" size={70}></Ionicons>
+            <Text style={{ textAlign: "center", fontSize: 16 }}>Hi</Text>
+          </View>
+          <View>
+            <Ionicons name="alarm" size={70}></Ionicons>
+            <Text style={{ textAlign: "center", fontSize: 16 }}>Hi</Text>
+          </View>
+          <View>
+            <Ionicons name="alarm" size={70}></Ionicons>
+            <Text style={{ textAlign: "center", fontSize: 16 }}>Hi</Text>
+          </View>
+        </View>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-around",
+            width: "100%",
+          }}
+        >
+          <View>
+            <Ionicons name="alarm" size={70}></Ionicons>
+            <Text style={{ textAlign: "center", fontSize: 16 }}>Hi</Text>
+          </View>
+          <View>
+            <Ionicons name="alarm" size={70}></Ionicons>
+            <Text style={{ textAlign: "center", fontSize: 16 }}>Hi</Text>
+          </View>
+          <View>
+            <Ionicons name="alarm" size={70}></Ionicons>
+            <Text style={{ textAlign: "center", fontSize: 16 }}>Hi</Text>
+          </View>
+        </View>
+      </HomeWidget>
       <HomeWidget flexValue={0.8} containerFlex={1} title={"Lagerbewegungen"} />
     </View>
   );
 }
 
-const HomeWidget = ({ title, flexValue, containerFlex }) => {
+const HomeWidget = ({
+  title,
+  flexValue,
+  containerFlex,
+  children,
+  containerStyle,
+}) => {
   return (
     <View
       style={{
@@ -157,7 +212,7 @@ const HomeWidget = ({ title, flexValue, containerFlex }) => {
           elevation: 8,
         }}
       >
-        <View></View>
+        <View style={[{ padding: 20 }, containerStyle]}>{children}</View>
       </View>
     </View>
   );
