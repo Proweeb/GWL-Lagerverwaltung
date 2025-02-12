@@ -8,7 +8,11 @@ import {
 } from "react-native";
 import { database } from "../../database/database";
 import Artikel from "../../database/models/Artikel";
-import { Ionicons } from "@expo/vector-icons";
+import {
+  Ionicons,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import { withObservables } from "@nozbe/watermelondb/react";
 import { createArtikel } from "../../database/DataMapper/HelperArtikel";
 import { styles } from "../../components/styles";
@@ -108,6 +112,57 @@ import { styles } from "../../components/styles";
 //     deleteLastArtikel={deleteLastArtikel}
 //   />
 // );
+import ActionGrid from "../../components/utils/ActionGrid";
+
+const actions = [
+  [
+    {
+      screen: "ArtikelNachfüllenNavigator",
+      iconName: "cart-heart", // Represents adding/refilling items
+      iconType: "MaterialCommunityIcons",
+      label: "Art.-Nachfüllen ",
+      route: "ArtikelNachfüllenNavigator",
+    },
+    {
+      screen: "PlatzHinzufügenNavigator",
+      iconName: "package-variant-closed", // Represents adding a storage location
+      iconType: "MaterialCommunityIcons",
+      label: "LP-Hinzufügen",
+      route: "PlatzHinzufügenNavigator",
+    },
+
+    {
+      screen: "ArtikelEinlagernNavigator",
+      iconName: "cart-plus", // Represents storing an item
+      iconType: "MaterialCommunityIcons",
+      label: "Art.-Einlagern",
+      route: "ArtikelEinlagernNavigator",
+    },
+  ],
+  [
+    {
+      screen: "LagerNavigator",
+      iconName: "warehouse", // Represents a warehouse
+      iconType: "MaterialCommunityIcons",
+      label: "Lager-Verwalten",
+      route: "LagerNavigator",
+    },
+    {
+      screen: "ArtikelPlatzHinzufügenNavigator",
+      iconName: "package-variant", // Represents assigning an item to a place
+      iconType: "MaterialCommunityIcons",
+      label: "Art. & LP-Ergänzen",
+      route: "ArtikelPlatzHinzufügenNavigator",
+    },
+    {
+      screen: "ArtikelEntnehmenNavigator",
+      iconName: "cart-minus", // Represents taking an item out
+      iconType: "MaterialCommunityIcons",
+      label: "Art.-Nachfüllen",
+      route: "ArtikelEntnehmenNavigator",
+    },
+  ],
+];
 
 function HomeScreen() {
   return (
@@ -126,7 +181,7 @@ function HomeScreen() {
         title={"Benachrichtungen"}
       />
       <HomeWidget
-        flexValue={0.9}
+        flexValue={0.95}
         containerFlex={1}
         title={"Aktionen"}
         containerStyle={{
@@ -134,48 +189,13 @@ function HomeScreen() {
           alignItems: "center",
         }}
       >
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-around",
-            width: "100%",
-          }}
-        >
-          <View>
-            <Ionicons name="alarm" size={70}></Ionicons>
-            <Text style={{ textAlign: "center", fontSize: 16 }}>Hi</Text>
-          </View>
-          <View>
-            <Ionicons name="alarm" size={70}></Ionicons>
-            <Text style={{ textAlign: "center", fontSize: 16 }}>Hi</Text>
-          </View>
-          <View>
-            <Ionicons name="alarm" size={70}></Ionicons>
-            <Text style={{ textAlign: "center", fontSize: 16 }}>Hi</Text>
-          </View>
-        </View>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-around",
-            width: "100%",
-          }}
-        >
-          <View>
-            <Ionicons name="alarm" size={70}></Ionicons>
-            <Text style={{ textAlign: "center", fontSize: 16 }}>Hi</Text>
-          </View>
-          <View>
-            <Ionicons name="alarm" size={70}></Ionicons>
-            <Text style={{ textAlign: "center", fontSize: 16 }}>Hi</Text>
-          </View>
-          <View>
-            <Ionicons name="alarm" size={70}></Ionicons>
-            <Text style={{ textAlign: "center", fontSize: 16 }}>Hi</Text>
-          </View>
-        </View>
+        <ActionGrid actions={actions} />
       </HomeWidget>
-      <HomeWidget flexValue={0.8} containerFlex={1} title={"Lagerbewegungen"} />
+      <HomeWidget
+        flexValue={0.8}
+        containerFlex={1}
+        title={"Lagerbewegungen"}
+      ></HomeWidget>
     </View>
   );
 }

@@ -14,6 +14,7 @@ export default function PlatzHinzufügenNavigator() {
           headerShown: true,
           statusBarBackgroundColor: styles.backgroundColor,
           statusBarStyle: "dark",
+          headerTitleStyle: styles.header,
         }}
         component={IndexScreen} // Using the same IndexScreen for all
       />

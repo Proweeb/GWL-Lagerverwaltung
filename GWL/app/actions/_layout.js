@@ -17,7 +17,7 @@ export default function AktionenNavigator() {
       screenOptions={{ headerShown: false }}
     >
       <Stack.Screen
-        name="LagerScreen"
+        name="LagerNavigator"
         component={LagerNavigator}
         options={{ title: "Lager verwalten" }}
       />
@@ -29,7 +29,7 @@ export default function AktionenNavigator() {
       <Stack.Screen
         name="ArtikelPlatzHinzufügenNavigator"
         component={ArtikelPlatzHinzufügenNavigator}
-        options={{ title: "Lagerplatz mit Artikel hinzufügen" }}
+        options={{ title: "Lagerplatz&Artikel" }}
       />
       <Stack.Screen
         name="ArtikelNachfüllenNavigator"

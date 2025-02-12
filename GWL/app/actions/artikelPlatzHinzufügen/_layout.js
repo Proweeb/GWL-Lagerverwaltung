@@ -10,10 +10,11 @@ export default function ArtikelPlatzHinzufügenNavigator() {
       <Stack.Screen
         name="ArtikelPlatzHinzufügen"
         options={{
-          title: "Lagerplatz mit Artikel hinzufügen",
+          title: "Lagerplatz&Artikel",
           headerShown: true,
           statusBarBackgroundColor: styles.backgroundColor,
           statusBarStyle: "dark",
+          headerTitleStyle: styles.header,
         }}
         component={IndexScreen} // Using the same IndexScreen for all
       />
