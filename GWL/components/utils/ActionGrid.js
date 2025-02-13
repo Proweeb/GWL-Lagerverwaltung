@@ -1,11 +1,18 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+} from "react-native";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
 const ActionGrid = ({ actions }) => {
   const navigation = useNavigation();
-
+  const { width } = Dimensions.get("window");
+  const iconSize = width * 0.1;
   return (
     <View style={styles.container}>
       {/* Render items in two rows of three */}
@@ -37,7 +44,11 @@ const ActionGrid = ({ actions }) => {
                     navigation.navigate("Actions", { screen: route })
                   }
                 >
-                  <IconComponent name={iconName} size={50} color="black" />
+                  <IconComponent
+                    name={iconName}
+                    size={iconSize}
+                    color="black"
+                  />
 
                   <Text
                     style={styles.text}
@@ -65,11 +76,16 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     justifyContent: "space-around",
+    alignItems: "center",
     marginBottom: 10,
+    height: "50%",
   },
   box: {
     alignItems: "center",
-    width: "33.3%", // Ensures equal width for each box
+    //width: "33.3%", // Ensures equal width for each box
+    flex: 1,
+    height: "100%",
+    justifyContent: "center",
   },
   text: {
     color: "#292D32",

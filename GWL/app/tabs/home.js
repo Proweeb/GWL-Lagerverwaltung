@@ -113,6 +113,7 @@ import { styles } from "../../components/styles";
 //   />
 // );
 import ActionGrid from "../../components/utils/ActionGrid";
+import InventoryWidget from "../../components/utils/InventoryWidget";
 
 const actions = [
   [
@@ -158,7 +159,7 @@ const actions = [
       screen: "ArtikelEntnehmenNavigator",
       iconName: "cart-minus", // Represents taking an item out
       iconType: "MaterialCommunityIcons",
-      label: "Art.-Nachfüllen",
+      label: "Art.-Entnehmen",
       route: "ArtikelEntnehmenNavigator",
     },
   ],
@@ -191,11 +192,9 @@ function HomeScreen() {
       >
         <ActionGrid actions={actions} />
       </HomeWidget>
-      <HomeWidget
-        flexValue={0.8}
-        containerFlex={1}
-        title={"Lagerbewegungen"}
-      ></HomeWidget>
+      <HomeWidget flexValue={0.8} containerFlex={1} title={"Lagerbewegungen"}>
+        <InventoryWidget></InventoryWidget>
+      </HomeWidget>
     </View>
   );
 }

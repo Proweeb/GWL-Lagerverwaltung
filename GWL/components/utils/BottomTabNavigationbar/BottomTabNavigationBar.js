@@ -1,8 +1,10 @@
-import { View, TouchableOpacity, Text } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
+import { View, TouchableOpacity, Text, Dimensions } from "react-native";
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { styles } from "../../styles";
 
 export const CustomTabBar = ({ state, descriptors, navigation }) => {
+  const { width } = Dimensions.get("window");
+  const iconSize = width * 0.05;
   return (
     <View style={{ width: "100%", backgroundColor: styles.backgroundColor }}>
       <View
@@ -25,10 +27,10 @@ export const CustomTabBar = ({ state, descriptors, navigation }) => {
           const isFocused = state.index === index;
           const iconName = {
             Home: "home",
-            Backup: "settings-backup-restore",
-            Inventur: "inventory",
-            Waren: "content-paste",
-            logs: "settings",
+            Backup: "backup-restore",
+            Inventur: "content-paste",
+            Waren: "cart-outline",
+            logs: "clipboard-list-outline",
           }[route.name];
 
           return (
@@ -47,10 +49,10 @@ export const CustomTabBar = ({ state, descriptors, navigation }) => {
                   : "transparent",
               }}
             >
-              <MaterialIcons
+              <MaterialCommunityIcons
                 name={iconName}
-                size={24}
-                color={isFocused ? styles.blue : "gray"}
+                size={iconSize}
+                color={isFocused ? styles.blue : "grey"}
               />
               {isFocused && (
                 <Text
