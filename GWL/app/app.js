@@ -21,8 +21,9 @@ export default function App() {
   useEffect(() => {
     SystemUI.setBackgroundColorAsync(styles.backgroundColor);
     NavigationBar.setBackgroundColorAsync(styles.backgroundColor);
-    insertArtikel();
-    insertLogs();
+    NavigationBar.setButtonStyleAsync("dark");
+    // insertArtikel();
+    //insertLogs();
   }, []);
 
   return (
