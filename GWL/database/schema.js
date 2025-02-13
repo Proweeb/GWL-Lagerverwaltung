@@ -1,37 +1,43 @@
 import { appSchema, tableSchema } from "@nozbe/watermelondb";
 
 export const lagerSchema = appSchema({
-  version: 1,
+  version: 2, // Incremented version due to schema changes
   tables: [
     tableSchema({
       name: "regale",
       columns: [
         { name: "regal_id", type: "string", isIndexed: true },
         { name: "fach_name", type: "string", isIndexed: true },
-        { name: "regal_name", type: "string",isIndexed: true},
+        { name: "regal_name", type: "string", isIndexed: true },
+        { name: "created_at", type: "number" },
+        { name: "updated_at", type: "number" },
       ],
     }),
     tableSchema({
       name: "artikel",
       columns: [
-        { name: "gwid", type: "number", isIndexed: true },
-        { name: "firmenId", type: "string" },
+        { name: "gw_id", type: "string", isIndexed: true }, // Correct gw_id for artikel
+        { name: "firmen_id", type: "string" },
         { name: "beschreibung", type: "string" },
         { name: "menge", type: "number" },
         { name: "mindestmenge", type: "number" },
         { name: "kunde", type: "string" },
-        { name: "regal_id", type: "string" },
+        { name: "regal_id", type: "string", isIndexed: true }, // Foreign key to regale
         { name: "ablaufdatum", type: "number" },
+        { name: "created_at", type: "number" },
+        { name: "updated_at", type: "number" },
       ],
     }),
     tableSchema({
       name: "logs",
       columns: [
-        { name: "beschreibung", type: "string", isIndexed: true  },
-        { name: "datum", type: "string", isIndexed: true },
-        { name: "regal_id", type: "string" },
-        { name: "gwid", type: "string" },
-        {name: "menge", type:"number"},
+        { name: "beschreibung", type: "string", isIndexed: true },
+        { name: "datum", type: "string" },
+        { name: "regal_id", type: "string", isIndexed: true }, // Foreign key to regale
+        { name: "gw_id", type: "string", isIndexed: true }, // Foreign key to artikel
+        { name: "menge", type: "number" },
+        { name: "created_at", type: "number" },
+        { name: "updated_at", type: "number" },
       ],
     }),
   ],

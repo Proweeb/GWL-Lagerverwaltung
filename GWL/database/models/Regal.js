@@ -1,17 +1,25 @@
 import { Model } from "@nozbe/watermelondb";
-import { children, field, relation } from "@nozbe/watermelondb/decorators";
+import { field, children, date } from "@nozbe/watermelondb/decorators";
 
 class Regal extends Model {
   static table = "regale";
 
-  // Columns in the table
-  @field("regal_id") id;
-  @field("fach_name") fachname;
-  @field("regal_name") regalname;
+  // Static associations
+  static associations = {
+    artikel: { type: "has_many", foreignKey: "regal_id" }, // foreign key for has_many
+    logs: { type: "has_many", foreignKey: "regal_id" }, // foreign key for has_many
+  };
 
-  // Define the relation to Artikel
+  @field("fach_name") fachName;
+  @field("regal_name") regalName;
+
+  // Timestamps
+  @date("created_at") createdAt;
+  @date("updated_at") updatedAt;
+
+  // Relations
   @children("artikel") artikel;
-  @children("logs") log;
+  @children("logs") logs;
 }
 
 export default Regal;

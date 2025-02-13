@@ -1,31 +1,65 @@
 import React, { useEffect, useState } from "react";
 import { Text, View, StyleSheet } from "react-native";
-import * as theme from "../styles";
+import { database } from "../../database/database";
 
 const InventoryWidget = () => {
-  const [logs, setLogs] = useState([
-    {
-      id: "FfRpvFbXTpvtgPZu",
-      name: "Kiwi",
-      gwid: 12323234,
-      menge: 5,
-      status: "high",
-    },
-    {
-      id: "aL9tkhWgAhTuh1sw",
-      name: "Baby Oil",
-      gwid: 23456789,
-      menge: 1,
-      status: "low",
-    },
-    {
-      id: "LTg8VRPkngH8lweG",
-      name: "TV",
-      gwid: 3,
-      menge: -403,
-      status: "out",
-    },
-  ]);
+  const [logs, setLogs] = useState([]);
+
+  useEffect(() => {
+    // const fetchLogs = async () => {
+    //   try {
+    //     const logsCollection = database.get("logs");
+    //     // Fetch the latest 3 logs with associated artikel
+    //     const latestLogs = await logsCollection.query().fetch();
+    //     //console.log(Object.values(latestLogs[0]._raw));
+    //     const logsData = await Promise.all(
+    //       latestLogs.slice(0, 3).map(async (log) => {
+    //         const artikel = await log.regal; // Fetch the associated artikel data
+    //         console.log(Object.values(log.artikel));
+    //         return {
+    //           id: log.id,
+    //           name: log.beschreibung,
+    //           gwid: log.gw_id,
+    //           menge: log.menge,
+    //           status: getStatus(log.menge, 0, 10),
+    //         };
+    //       })
+    //     );
+    //     setLogs(logsData);
+    //   } catch (error) {
+    //     console.error("Error fetching logs:", error);
+    //   }
+    // };
+    // fetchLogs();
+
+    const readArtikelWithLogs = async () => {
+      try {
+        // Query all artikel
+        const artikels = await database.get("artikel").query().fetch();
+
+        for (const artikel of artikels) {
+          // Eager load related logs
+          const logs = await artikel.logs.fetch(); // Load related logs
+
+          // Log artikel and related logs
+          console.log(`Artikel GW_ID: ${artikel.gw_id}`);
+          console.log(`Beschreibung: ${artikel.beschreibung}`);
+          console.log(`Menge: ${artikel.menge}`);
+
+          logs.forEach((log) => {
+            console.log(`  Log Beschreibung: ${log.beschreibung}`);
+            console.log(`  Log Datum: ${log.datum}`);
+            console.log(`  Log Menge: ${log.menge}`);
+          });
+
+          console.log("-----------------------------");
+        }
+      } catch (error) {
+        console.error("Error reading artikel with logs:", error);
+      }
+    };
+    readArtikelWithLogs();
+  }, []);
 
   const getStatus = (menge, mindestmenge, high) => {
     if (menge <= mindestmenge) return "low";
@@ -51,9 +85,16 @@ const InventoryWidget = () => {
           >
             {item.menge < 0 ? item.menge : "+" + item.menge}
           </Text>
-          <View style={{ flex: 1 }}>
-            <View style={[styles.status, styles[item.status]]}>
-              <Text style={[styles.text, styles.statusText]} numberOfLines={1}>
+          <View
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          >
+            <View
+              style={[
+                { width: "80%", borderRadius: 30, elevation: 4 },
+                styles[item.status],
+              ]}
+            >
+              <Text style={[{ textAlign: "center" }]} numberOfLines={1}>
                 {item.status}
               </Text>
             </View>
@@ -67,7 +108,7 @@ const InventoryWidget = () => {
 const styles = StyleSheet.create({
   item: {
     flexDirection: "row",
-    justifyContent: "space-between", // Ensure properties are spaced out
+    justifyContent: "space-between",
     alignItems: "center",
     padding: 5,
     backgroundColor: "#F8F8FF",
@@ -77,35 +118,17 @@ const styles = StyleSheet.create({
     height: "30%",
   },
   text: {
-    flex: 1, // Allow each property to take equal space
-    marginRight: 5, // Spacing between the properties
-    overflow: "hidden", // Hide overflow text
-    textOverflow: "ellipsis", // Adds ellipsis when text overflows
+    flex: 1,
+    marginRight: 5,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
   },
-  name: {
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  gwid: {
-    color: "#777",
-    textAlign: "center",
-  },
-  menge: {
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  status: {
-    height: "100%",
-    padding: 5,
-    borderRadius: 50,
-  },
+  name: { fontWeight: "bold", textAlign: "center" },
+  gwid: { color: "#777", textAlign: "center" },
+  menge: { fontWeight: "bold", textAlign: "center" },
   high: { backgroundColor: "#c8f7c5" },
   low: { backgroundColor: "#f9e79f" },
   out: { backgroundColor: "#f5b7b1" },
-  statusText: {
-    fontWeight: "bold",
-    textAlign: "center",
-  },
 });
 
 export default InventoryWidget;
