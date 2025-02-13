@@ -11,6 +11,8 @@ import { styles } from "../components/styles";
 import TopTabNavigator from "./scan/_layout";
 import BottomTabNavigator from "./tabs/_layout";
 import AktionenNavigator from "./actions/_layout";
+import { insertArtikel } from "../database/test";
+import { insertLogs } from "../database/test";
 
 // Create Stack & Tab Navigators
 const Stack = createStackNavigator();
@@ -19,6 +21,8 @@ export default function App() {
   useEffect(() => {
     SystemUI.setBackgroundColorAsync(styles.backgroundColor);
     NavigationBar.setBackgroundColorAsync(styles.backgroundColor);
+    insertArtikel();
+    insertLogs();
   }, []);
 
   return (
