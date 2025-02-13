@@ -11,8 +11,7 @@ import { styles } from "../components/styles";
 import TopTabNavigator from "./scan/_layout";
 import BottomTabNavigator from "./tabs/_layout";
 import AktionenNavigator from "./actions/_layout";
-import { insertArtikel } from "../database/test";
-import { insertLogs } from "../database/test";
+import { relation } from "@nozbe/watermelondb/decorators";
 
 // Create Stack & Tab Navigators
 const Stack = createStackNavigator();
@@ -22,8 +21,6 @@ export default function App() {
     SystemUI.setBackgroundColorAsync(styles.backgroundColor);
     NavigationBar.setBackgroundColorAsync(styles.backgroundColor);
     NavigationBar.setButtonStyleAsync("dark");
-    // insertArtikel();
-    //insertLogs();
   }, []);
 
   return (

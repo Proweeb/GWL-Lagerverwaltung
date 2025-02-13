@@ -6,66 +6,116 @@ const InventoryWidget = () => {
   const [logs, setLogs] = useState([]);
 
   useEffect(() => {
-    // const fetchLogs = async () => {
-    //   try {
-    //     const logsCollection = database.get("logs");
-    //     // Fetch the latest 3 logs with associated artikel
-    //     const latestLogs = await logsCollection.query().fetch();
-    //     //console.log(Object.values(latestLogs[0]._raw));
-    //     const logsData = await Promise.all(
-    //       latestLogs.slice(0, 3).map(async (log) => {
-    //         const artikel = await log.regal; // Fetch the associated artikel data
-    //         console.log(Object.values(log.artikel));
-    //         return {
-    //           id: log.id,
-    //           name: log.beschreibung,
-    //           gwid: log.gw_id,
-    //           menge: log.menge,
-    //           status: getStatus(log.menge, 0, 10),
-    //         };
-    //       })
-    //     );
-    //     setLogs(logsData);
-    //   } catch (error) {
-    //     console.error("Error fetching logs:", error);
-    //   }
-    // };
-    // fetchLogs();
-
-    const readArtikelWithLogs = async () => {
+    const fetchLogs = async () => {
       try {
-        // Query all artikel
-        const artikels = await database.get("artikel").query().fetch();
+        const logsCollection = database.get("logs");
+        // Fetch all logs (or you can limit your query if needed)
+        const latestLogs = await logsCollection.query().fetch();
 
-        for (const artikel of artikels) {
-          // Eager load related logs
-          const logs = await artikel.logs.fetch(); // Load related logs
+        // Map over the first 3 logs and fetch the associated artikel for each log
+        const logsData = await Promise.all(
+          latestLogs.slice(0, 3).map(async (log) => {
+            // Use .fetch() on the belongs-to relation to get the associated artikel record
+            const artikel = await log.artikel.fetch();
+            // If you also need the associated regal, do:
+            // const regal = await log.regal.fetch();
 
-          // Log artikel and related logs
-          console.log(`Artikel GW_ID: ${artikel.gw_id}`);
-          console.log(`Beschreibung: ${artikel.beschreibung}`);
-          console.log(`Menge: ${artikel.menge}`);
+            return {
+              id: log.id,
+              name: artikel.beschreibung, // using artikel's beschreibung
+              gwid: artikel.gwId,
+              menge: log.menge,
+              status: artikel.status,
+            };
+          })
+        );
 
-          logs.forEach((log) => {
-            console.log(`  Log Beschreibung: ${log.beschreibung}`);
-            console.log(`  Log Datum: ${log.datum}`);
-            console.log(`  Log Menge: ${log.menge}`);
-          });
-
-          console.log("-----------------------------");
-        }
+        setLogs(logsData);
       } catch (error) {
-        console.error("Error reading artikel with logs:", error);
+        console.error("Error fetching logs:", error);
       }
     };
-    readArtikelWithLogs();
-  }, []);
 
-  const getStatus = (menge, mindestmenge, high) => {
-    if (menge <= mindestmenge) return "low";
-    if (menge >= high) return "high";
-    return "out";
-  };
+    async function testInsertAndFetch() {
+      await database.write(async () => {
+        // Delete all existing records from "artikel" and "logs"
+        const allArtikel = await database.get("artikel").query().fetch();
+        const allLogs = await database.get("logs").query().fetch();
+
+        await database.batch(
+          ...allArtikel.map((artikel) => artikel.prepareDestroyPermanently()),
+          ...allLogs.map((log) => log.prepareDestroyPermanently())
+        );
+
+        // Create a single artikel record
+        const artikel = await database.get("artikel").create((artikel) => {
+          artikel.gwId = "123";
+          artikel.firmenId = "firmen456";
+          artikel.beschreibung = "Test Artikel";
+          artikel.menge = 10;
+          artikel.high = 5;
+          artikel.mindestMenge = 2;
+          artikel.kunde = "Test Kunde";
+          artikel.ablaufdatum = Date.now();
+        });
+
+        // Create a single regal record
+        const regal = await database.get("regale").create((regal) => {
+          regal.fachName = "hans";
+          regal.regalName = "mutter";
+          regal.regalId = "123"; // Ensure this matches your model's field (@field("regal_id") regalId)
+        });
+
+        // Create 3 log records using a loop
+        for (let i = 0; i < 3; i++) {
+          await database.get("logs").create((log) => {
+            log.beschreibung = `Test Log ${i + 1}`;
+            log.datum = new Date().toISOString();
+            log.menge = -5;
+            // Use .set() to assign the belongs-to relationships
+            log.artikel.set(artikel);
+            log.regal.set(regal);
+          });
+        }
+
+        // Optionally, fetch all logs and log the related artikel for each log
+        const allCreatedLogs = await database.get("logs").query().fetch();
+        for (const log of allCreatedLogs) {
+          const relatedArtikel = await log.artikel.fetch();
+        }
+      });
+    }
+    testInsertAndFetch();
+    fetchLogs();
+
+    // const readArtikelWithLogs = async () => {
+    //   try {
+    //     // Query all artikel
+    //     const artikels = await database.get("artikel").query().fetch();
+
+    //     for (const artikel of artikels) {
+    //       // Eager load related logs
+    //       const logs = await artikel.logs.fetch(); // Load related logs
+
+    //       // Log artikel and related logs
+    //       console.log(`Artikel GW_ID: ${artikel.gwId}`);
+    //       console.log(`Beschreibung: ${artikel.beschreibung}`);
+    //       console.log(`Menge: ${artikel.menge}`);
+
+    //       logs.forEach((log) => {
+    //         console.log(`  Log Beschreibung: ${log.beschreibung}`);
+    //         console.log(`  Log Datum: ${log.datum}`);
+    //         console.log(`  Log Menge: ${log.menge}`);
+    //       });
+
+    //       console.log("-----------------------------");
+    //     }
+    //   } catch (error) {
+    //     console.error("Error reading artikel with logs:", error);
+    //   }
+    // };
+    // readArtikelWithLogs();
+  }, []);
 
   const getColor = (menge) => (menge > 0 ? "green" : "red");
 

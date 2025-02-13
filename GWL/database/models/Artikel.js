@@ -1,34 +1,39 @@
 import { Model } from "@nozbe/watermelondb";
 import {
+  children,
   field,
   relation,
   date,
-  children,
 } from "@nozbe/watermelondb/decorators";
 
 class Artikel extends Model {
   static table = "artikel";
 
-  // Static associations
   static associations = {
-    regale: { type: "belongs_to", key: "regal_id" }, // correct the key
+    regale: { type: "belongs_to", key: "regal_id" },
     logs: { type: "has_many", foreignKey: "gw_id" },
   };
 
+  @field("gw_id") gwId;
   @field("firmen_id") firmenId;
   @field("beschreibung") beschreibung;
   @field("menge") menge;
   @field("mindestmenge") mindestMenge;
   @field("kunde") kunde;
   @field("ablaufdatum") ablaufdatum;
+  @field("high") high;
 
-  // Timestamps
   @date("created_at") createdAt;
   @date("updated_at") updatedAt;
 
-  // Relations
-  @relation("regale", "regal_id") regal; // foreign key relation with Regal model
+  @relation("regale", "regal_id") regal;
   @children("logs") logs;
+
+  get status() {
+    if (this.menge <= this.mindestmenge) return "low";
+    if (this.menge >= this.high) return "high";
+    return "out";
+  }
 }
 
 export default Artikel;
