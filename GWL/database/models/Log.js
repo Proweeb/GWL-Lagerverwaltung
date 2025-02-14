@@ -11,7 +11,6 @@ class Log extends Model {
   };
 
   @field("beschreibung") beschreibung;
-  @field("datum") datum;
   @field("menge") menge;
 
   @date("created_at") createdAt;

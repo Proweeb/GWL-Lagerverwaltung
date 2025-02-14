@@ -11,7 +11,10 @@ import { styles } from "../components/styles";
 import TopTabNavigator from "./scan/_layout";
 import BottomTabNavigator from "./tabs/_layout";
 import AktionenNavigator from "./actions/_layout";
-import { relation } from "@nozbe/watermelondb/decorators";
+import ArtikelService from "../database/datamapper/ArtikelHelper";
+import LogService from "../database/datamapper/LogHelper"
+import RegalService from "../database/datamapper/RegalHelper"
+
 
 // Create Stack & Tab Navigators
 const Stack = createStackNavigator();

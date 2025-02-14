@@ -14,7 +14,7 @@ import {
   MaterialIcons,
 } from "@expo/vector-icons";
 import { withObservables } from "@nozbe/watermelondb/react";
-import { createArtikel } from "../../database/DataMapper/HelperArtikel";
+import { createArtikel } from "../../database/datamapper/ArtikelHelper";
 import { styles } from "../../components/styles";
 
 // // Component to render each Artikel
