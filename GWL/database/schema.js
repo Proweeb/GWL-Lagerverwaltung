@@ -24,7 +24,6 @@ export const lagerSchema = appSchema({
         { name: "kunde", type: "string" },
         { name: "regal_id", type: "string", isIndexed: true }, // Foreign key to regale
         { name: "ablaufdatum", type: "number" },
-        { name: "high", type: "number" },
         { name: "created_at", type: "number" },
         { name: "updated_at", type: "number" },
       ],

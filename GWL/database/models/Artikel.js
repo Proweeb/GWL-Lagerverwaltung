@@ -21,7 +21,6 @@ class Artikel extends Model {
   @field("mindestmenge") mindestMenge;
   @field("kunde") kunde;
   @field("ablaufdatum") ablaufdatum;
-  @field("high") high;
 
   @date("created_at") createdAt;
   @date("updated_at") updatedAt;
@@ -30,9 +29,9 @@ class Artikel extends Model {
   @children("logs") logs;
 
   get status() {
-    if (this.menge <= this.mindestmenge) return "low";
-    if (this.menge >= this.high) return "high";
-    return "out";
+    if (this.menge <= this.mindestmenge && this.menge != this.mindestmenge) return "low";
+    if(this.menge == 0 ) return "out";
+    return "ok";
   }
 }
 
