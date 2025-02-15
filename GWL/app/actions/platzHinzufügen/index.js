@@ -16,15 +16,7 @@ export default function IndexScreen() {
     try {
               
 
-      //Chat Gibity Skibidi 
-        const route = useRoute(); // Get route object
-
-        useEffect(() => {
-          if (route.params?.scannedCode) {
-            setCode(route.params.scannedCode); // Set the scanned code in the Regal ID field
-          }
-        }, [route.params?.scannedCode]); // Run when scannedCode changes
-
+      
       if (!name || !fach || !code) {
         Alert.alert("Fehlende Angaben", "Bitte fülle alle Felder aus, bevor du speicherst.");
         return;
