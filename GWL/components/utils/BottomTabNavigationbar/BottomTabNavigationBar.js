@@ -8,24 +8,19 @@ export const CustomTabBar = ({ state, descriptors, navigation }) => {
   return (
     <View style={{ width: "100%", backgroundColor: styles.backgroundColor }}>
       <View
-        style={[
-          {
-            flexDirection: "row",
-            backgroundColor: styles.white,
-            marginBottom: 10,
-            marginHorizontal: 15,
-            borderRadius: 20,
-            padding: 5,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.3,
-            shadowRadius: 3,
-            elevation: 2,
-          },
-          Dimensions.get("window").width > 599 && {
-            marginHorizontal: 100,
-          },
-        ]}
+        style={{
+          flexDirection: "row",
+          backgroundColor: styles.white,
+          marginBottom: 10,
+          marginHorizontal: 15,
+          borderRadius: 20,
+          padding: 5,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.3,
+          shadowRadius: 3,
+          elevation: 2,
+        }}
       >
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];

@@ -7,14 +7,14 @@ import * as NavigationBar from "expo-navigation-bar";
 import { DatabaseProvider } from "@nozbe/watermelondb/react";
 import { database } from "../database/database";
 import { styles } from "../components/styles";
-import * as Notifications from "expo-notifications";
 
 import TopTabNavigator from "./scan/_layout";
 import BottomTabNavigator from "./tabs/_layout";
 import AktionenNavigator from "./actions/_layout";
 import ArtikelService from "../database/datamapper/ArtikelHelper";
-import LogService from "../database/datamapper/LogHelper";
-import RegalService from "../database/datamapper/RegalHelper";
+import LogService from "../database/datamapper/LogHelper"
+import RegalService from "../database/datamapper/RegalHelper"
+
 
 // Create Stack & Tab Navigators
 const Stack = createStackNavigator();
@@ -24,25 +24,6 @@ export default function App() {
     SystemUI.setBackgroundColorAsync(styles.backgroundColor);
     NavigationBar.setBackgroundColorAsync(styles.backgroundColor);
     NavigationBar.setButtonStyleAsync("dark");
-    Notifications.setNotificationHandler({
-      handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: true,
-        shouldSetBadge: true,
-      }),
-    });
-
-    // Second, call scheduleNotificationAsync()
-    Notifications.scheduleNotificationAsync({
-      content: {
-        title: "🔥 Breaking News",
-        subtitle: "Something interesting happened!",
-        body: "Tap to read more...",
-        color: "#FF5733", // Notification accent color
-      },
-
-      trigger: null,
-    });
   }, []);
 
   return (

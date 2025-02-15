@@ -16,10 +16,6 @@ import LogsScreen from "./logs";
 import WarenScreen from "./waren";
 // Import Custom Tab Bar (if you have one)
 import { CustomTabBar } from "../../components/utils/BottomTabNavigationbar/BottomTabNavigationBar";
-import {
-  widthPercentageToDP,
-  heightPercentageToDP,
-} from "react-native-responsive-screen";
 
 // Create Bottom Tabs
 const Tab = createBottomTabNavigator();
@@ -32,9 +28,6 @@ export default function BottomTabNavigator() {
       screenOptions={{
         headerShadowVisible: false,
         headerTitleStyle: styles.header,
-        headerStyle: {
-          height: heightPercentageToDP(10),
-        },
       }}
     >
       {/* Inventur Tab */}
@@ -71,24 +64,23 @@ export default function BottomTabNavigator() {
         component={HomeScreen}
         options={{
           title: "Home",
-
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home" size={size} color={color} />
+          ),
           headerRight: () => (
             <TouchableOpacity
               style={{
-                backgroundColor: "transparent",
-
-                width: widthPercentageToDP(20), // Fixed dimensions for consistency
-                height: heightPercentageToDP(10),
-                borderRadius: 20, // Optional: Make it circular
+                justifyContent: "center",
+                alignItems: "center",
                 overflow: "hidden",
               }}
             >
               <Image
                 source={require("../../assets/adaptive-icon.png")}
                 style={{
-                  width: "100%",
-                  height: "100%",
-                  resizeMode: "cover",
+                  height: 100,
+                  width: 100,
+                  resizeMode: "center",
                 }}
               />
             </TouchableOpacity>

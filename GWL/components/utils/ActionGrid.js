@@ -8,7 +8,6 @@ import {
 } from "react-native";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { RFPercentage } from "react-native-responsive-fontsize";
 
 const ActionGrid = ({ actions }) => {
   const navigation = useNavigation();
@@ -91,7 +90,7 @@ const styles = StyleSheet.create({
   text: {
     color: "#292D32",
     textAlign: "center",
-    fontSize: RFPercentage(1.6),
+    fontSize: 14,
     width: "90%", // Prevents text overflow
     flexShrink: 1, // Prevents text from expanding
     fontWeight: "400",

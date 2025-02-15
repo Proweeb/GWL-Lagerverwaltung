@@ -1,4 +1,3 @@
-import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 export const styles = {
   //Background Colors
   backgroundColor: "#FFFFFF",
@@ -11,7 +10,7 @@ export const styles = {
   //Textstyle
   textInputBackgroundColor: "D9D9D9",
   header: {
-    fontSize: RFPercentage(3.7),
+    fontSize: 30,
     fontFamily: "inter",
     fontWeight: "700",
     textAlign: "left",
@@ -19,7 +18,7 @@ export const styles = {
   },
 
   subHeader: {
-    fontSize: RFPercentage(2),
+    fontSize: 18,
     fontFamily: "inter",
     fontWeight: "700",
     textAlign: "left",
