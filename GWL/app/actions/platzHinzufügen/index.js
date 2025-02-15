@@ -1,20 +1,35 @@
-import { Text, View, TextInput, Button, Alert, TouchableOpacity} from "react-native";
-import React, { useState } from "react";
+import { Text, View, TextInput, Button, Alert, TouchableOpacity } from "react-native";
+import React, { Component, useState } from "react";
 import RegalService from "../../../database/datamapper/RegalHelper";
+import TopTabNavigator from "../../scan/_layout";
+import { useNavigation } from "@react-navigation/native";
 
-
+import { useRoute } from "@react-navigation/native"; // Import useRoute
 
 export default function IndexScreen() {
   const [name, setName] = useState("");
   const [fach, setFach] = useState("");
   const [code, setCode] = useState("");
+  const navigation = useNavigation();
 
   const handleSubmit = async () => {
     try {
+              
+
+      //Chat Gibity Skibidi 
+        const route = useRoute(); // Get route object
+
+        useEffect(() => {
+          if (route.params?.scannedCode) {
+            setCode(route.params.scannedCode); // Set the scanned code in the Regal ID field
+          }
+        }, [route.params?.scannedCode]); // Run when scannedCode changes
+
       if (!name || !fach || !code) {
         Alert.alert("Fehlende Angaben", "Bitte fülle alle Felder aus, bevor du speicherst.");
         return;
       }
+
 
       const regalData = {
         regalId: code,
@@ -23,7 +38,10 @@ export default function IndexScreen() {
       };
 
       await RegalService.createRegal(regalData);
-      Alert.alert("Erfolgreich gespeichert!", `Das Regal wurde mit folgenden Daten angelegt:\n\n📌 Name: ${name}\n📦 Fach: ${fach}\n🔢 Code: ${code}`);
+      Alert.alert(
+        "Erfolgreich gespeichert!", 
+        `Das Regal wurde mit folgenden Daten angelegt:\n\n📌 Name: ${name}\n📦 Fach: ${fach}\n🔢 Code: ${code}`
+      );
 
       console.log("Regal erfolgreich erstellt.");
       const regal = await RegalService.getRegalById(code);
@@ -34,36 +52,55 @@ export default function IndexScreen() {
     }
   };
 
+  const inputStyle = {
+    height: 40,
+    borderColor: "gray",
+    borderWidth: 1,
+    width: "100%",
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    backgroundColor: "transparent",
+  };
+
   return (
-    <View style={{ flex: 1, justifyContent: "flex-start", alignItems: "center", padding: 20, marginTop: 50 }}>
-      <Text style={{ fontSize: 24, marginBottom: 20 }}>Profile Form</Text>
-      <TextInput
-        style={{ height: 40, borderColor: "gray", borderWidth: 1, width: "100%", marginBottom: 10, paddingHorizontal: 10 }}
-        placeholder="Enter your name"
-        value={name}
-        onChangeText={setName}
-      />
-      <TextInput
-        style={{ height: 40, borderColor: "gray", borderWidth: 1, width: "100%", marginBottom: 10, paddingHorizontal: 10 }}
-        placeholder="Enter Fach"
-        value={fach}
-        onChangeText={setFach}
-      />
-      <View style={{ flexDirection: "row", alignItems: "center", width: "100%" }}>
+    <View style={{ flex: 1, justifyContent: "flex-start", padding: 20, backgroundColor: "#ffffff" }}>
+      <Text style={{ fontSize: 16, marginBottom: 30 }}>Lagerung</Text>
+
+      <View style={{ marginBottom: 10 }}>
         <TextInput
-          style={{ flex: 1, height: 40, borderColor: "gray", borderWidth: 1, marginBottom: 10, paddingHorizontal: 10 }}
-          placeholder="Enter Code"
-          value={code}
-          onChangeText={setCode}
+          style={inputStyle}
+          placeholder="Regal Name"
+          value={name}
+          onChangeText={setName}
         />
+      </View>
+
+      <View style={{ marginBottom: 10 }}>
+        <TextInput
+          style={inputStyle}
+          placeholder="Fach Name"
+          value={fach}
+          onChangeText={setFach}
+        />
+      </View>
+
+      <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}>
+        <View style={{ flex: 1 }}>
+          <TextInput
+            style={inputStyle}
+            placeholder="Regal ID"
+            value={code}
+            onChangeText={setCode}
+          />
+        </View>
         <TouchableOpacity
-          onPress={() => router.push("/(scan)/barcode")}
+          onPress={() => navigation.navigate("Scan")}
           style={{
             marginLeft: 10,
             width: 40,
             height: 40,
-            borderRadius: 20,
-            backgroundColor: "#87CEEB",
+            borderRadius: 10,
+            backgroundColor: "#ffffff",
             justifyContent: "center",
             alignItems: "center",
             elevation: 5,
@@ -73,11 +110,17 @@ export default function IndexScreen() {
             shadowRadius: 3,
           }}
         >
-          <Text style={{ color: "white", fontSize: 20 }}>🔍</Text>
+          <Text style={{ color: "black", fontSize: 20 }}>[III]</Text>
         </TouchableOpacity>
       </View>
-      <Button title="Submit" onPress={handleSubmit} />
+      <View style={{ marginTop: "auto", alignItems: "center" }}>
+        <TouchableOpacity 
+          onPress={handleSubmit} 
+          style={{ backgroundColor: "#dcebf9", padding: 10, borderRadius: 5 }}>
+          <Text style={{ color: "#30A6DE", fontSize: 16 }}>Fertig</Text>
+        </TouchableOpacity>
+      </View>
+      
     </View>
   );
 }
-
