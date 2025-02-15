@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View, StyleSheet, Dimensions } from "react-native";
 import { database } from "../../database/database";
+import { RFPercentage } from "react-native-responsive-fontsize";
 
 const InventoryWidget = () => {
   const [logs, setLogs] = useState([]);
@@ -17,6 +18,7 @@ const InventoryWidget = () => {
           latestLogs.slice(0, 3).map(async (log) => {
             // Use .fetch() on the belongs-to relation to get the associated artikel record
             const artikel = await log.artikel.fetch();
+            const regal = await log.regal.fetch();
             // If you also need the associated regal, do:
             // const regal = await log.regal.fetch();
 
@@ -26,6 +28,13 @@ const InventoryWidget = () => {
               gwid: artikel.gwId,
               menge: log.menge,
               status: artikel.status,
+              fachName: regal.fachName,
+              regalName: regal.regalName,
+              datum: new Date(log.createdAt).toLocaleString("de-DE", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+              }),
             };
           })
         );
@@ -53,7 +62,6 @@ const InventoryWidget = () => {
           artikel.firmenId = "firmen456";
           artikel.beschreibung = "Test Artikel";
           artikel.menge = 10;
-          artikel.high = 5;
           artikel.mindestMenge = 2;
           artikel.kunde = "Test Kunde";
           artikel.ablaufdatum = Date.now();
@@ -61,9 +69,9 @@ const InventoryWidget = () => {
 
         // Create a single regal record
         const regal = await database.get("regale").create((regal) => {
-          regal.fachName = "hans";
-          regal.regalName = "mutter";
-          regal.regalId = "123"; // Ensure this matches your model's field (@field("regal_id") regalId)
+          regal.fachName = "10";
+          regal.regalName = "A5";
+          regal.regalId = "134"; // Ensure this matches your model's field (@field("regal_id") regalId)
         });
 
         // Create 3 log records using a loop
@@ -129,6 +137,16 @@ const InventoryWidget = () => {
           <Text style={[styles.text, styles.gwid]} numberOfLines={1}>
             #{item.gwid}
           </Text>
+          {/* {Dimensions.get("window").width > 599 && (
+            <>
+              <Text style={[styles.text, styles.name]} numberOfLines={1}>
+                {item.regalName}
+              </Text>
+              <Text style={[styles.text, styles.gwid]} numberOfLines={1}>
+                {item.fachName}
+              </Text>
+            </>
+          )} */}
           <Text
             style={[styles.text, styles.menge, { color: getColor(item.menge) }]}
             numberOfLines={1}
@@ -144,7 +162,16 @@ const InventoryWidget = () => {
                 styles[item.status],
               ]}
             >
-              <Text style={[{ textAlign: "center" }]} numberOfLines={1}>
+              <Text
+                style={[
+                  {
+                    textAlign: "center",
+                    fontSize: RFPercentage(1.6),
+                    fontWeight: "bold",
+                  },
+                ]}
+                numberOfLines={1}
+              >
                 {item.status}
               </Text>
             </View>
@@ -160,7 +187,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 5,
+    padding: 10,
     backgroundColor: "#F8F8FF",
     borderRadius: 10,
     marginBottom: 5,
@@ -172,11 +199,12 @@ const styles = StyleSheet.create({
     marginRight: 5,
     overflow: "hidden",
     textOverflow: "ellipsis",
+    fontSize: RFPercentage(1.65),
   },
   name: { fontWeight: "bold", textAlign: "center" },
   gwid: { color: "#777", textAlign: "center" },
   menge: { fontWeight: "bold", textAlign: "center" },
-  high: { backgroundColor: "#c8f7c5" },
+  ok: { backgroundColor: "#c8f7c5" },
   low: { backgroundColor: "#f9e79f" },
   out: { backgroundColor: "#f5b7b1" },
 });
