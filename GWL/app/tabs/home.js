@@ -5,6 +5,7 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
+  Dimensions,
 } from "react-native";
 import { database } from "../../database/database";
 import Artikel from "../../database/models/Artikel";
@@ -16,6 +17,8 @@ import {
 import { withObservables } from "@nozbe/watermelondb/react";
 import { createArtikel } from "../../database/datamapper/ArtikelHelper";
 import { styles } from "../../components/styles";
+
+import { RFPercentage } from "react-native-responsive-fontsize";
 
 // // Component to render each Artikel
 // const ArtikelItem = ({ artikel }) => (
@@ -168,13 +171,17 @@ const actions = [
 function HomeScreen() {
   return (
     <View
-      style={{
-        flex: 1,
-        paddingLeft: 20,
-        paddingRight: 20,
+      style={[
+        {
+          flex: 1,
+          paddingHorizontal: 20,
 
-        backgroundColor: styles.backgroundColor,
-      }}
+          backgroundColor: styles.backgroundColor,
+        },
+        Dimensions.get("screen").width > 599 && {
+          paddingHorizontal: 100,
+        },
+      ]}
     >
       <HomeWidget
         flexValue={0.9}
@@ -192,7 +199,14 @@ function HomeScreen() {
       >
         <ActionGrid actions={actions} />
       </HomeWidget>
-      <HomeWidget flexValue={0.8} containerFlex={1} title={"Lagerbewegungen"}>
+      <HomeWidget
+        flexValue={0.8}
+        containerFlex={1}
+        title={"Lagerbewegungen"}
+        containerStyle={{
+          paddingHorizontal: Dimensions.get("window").width > 599 ? 50 : 20,
+        }}
+      >
         <InventoryWidget></InventoryWidget>
       </HomeWidget>
     </View>
