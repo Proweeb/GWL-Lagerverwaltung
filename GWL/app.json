@@ -49,7 +49,10 @@
       [
         "react-native-permissions",
         {
-          "iosPermissions": ["Camera", "Microphone"]
+          "iosPermissions": [
+            "Camera",
+            "Microphone"
+          ]
         }
       ],
       [
@@ -60,14 +63,19 @@
             "compileSdkVersion": 34,
             "targetSdkVersion": 34,
             "packagingOptions": {
-              "pickFirst": ["**/libc++_shared.so"]
+              "pickFirst": [
+                "**/libc++_shared.so"
+              ]
             }
           },
           "ios": {
             "extraPods": [
               {
                 "name": "simdjson",
-                "configurations": ["Debug", "Release"],
+                "configurations": [
+                  "Debug",
+                  "Release"
+                ],
                 "path": "path_to/node_modules/@nozbe/simdjson",
                 "modular_headers": true
               }
@@ -84,6 +92,12 @@
           "enableBackgroundRemoteNotifications": false
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "918d31ec-6cbd-4034-a962-b23426dfcbd0"
+      }
+    },
+    "owner": "abehari"
   }
 }

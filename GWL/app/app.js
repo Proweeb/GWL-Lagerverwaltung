@@ -8,16 +8,17 @@ import { DatabaseProvider } from "@nozbe/watermelondb/react";
 import { database } from "../database/database";
 import { styles } from "../components/styles";
 import * as Notifications from "expo-notifications";
+import { LogBox } from "react-native";
 
-import TopTabNavigator from "./scan/_layout";
+import ScanScreen from "./scan/scan";
 import BottomTabNavigator from "./tabs/_layout";
 import AktionenNavigator from "./actions/_layout";
-import ArtikelService from "../database/datamapper/ArtikelHelper";
-import LogService from "../database/datamapper/LogHelper";
-import RegalService from "../database/datamapper/RegalHelper";
 
 // Create Stack & Tab Navigators
 const Stack = createStackNavigator();
+LogBox.ignoreLogs([
+  "Non-serializable values were found in the navigation state",
+]);
 
 export default function App() {
   useEffect(() => {
@@ -66,18 +67,7 @@ function MainStack() {
       }}
     >
       <Stack.Screen name="Tabs" component={BottomTabNavigator} />
-      <Stack.Screen
-        name="Scan"
-        component={TopTabNavigator}
-        options={{
-          headerShown: true,
-          title: "Scan Item",
-          headerTitleStyle: styles.header,
-          headerBackButtonMenuEnabled: false,
-          headerShadowVisible: false,
-          headerBackVisible: false,
-        }}
-      />
+      <Stack.Screen name="Scan" component={ScanScreen} />
       <Stack.Screen name="Actions" component={AktionenNavigator} />
     </Stack.Navigator>
   );

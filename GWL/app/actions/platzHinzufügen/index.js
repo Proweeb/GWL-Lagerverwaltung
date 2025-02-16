@@ -1,10 +1,16 @@
-import { Text, View, TextInput, Button, Alert, TouchableOpacity } from "react-native";
+import {
+  Text,
+  View,
+  TextInput,
+  Button,
+  Alert,
+  TouchableOpacity,
+} from "react-native";
 import React, { Component, useState } from "react";
 import RegalService from "../../../database/datamapper/RegalHelper";
-import TopTabNavigator from "../../scan/_layout";
+
 import { useNavigation } from "@react-navigation/native";
 
-import { useRoute } from "@react-navigation/native"; // Import useRoute
 import { MaterialIcons } from "@expo/vector-icons";
 
 export default function IndexScreen() {
@@ -15,14 +21,13 @@ export default function IndexScreen() {
 
   const handleSubmit = async () => {
     try {
-              
-
-      
       if (!name || !fach || !code) {
-        Alert.alert("Fehlende Angaben", "Bitte fülle alle Felder aus, bevor du speicherst.");
+        Alert.alert(
+          "Fehlende Angaben",
+          "Bitte fülle alle Felder aus, bevor du speicherst."
+        );
         return;
       }
-
 
       const regalData = {
         regalId: code,
@@ -32,7 +37,7 @@ export default function IndexScreen() {
 
       await RegalService.createRegal(regalData);
       Alert.alert(
-        "Erfolgreich gespeichert!", 
+        "Erfolgreich gespeichert!",
         `Das Regal wurde mit folgenden Daten angelegt:\n\n📌 Name: ${name}\n📦 Fach: ${fach}\n🔢 Code: ${code}`
       );
 
@@ -41,7 +46,10 @@ export default function IndexScreen() {
       console.log(regal);
     } catch (error) {
       console.error("Fehler beim Speichern des Regals: ", error);
-      Alert.alert("Speicherung fehlgeschlagen", "Das Regal konnte nicht gespeichert werden. Bitte überprüfe deine Eingaben und versuche es erneut.");
+      Alert.alert(
+        "Speicherung fehlgeschlagen",
+        "Das Regal konnte nicht gespeichert werden. Bitte überprüfe deine Eingaben und versuche es erneut."
+      );
     }
   };
 
@@ -56,7 +64,14 @@ export default function IndexScreen() {
   };
 
   return (
-    <View style={{ flex: 1, justifyContent: "flex-start", padding: 20, backgroundColor: "#ffffff" }}>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "flex-start",
+        padding: 20,
+        backgroundColor: "#ffffff",
+      }}
+    >
       <Text style={{ fontSize: 16, marginBottom: 30 }}>Lagerung</Text>
 
       <View style={{ marginBottom: 10 }}>
@@ -77,7 +92,9 @@ export default function IndexScreen() {
         />
       </View>
 
-      <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}>
+      <View
+        style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}
+      >
         <View style={{ flex: 1 }}>
           <TextInput
             style={inputStyle}
@@ -104,17 +121,16 @@ export default function IndexScreen() {
           }}
         >
           <Text style={{ color: "black", fontSize: 20 }}>[III]</Text>
-        
         </TouchableOpacity>
       </View>
       <View style={{ marginTop: "auto", alignItems: "center" }}>
-        <TouchableOpacity 
-          onPress={handleSubmit} 
-          style={{ backgroundColor: "#dcebf9", padding: 10, borderRadius: 5 }}>
+        <TouchableOpacity
+          onPress={handleSubmit}
+          style={{ backgroundColor: "#dcebf9", padding: 10, borderRadius: 5 }}
+        >
           <Text style={{ color: "#30A6DE", fontSize: 16 }}>Fertig</Text>
         </TouchableOpacity>
       </View>
-      
     </View>
   );
 }

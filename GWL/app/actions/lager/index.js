@@ -1,4 +1,10 @@
-import { Text, View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import {
+  Text,
+  View,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
 import { styles } from "../../../components/styles";
 import { MaterialIcons } from "@expo/vector-icons";
 
@@ -12,14 +18,12 @@ export default function IndexScreen() {
   ];
 
   const handlePress = () => {
-    console.log('Action was pressed!');
+    console.log("Action was pressed!");
   };
 
   return (
     <ScrollView contentContainerStyle={localStyles.scrollContainer}>
-
-      // Table Start v
-      <Text style= {localStyles.regalBez}>Regal Bezeichnung</Text>
+      <Text style={localStyles.regalBez}>Regal Bezeichnung</Text>
       <View style={localStyles.table}>
         {/* Table Header */}
         <View style={[localStyles.row, localStyles.rowBorder]}>
@@ -39,7 +43,7 @@ export default function IndexScreen() {
             <Text style={localStyles.tableContent}>Aktion</Text>
           </View>
         </View>
-        
+
         {/* Table Rows */}
         {data.map((item, index) => (
           <View key={index} style={[localStyles.row, localStyles.rowBorder]}>
@@ -53,7 +57,9 @@ export default function IndexScreen() {
               <Text style={localStyles.cell}>{item.menge}</Text>
             </View>
             <View style={localStyles.cell}>
-              <Text style={[localStyles.cell, localStyles[item.status]]}>{item.status}</Text>
+              <Text style={[localStyles.cell, localStyles[item.status]]}>
+                {item.status}
+              </Text>
             </View>
             <View style={localStyles.cell}>
               <TouchableOpacity onPress={handlePress}>
@@ -63,17 +69,7 @@ export default function IndexScreen() {
           </View>
         ))}
       </View>
-      // Table End ^
-
-
-
-
-
-
-
-
-      <Text style= {localStyles.regalBez}>Regal Bezeichnung</Text>
-
+      <Text style={localStyles.regalBez}>Regal Bezeichnung</Text>
       <View style={localStyles.table}>
         {/* Table Header */}
         <View style={[localStyles.row, localStyles.rowBorder]}>
@@ -93,7 +89,7 @@ export default function IndexScreen() {
             <Text style={localStyles.tableContent}>Aktion</Text>
           </View>
         </View>
-        
+
         {/* Table Rows */}
         {data.map((item, index) => (
           <View key={index} style={[localStyles.row, localStyles.rowBorder]}>
@@ -107,7 +103,9 @@ export default function IndexScreen() {
               <Text style={localStyles.cell}>{item.menge}</Text>
             </View>
             <View style={localStyles.cell}>
-              <Text style={[localStyles.cell, localStyles[item.status]]}>{item.status}</Text>
+              <Text style={[localStyles.cell, localStyles[item.status]]}>
+                {item.status}
+              </Text>
             </View>
             <View style={localStyles.cell}>
               <TouchableOpacity onPress={handlePress}>
@@ -117,25 +115,7 @@ export default function IndexScreen() {
           </View>
         ))}
       </View>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      <Text style= {localStyles.regalBez}>Regal Bezeichnung</Text>
-
+      <Text style={localStyles.regalBez}>Regal Bezeichnung</Text>
       <View style={localStyles.table}>
         {/* Table Header */}
         <View style={[localStyles.row, localStyles.rowBorder]}>
@@ -155,7 +135,7 @@ export default function IndexScreen() {
             <Text style={localStyles.tableContent}>Aktion</Text>
           </View>
         </View>
-        
+
         {/* Table Rows */}
         {data.map((item, index) => (
           <View key={index} style={[localStyles.row, localStyles.rowBorder]}>
@@ -169,7 +149,9 @@ export default function IndexScreen() {
               <Text style={localStyles.cell}>{item.menge}</Text>
             </View>
             <View style={localStyles.cell}>
-              <Text style={[localStyles.cell, localStyles[item.status]]}>{item.status}</Text>
+              <Text style={[localStyles.cell, localStyles[item.status]]}>
+                {item.status}
+              </Text>
             </View>
             <View style={localStyles.cell}>
               <TouchableOpacity onPress={handlePress}>
@@ -253,7 +235,7 @@ const localStyles = StyleSheet.create({
     color: "red",
     fontSize: 10,
     textAlign: "center",
-    width: 40
+    width: 40,
   },
   high: {
     backgroundColor: "#DFFFD8",
@@ -263,7 +245,7 @@ const localStyles = StyleSheet.create({
     color: "green",
     fontSize: 10,
     textAlign: "center",
-    width: 40
+    width: 40,
   },
   low: {
     backgroundColor: "#FFF4D8",
@@ -273,7 +255,7 @@ const localStyles = StyleSheet.create({
     color: "orange",
     fontSize: 10,
     textAlign: "center",
-    width: 40
+    width: 40,
   },
   name: {
     fontSize: 12,
