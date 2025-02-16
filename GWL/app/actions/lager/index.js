@@ -2,7 +2,6 @@ import { Text, View, StyleSheet, ScrollView, TouchableOpacity } from "react-nati
 import { styles } from "../../../components/styles";
 import { MaterialIcons } from "@expo/vector-icons";
 
-
 export default function IndexScreen() {
   const data = [
     { name: "Baby Oil", id: "#3451F", menge: "x3", status: "out" },
@@ -10,83 +9,180 @@ export default function IndexScreen() {
     { name: "Keyboard", id: "#8253A", menge: "x60", status: "low" },
     { name: "Mouse", id: "#5434R", menge: "x1", status: "out" },
     { name: "Cup", id: "#1244T", menge: "x4", status: "out" },
-    
-   
   ];
 
   const handlePress = () => {
     console.log('Action was pressed!');
   };
 
-  
   return (
     <ScrollView contentContainerStyle={localStyles.scrollContainer}>
-        <View style={localStyles.table}>
-          <View style={[localStyles.row, localStyles.rowBorder]}>
+
+
+
+      <Text style= {localStyles.regalBez}>Regal Bezeichnung</Text>
+
+      <View style={localStyles.table}>
+        {/* Table Header */}
+        <View style={[localStyles.row, localStyles.rowBorder]}>
+          <View style={localStyles.cell}>
             <Text style={localStyles.tableContent}>Produkt Name</Text>
+          </View>
+          <View style={localStyles.cell}>
             <Text style={localStyles.tableContent}>Produkt ID</Text>
+          </View>
+          <View style={localStyles.cell}>
             <Text style={localStyles.tableContent}>Menge</Text>
+          </View>
+          <View style={localStyles.cell}>
             <Text style={localStyles.tableContent}>Status</Text>
+          </View>
+          <View style={localStyles.cell}>
             <Text style={localStyles.tableContent}>Aktion</Text>
           </View>
-          {/* Table Rows */}
-          {data.map((item, index) => (
-            <View key={index} style={[localStyles.row, localStyles.rowBorder]}>
-              <Text style={localStyles.name}>{item.name}</Text>
-              <Text style={localStyles.cell}>{item.id}</Text>
-              <Text style={localStyles.cell}>{item.menge}</Text>
-              <Text style={[localStyles.cell, localStyles[item.status]]}>{item.status}</Text>
-              <TouchableOpacity onPress={handlePress}><MaterialIcons name="more-horiz" size={24} color="#D3D3D3"/></TouchableOpacity>
-            </View>
-          ))}
         </View>
+        
+        {/* Table Rows */}
+        {data.map((item, index) => (
+          <View key={index} style={[localStyles.row, localStyles.rowBorder]}>
+            <View style={localStyles.cell}>
+              <Text style={localStyles.name}>{item.name}</Text>
+            </View>
+            <View style={localStyles.cell}>
+              <Text style={localStyles.cellText}>{item.id}</Text>
+            </View>
+            <View style={localStyles.cell}>
+              <Text style={localStyles.cell}>{item.menge}</Text>
+            </View>
+            <View style={localStyles.cell}>
+              <Text style={[localStyles.cell, localStyles[item.status]]}>{item.status}</Text>
+            </View>
+            <View style={localStyles.cell}>
+              <TouchableOpacity onPress={handlePress}>
+                <MaterialIcons name="more-horiz" size={24} color="#D3D3D3" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        ))}
+      </View>
 
 
-        <View style={localStyles.table}>
+
+
+
+
+
+
+
+
+
+      <Text style= {localStyles.regalBez}>Regal Bezeichnung</Text>
+
+      <View style={localStyles.table}>
+        {/* Table Header */}
         <View style={[localStyles.row, localStyles.rowBorder]}>
-          <Text style={localStyles.tableContent}>Produkt Name</Text>
-          <Text style={localStyles.tableContent}>Produkt ID</Text>
-          <Text style={localStyles.tableContent}>Menge</Text>
-          <Text style={localStyles.tableContent}>Status</Text>
-          <Text style={localStyles.tableContent}>Aktion</Text>
+          <View style={localStyles.cell}>
+            <Text style={localStyles.tableContent}>Produkt Name</Text>
+          </View>
+          <View style={localStyles.cell}>
+            <Text style={localStyles.tableContent}>Produkt ID</Text>
+          </View>
+          <View style={localStyles.cell}>
+            <Text style={localStyles.tableContent}>Menge</Text>
+          </View>
+          <View style={localStyles.cell}>
+            <Text style={localStyles.tableContent}>Status</Text>
+          </View>
+          <View style={localStyles.cell}>
+            <Text style={localStyles.tableContent}>Aktion</Text>
+          </View>
         </View>
-          {/* Table Rows */}
-          {data.map((item, index) => (
-            <View key={index} style={[localStyles.row, localStyles.rowBorder]}>
+        
+        {/* Table Rows */}
+        {data.map((item, index) => (
+          <View key={index} style={[localStyles.row, localStyles.rowBorder]}>
+            <View style={localStyles.cell}>
               <Text style={localStyles.name}>{item.name}</Text>
-              <Text style={localStyles.cell}>{item.id}</Text>
-              <Text style={localStyles.cell}>{item.menge}</Text>
-              <Text style={[localStyles.cell, localStyles[item.status]]}>{item.status}</Text>
-              <TouchableOpacity onPress={handlePress}><MaterialIcons name="more-horiz" size={24} color="#D3D3D3"/></TouchableOpacity>
             </View>
-          ))}
-        </View>
+            <View style={localStyles.cell}>
+              <Text style={localStyles.cellText}>{item.id}</Text>
+            </View>
+            <View style={localStyles.cell}>
+              <Text style={localStyles.cell}>{item.menge}</Text>
+            </View>
+            <View style={localStyles.cell}>
+              <Text style={[localStyles.cell, localStyles[item.status]]}>{item.status}</Text>
+            </View>
+            <View style={localStyles.cell}>
+              <TouchableOpacity onPress={handlePress}>
+                <MaterialIcons name="more-horiz" size={24} color="#D3D3D3" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        ))}
+      </View>
 
-        <View style={localStyles.table}>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      <Text style= {localStyles.regalBez}>Regal Bezeichnung</Text>
+
+      <View style={localStyles.table}>
+        {/* Table Header */}
         <View style={[localStyles.row, localStyles.rowBorder]}>
-          <Text style={localStyles.tableContent}>Produkt Name</Text>
-          <Text style={localStyles.tableContent}>Produkt ID</Text>
-          <Text style={localStyles.tableContent}>Menge</Text>
-          <Text style={localStyles.tableContent}>Status</Text>
-          <Text style={localStyles.tableContent}>Aktion</Text>
+          <View style={localStyles.cell}>
+            <Text style={localStyles.tableContent}>Produkt Name</Text>
+          </View>
+          <View style={localStyles.cell}>
+            <Text style={localStyles.tableContent}>Produkt ID</Text>
+          </View>
+          <View style={localStyles.cell}>
+            <Text style={localStyles.tableContent}>Menge</Text>
+          </View>
+          <View style={localStyles.cell}>
+            <Text style={localStyles.tableContent}>Status</Text>
+          </View>
+          <View style={localStyles.cell}>
+            <Text style={localStyles.tableContent}>Aktion</Text>
+          </View>
         </View>
-          {/* Table Rows */}
-          {data.map((item, index) => (
-            <View key={index} style={[localStyles.row, localStyles.rowBorder]}>
+        
+        {/* Table Rows */}
+        {data.map((item, index) => (
+          <View key={index} style={[localStyles.row, localStyles.rowBorder]}>
+            <View style={localStyles.cell}>
               <Text style={localStyles.name}>{item.name}</Text>
-              <Text style={localStyles.cell}>{item.id}</Text>
-              <Text style={localStyles.cell}>{item.menge}</Text>
-              <Text style={[localStyles.cell, localStyles[item.status]]}>{item.status}</Text>
-              <TouchableOpacity onPress={handlePress}><MaterialIcons name="more-horiz" size={24} color="#D3D3D3"/></TouchableOpacity>
             </View>
-          ))}
-        </View>
-
-
-
-
-
-     
+            <View style={localStyles.cell}>
+              <Text style={localStyles.cellText}>{item.id}</Text>
+            </View>
+            <View style={localStyles.cell}>
+              <Text style={localStyles.cell}>{item.menge}</Text>
+            </View>
+            <View style={localStyles.cell}>
+              <Text style={[localStyles.cell, localStyles[item.status]]}>{item.status}</Text>
+            </View>
+            <View style={localStyles.cell}>
+              <TouchableOpacity onPress={handlePress}>
+                <MaterialIcons name="more-horiz" size={24} color="#D3D3D3" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        ))}
+      </View>
     </ScrollView>
   );
 }
@@ -97,7 +193,7 @@ const localStyles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: styles.backgroundColor,
-    paddingVertical: 20, // Optional: Adds spacing
+    paddingVertical: 20,
   },
   table: {
     borderRadius: 20,
@@ -108,37 +204,50 @@ const localStyles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 4,
     width: 349,
-    height: 282,
-    flexShrink: 0,
     marginBottom: 20,
-    overflowY: "auto", 
-    padding: 10, 
+    padding: 5,
+  },
+  regalBez: {
+    color: "#292D32", // Text color
+    fontFamily: "Inter", // Font family
+    fontSize: 12, // Font size in points
+    fontStyle: "normal", // Normal font style
+    fontWeight: "400", // Font weight
+    lineHeight: 16, // lineHeight, you can adjust it based on your design preference
+    marginBottom: 10,
   },
   tableContent: {
-    color: "#AFAFAF", 
-    fontFamily: "Inter", 
-    fontSize: 12, 
+    color: "#AFAFAF",
+    fontFamily: "Inter",
+    fontSize: 12,
     fontStyle: "normal",
-    fontWeight: "400", 
-    marginTop: 10,
+    fontWeight: "400",
   },
   row: {
-    flexDirection: "row", 
-    justifyContent: "space-between", 
-    alignItems: "center", 
-    width: "100%", 
-    paddingHorizontal: 10, 
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+    paddingHorizontal: 10,
     marginBottom: 5,
-    height:35,
+    height: 35,
+  },
+  cellText: {
+    fontSize: 12,
+    color: "#AFAFAF",
+    textAlign: "center",
   },
   cell: {
     fontSize: 12,
     color: "#AFAFAF",
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+    width: 60,
   },
-    rowBorder: {
-    borderBottomWidth: 2, 
-    borderBottomColor: "#ffffff", 
-    
+  rowBorder: {
+    borderBottomWidth: 2,
+    borderBottomColor: "#ffffff",
   },
   out: {
     backgroundColor: "#FFEEEE",
@@ -147,6 +256,8 @@ const localStyles = StyleSheet.create({
     borderRadius: 10,
     color: "red",
     fontSize: 10,
+    textAlign: "center",
+    width: 40
   },
   high: {
     backgroundColor: "#DFFFD8",
@@ -155,6 +266,8 @@ const localStyles = StyleSheet.create({
     borderRadius: 10,
     color: "green",
     fontSize: 10,
+    textAlign: "center",
+    width: 40
   },
   low: {
     backgroundColor: "#FFF4D8",
@@ -163,18 +276,12 @@ const localStyles = StyleSheet.create({
     borderRadius: 10,
     color: "orange",
     fontSize: 10,
+    textAlign: "center",
+    width: 40
   },
-  rowBorder: {
-    borderBottomWidth: 1, 
-    borderBottomColor: "#EEE", 
-  },
-  name:{
+  name: {
     fontSize: 12,
     color: "#333",
-  },
-  button: {
-    padding: 10, 
-    alignItems: "center",
-    justifyContent: "center",
+    textAlign: "left",
   },
 });
