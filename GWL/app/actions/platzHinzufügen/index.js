@@ -5,6 +5,7 @@ import TopTabNavigator from "../../scan/_layout";
 import { useNavigation } from "@react-navigation/native";
 
 import { useRoute } from "@react-navigation/native"; // Import useRoute
+import { MaterialIcons } from "@expo/vector-icons";
 
 export default function IndexScreen() {
   const [name, setName] = useState("");
@@ -103,6 +104,7 @@ export default function IndexScreen() {
           }}
         >
           <Text style={{ color: "black", fontSize: 20 }}>[III]</Text>
+        
         </TouchableOpacity>
       </View>
       <View style={{ marginTop: "auto", alignItems: "center" }}>
