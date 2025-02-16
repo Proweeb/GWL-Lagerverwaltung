@@ -18,10 +18,8 @@ export default function IndexScreen() {
   return (
     <ScrollView contentContainerStyle={localStyles.scrollContainer}>
 
-
-
+      // Table Start v
       <Text style= {localStyles.regalBez}>Regal Bezeichnung</Text>
-
       <View style={localStyles.table}>
         {/* Table Header */}
         <View style={[localStyles.row, localStyles.rowBorder]}>
@@ -65,9 +63,7 @@ export default function IndexScreen() {
           </View>
         ))}
       </View>
-
-
-
+      // Table End ^
 
 
 
