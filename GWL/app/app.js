@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { createStackNavigator } from "@react-navigation/stack";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { request, requestNotifications } from "react-native-permissions";
 import { NavigationContainer } from "@react-navigation/native";
 import * as SystemUI from "expo-system-ui";
 import * as NavigationBar from "expo-navigation-bar";
@@ -25,25 +25,30 @@ export default function App() {
     SystemUI.setBackgroundColorAsync(styles.backgroundColor);
     NavigationBar.setBackgroundColorAsync(styles.backgroundColor);
     NavigationBar.setButtonStyleAsync("dark");
-    Notifications.setNotificationHandler({
-      handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: true,
-        shouldSetBadge: true,
-      }),
+    requestNotifications(["alert", "sound"]).then(({ status, settings }) => {
+      // …
     });
+    const a = async () => {
+      await Notifications.setNotificationHandler({
+        handleNotification: async () => ({
+          shouldShowAlert: true,
+          shouldPlaySound: true,
+          shouldSetBadge: true,
+        }),
+      });
 
-    // Second, call scheduleNotificationAsync()
-    Notifications.scheduleNotificationAsync({
-      content: {
-        title: "🔥 Breaking News",
-        subtitle: "Something interesting happened!",
-        body: "Tap to read more...",
-        color: "#FF5733", // Notification accent color
-      },
+      // Second, call scheduleNotificationAsync()
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: "Welcome Back",
+          sound: require("../assets/scanned.mp3"),
+          color: "#FF5733", // Notification accent color
+        },
 
-      trigger: null,
-    });
+        trigger: null,
+      });
+    };
+    a();
   }, []);
 
   return (

@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Text, View, StyleSheet, Dimensions } from "react-native";
+import { Text, View, StyleSheet } from "react-native";
 import { database } from "../../database/database";
 import { RFPercentage } from "react-native-responsive-fontsize";
+import { Q } from "@nozbe/watermelondb";
+import { testInsertAndFetch } from "../../Old_Code/insertLogswithArtikel";
 
 const InventoryWidget = () => {
   const [logs, setLogs] = useState([]);
@@ -10,122 +12,80 @@ const InventoryWidget = () => {
     const fetchLogs = async () => {
       try {
         const logsCollection = database.get("logs");
-        // Fetch all logs (or you can limit your query if needed)
-        const latestLogs = await logsCollection.query().fetch();
 
-        // Map over the first 3 logs and fetch the associated artikel for each log
-        const logsData = await Promise.all(
-          latestLogs.slice(0, 3).map(async (log) => {
-            // Use .fetch() on the belongs-to relation to get the associated artikel record
-            const artikel = await log.artikel.fetch();
-            const regal = await log.regal.fetch();
-            // If you also need the associated regal, do:
-            // const regal = await log.regal.fetch();
+        const subscription = logsCollection
+          .query(
+            Q.sortBy("created_at", "desc"),
+            Q.take(3) // Limit to the latest 3 logs
+          )
+          .observe()
+          .subscribe(async (latestLogs) => {
+            if (latestLogs.length === 0) {
+              setLogs([]);
+              return;
+            }
 
-            return {
-              id: log.id,
-              name: artikel.beschreibung, // using artikel's beschreibung
-              gwid: artikel.gwId,
-              menge: log.menge,
-              status: artikel.status,
-              fachName: regal.fachName,
-              regalName: regal.regalName,
-              datum: new Date(log.createdAt).toLocaleString("de-DE", {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-              }),
-            };
-          })
-        );
+            const logsData = await Promise.all(
+              latestLogs.map(async (log) => {
+                const artikel = await log.artikel.fetch();
+                const regal = await log.regal.fetch();
 
-        setLogs(logsData);
+                return {
+                  id: log.id,
+                  name: artikel.beschreibung,
+                  gwid: artikel.gwId,
+                  menge: log.menge,
+                  status: artikel.status,
+                  fachName: regal.fachName,
+                  regalName: regal.regalName,
+                  datum: new Date(log.createdAt).toLocaleString("de-DE", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  }),
+                };
+              })
+            );
+
+            setLogs(logsData);
+          });
+
+        return () => subscription.unsubscribe();
       } catch (error) {
         console.error("Error fetching logs:", error);
       }
     };
-
-    async function testInsertAndFetch() {
-      await database.write(async () => {
-        // Delete all existing records from "artikel" and "logs"
-        const allArtikel = await database.get("artikel").query().fetch();
-        const allLogs = await database.get("logs").query().fetch();
-
-        await database.batch(
-          ...allArtikel.map((artikel) => artikel.prepareDestroyPermanently()),
-          ...allLogs.map((log) => log.prepareDestroyPermanently())
-        );
-
-        // Create a single artikel record
-        const artikel = await database.get("artikel").create((artikel) => {
-          artikel.gwId = "123";
-          artikel.firmenId = "firmen456";
-          artikel.beschreibung = "Test Artikel";
-          artikel.menge = 10;
-          artikel.mindestMenge = 2;
-          artikel.kunde = "Test Kunde";
-          artikel.ablaufdatum = Date.now();
-        });
-
-        // Create a single regal record
-        const regal = await database.get("regale").create((regal) => {
-          regal.fachName = "10";
-          regal.regalName = "A5";
-          regal.regalId = "134"; // Ensure this matches your model's field (@field("regal_id") regalId)
-        });
-
-        // Create 3 log records using a loop
-        for (let i = 0; i < 3; i++) {
-          await database.get("logs").create((log) => {
-            log.beschreibung = `Test Log ${i + 1}`;
-            log.datum = new Date().toISOString();
-            log.menge = -5;
-            // Use .set() to assign the belongs-to relationships
-            log.artikel.set(artikel);
-            log.regal.set(regal);
-          });
-        }
-
-        // Optionally, fetch all logs and log the related artikel for each log
-        const allCreatedLogs = await database.get("logs").query().fetch();
-        for (const log of allCreatedLogs) {
-          const relatedArtikel = await log.artikel.fetch();
-        }
-      });
-    }
     testInsertAndFetch();
     fetchLogs();
-
-    // const readArtikelWithLogs = async () => {
-    //   try {
-    //     // Query all artikel
-    //     const artikels = await database.get("artikel").query().fetch();
-
-    //     for (const artikel of artikels) {
-    //       // Eager load related logs
-    //       const logs = await artikel.logs.fetch(); // Load related logs
-
-    //       // Log artikel and related logs
-    //       console.log(`Artikel GW_ID: ${artikel.gwId}`);
-    //       console.log(`Beschreibung: ${artikel.beschreibung}`);
-    //       console.log(`Menge: ${artikel.menge}`);
-
-    //       logs.forEach((log) => {
-    //         console.log(`  Log Beschreibung: ${log.beschreibung}`);
-    //         console.log(`  Log Datum: ${log.datum}`);
-    //         console.log(`  Log Menge: ${log.menge}`);
-    //       });
-
-    //       console.log("-----------------------------");
-    //     }
-    //   } catch (error) {
-    //     console.error("Error reading artikel with logs:", error);
-    //   }
-    // };
-    // readArtikelWithLogs();
   }, []);
 
-  const getColor = (menge) => (menge > 0 ? "green" : "red");
+  const getTextColor = (status) => {
+    switch (status) {
+      case "low":
+        return "orange";
+      case "out":
+        return "red";
+      case "ok":
+        return "green";
+      default:
+        return "black";
+    }
+  };
+
+  const getMengeColor = (menge) => {
+    if (menge < 0) {
+      return "red";
+    } else {
+      return "green";
+    }
+  };
+  if (logs.length == 0) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>Keine Lagerbewegung bis jetzt</Text>
+      </View>
+    );
+  }
 
   return (
     <>
@@ -134,41 +94,28 @@ const InventoryWidget = () => {
           <Text style={[styles.text, styles.name]} numberOfLines={1}>
             {item.name}
           </Text>
+
           <Text style={[styles.text, styles.gwid]} numberOfLines={1}>
             #{item.gwid}
           </Text>
-          {/* {Dimensions.get("window").width > 599 && (
-            <>
-              <Text style={[styles.text, styles.name]} numberOfLines={1}>
-                {item.regalName}
-              </Text>
-              <Text style={[styles.text, styles.gwid]} numberOfLines={1}>
-                {item.fachName}
-              </Text>
-            </>
-          )} */}
+
           <Text
-            style={[styles.text, styles.menge, { color: getColor(item.menge) }]}
+            style={[
+              styles.text,
+              styles.menge,
+              { color: getMengeColor(item.menge) },
+            ]}
             numberOfLines={1}
           >
-            {item.menge < 0 ? item.menge : "+" + item.menge}
+            {item.menge < 0 ? item.menge : `+${item.menge}`}
           </Text>
-          <View
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-          >
-            <View
-              style={[
-                { width: "80%", borderRadius: 30, elevation: 4 },
-                styles[item.status],
-              ]}
-            >
+
+          <View style={styles.statusContainer}>
+            <View style={[styles.statusBox, styles[item.status]]}>
               <Text
                 style={[
-                  {
-                    textAlign: "center",
-                    fontSize: RFPercentage(1.6),
-                    fontWeight: "bold",
-                  },
+                  styles.statusText,
+                  { color: getTextColor(item.status) },
                 ]}
                 numberOfLines={1}
               >
@@ -188,25 +135,52 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     padding: 10,
-    backgroundColor: "#F8F8FF",
-    borderRadius: 10,
+    backgroundColor: "white",
+    borderRadius: 6,
     marginBottom: 5,
-    elevation: 4,
-    height: "30%",
+    elevation: 2,
+
+    gap: 5,
   },
   text: {
     flex: 1,
-    marginRight: 5,
     overflow: "hidden",
-    textOverflow: "ellipsis",
-    fontSize: RFPercentage(1.65),
+    fontSize: RFPercentage(2),
   },
   name: { fontWeight: "bold", textAlign: "center" },
   gwid: { color: "#777", textAlign: "center" },
   menge: { fontWeight: "bold", textAlign: "center" },
-  ok: { backgroundColor: "#c8f7c5" },
-  low: { backgroundColor: "#f9e79f" },
-  out: { backgroundColor: "#f5b7b1" },
+  statusContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  statusBox: {
+    width: "80%",
+    borderRadius: 30,
+    elevation: 2,
+    overflow: "hidden",
+    paddingVertical: 1,
+  },
+  statusText: {
+    textAlign: "center",
+    fontSize: RFPercentage(1.7),
+    fontWeight: "bold",
+  },
+  out: { backgroundColor: "#FFEEEE" },
+  ok: { backgroundColor: "#CDEDD8" },
+  low: { backgroundColor: "#FFF4D8" },
+  emptyContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+    height: "100%",
+  },
+  emptyText: {
+    fontSize: RFPercentage(2),
+    fontWeight: "700",
+    color: "#555",
+  },
 });
 
 export default InventoryWidget;

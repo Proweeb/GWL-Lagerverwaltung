@@ -29,9 +29,16 @@ class Artikel extends Model {
   @children("logs") logs;
 
   get status() {
-    if (this.menge <= this.mindestmenge && this.menge != this.mindestmenge) return "low";
-    if(this.menge == 0 ) return "out";
-    return "ok";
+    const menge = parseFloat(this.menge); // Ensure menge is treated as a number
+    const mindestMenge = parseFloat(this.mindestMenge); // Ensure mindestMenge is treated as a number
+
+    if (isNaN(menge) || isNaN(mindestMenge)) {
+      return "unknown"; // Fallback for invalid values
+    }
+
+    if (menge === 0) return "out"; // Explicit check for zero
+    if (menge <= mindestMenge) return "low"; // Check if menge is less than or equal to mindestMenge
+    return "ok"; // Default case
   }
 }
 

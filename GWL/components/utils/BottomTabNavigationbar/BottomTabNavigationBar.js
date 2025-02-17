@@ -48,7 +48,7 @@ export const CustomTabBar = ({ state, descriptors, navigation }) => {
                 alignItems: "center",
                 justifyContent: "space-around",
                 borderRadius: 15,
-                paddingVertical: 4,
+                padding: 5,
                 backgroundColor: isFocused
                   ? styles.lightLightBlue
                   : "transparent",

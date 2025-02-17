@@ -29,7 +29,8 @@
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO",
-        "android.permission.VIBRATE"
+        "android.permission.VIBRATE",
+        "android.permission.POST_NOTIFICATIONS"
       ],
       "package": "com.Lagerverwaltung"
     },
@@ -49,10 +50,7 @@
       [
         "react-native-permissions",
         {
-          "iosPermissions": [
-            "Camera",
-            "Microphone"
-          ]
+          "iosPermissions": ["Camera", "Microphone"]
         }
       ],
       [
@@ -63,19 +61,14 @@
             "compileSdkVersion": 34,
             "targetSdkVersion": 34,
             "packagingOptions": {
-              "pickFirst": [
-                "**/libc++_shared.so"
-              ]
+              "pickFirst": ["**/libc++_shared.so"]
             }
           },
           "ios": {
             "extraPods": [
               {
                 "name": "simdjson",
-                "configurations": [
-                  "Debug",
-                  "Release"
-                ],
+                "configurations": ["Debug", "Release"],
                 "path": "path_to/node_modules/@nozbe/simdjson",
                 "modular_headers": true
               }

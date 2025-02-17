@@ -204,7 +204,7 @@ function HomeScreen() {
         containerFlex={1}
         title={"Lagerbewegungen"}
         containerStyle={{
-          paddingHorizontal: Dimensions.get("window").width > 599 ? 50 : 20,
+          paddingHorizontal: Dimensions.get("window").width > 599 ? 50 : 35,
         }}
       >
         <InventoryWidget></InventoryWidget>
