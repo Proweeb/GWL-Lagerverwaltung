@@ -27,7 +27,7 @@ export const styles = {
   },
 
   text: {
-    fontSize: 10,
+    fontSize: RFPercentage(1.7),
   },
   //Accent Colors
   //light

@@ -38,15 +38,15 @@ export default function App() {
       });
 
       // Second, call scheduleNotificationAsync()
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: "Welcome Back",
-          sound: require("../assets/scanned.mp3"),
-          color: "#FF5733", // Notification accent color
-        },
+      // await Notifications.scheduleNotificationAsync({
+      //   content: {
+      //     title: "Welcome Back",
+      //     sound: require("../assets/scanned.mp3"),
+      //     color: "#FF5733", // Notification accent color
+      //   },
 
-        trigger: null,
-      });
+      //   trigger: null,
+      // });
     };
     a();
   }, []);
