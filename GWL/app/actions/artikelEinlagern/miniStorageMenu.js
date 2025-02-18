@@ -8,16 +8,18 @@ import { widthPercentageToDP } from "react-native-responsive-screen";
 import { useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 
-export default function ArticleMenu({ formData, setFormData }) {
+export default function MiniStorageMenu() {
   const navigation = useNavigation();
+  const [codes, setCodes] = useState("");
 
   return (
     <View
       style={{
+        flexDirection: "column",
         margin: 10,
       }}
     >
-      <Text style={{ fontSize: RFPercentage(1.8) }}>GWID</Text>
+      <Text style={{ fontSize: RFPercentage(1.8) }}>RegalID</Text>
       <View
         style={{
           flexDirection: "row",
@@ -27,10 +29,10 @@ export default function ArticleMenu({ formData, setFormData }) {
       >
         <View style={{ flex: 1 }}>
           <TextInputField
-            value={formData.codes}
-            onChangeText={(text) =>
-              setFormData((prevData) => ({ ...prevData, codes: text }))
-            }
+            value={codes}
+            onChangeText={(text) => {
+              setCodes(text);
+            }}
           />
         </View>
 
@@ -38,7 +40,8 @@ export default function ArticleMenu({ formData, setFormData }) {
           onPress={() => {
             navigation.navigate("Scan", {
               onScan: (code) => {
-                setFormData((prevData) => ({ ...prevData, codes: code }));
+                setCodes(code);
+                //console.log(code);
               },
             });
           }}
@@ -57,40 +60,6 @@ export default function ArticleMenu({ formData, setFormData }) {
           <Text style={{ color: "black", fontSize: 20 }}>[III]</Text>
         </TouchableOpacity>
       </View>
-      <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>
-        Beschreibung
-      </Text>
-      <TextInputField
-        value={formData.beschreibung}
-        onChangeText={(text) =>
-          setFormData((prevData) => ({ ...prevData, beschreibung: text }))
-        }
-      />
-      <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>Menge</Text>
-      <TextInputField
-        value={formData.menge}
-        onChangeText={(text) =>
-          setFormData((prevData) => ({ ...prevData, menge: text }))
-        }
-      />
-      <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>
-        Ablaufdatum
-      </Text>
-      <TextInputField
-        value={formData.ablaufdatum}
-        onChangeText={(text) =>
-          setFormData((prevData) => ({ ...prevData, ablaufdatum: text }))
-        }
-      />
-      <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>
-        Mindestmenge
-      </Text>
-      <TextInputField
-        value={formData.mindestmenge}
-        onChangeText={(text) =>
-          setFormData((prevData) => ({ ...prevData, mindestmenge: text }))
-        }
-      />
     </View>
   );
 }

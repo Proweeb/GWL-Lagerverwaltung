@@ -287,7 +287,7 @@ export default function QrCodeScreen() {
   useEffect(() => {}, [isActive]);
   useEffect(() => {
     if (codes.saveQrCode) {
-      onScan(codes.barcode);
+      onScan(codes.qrCode);
       navigation.goBack();
     }
 
