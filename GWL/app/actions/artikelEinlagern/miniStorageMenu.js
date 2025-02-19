@@ -8,9 +8,8 @@ import { widthPercentageToDP } from "react-native-responsive-screen";
 import { useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 
-export default function MiniStorageMenu() {
+export default function MiniStorageMenu({ formData, setFormData }) {
   const navigation = useNavigation();
-  const [codes, setCodes] = useState("");
 
   return (
     <View
@@ -29,10 +28,10 @@ export default function MiniStorageMenu() {
       >
         <View style={{ flex: 1 }}>
           <TextInputField
-            value={codes}
-            onChangeText={(text) => {
-              setCodes(text);
-            }}
+            value={formData.regalId}
+            onChangeText={(text) =>
+              setFormData((prevData) => ({ ...prevData, regalId: text }))
+            }
           />
         </View>
 
@@ -40,7 +39,7 @@ export default function MiniStorageMenu() {
           onPress={() => {
             navigation.navigate("Scan", {
               onScan: (code) => {
-                setCodes(code);
+                setFormData((prevData) => ({ ...prevData, regalId: code }));
                 //console.log(code);
               },
             });

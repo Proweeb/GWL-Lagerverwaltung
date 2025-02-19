@@ -1,4 +1,4 @@
-import { Text, View } from "react-native";
+import { Text, View, ScrollView } from "react-native";
 import { styles } from "../../../components/styles";
 import { TextInput } from "react-native-gesture-handler";
 import ArticleMenu from "./articleMenu.js";
@@ -6,28 +6,64 @@ import MiniStorageMenu from "./miniStorageMenu.js";
 import { TouchableOpacity } from "react-native";
 import { useState } from "react";
 import { Alert } from "react-native";
+import ArtikelService from "../../../database/datamapper/ArtikelHelper.js";
+import RegalService from "../../../database/datamapper/RegalHelper.js";
 
 export default function IndexScreen() {
   const [formData, setFormData] = useState({
-    codes: "",
+    gwId: "",
     beschreibung: "",
     menge: "",
     ablaufdatum: "",
     mindestmenge: "",
+    regalId: "",
   });
 
-  const handleSubmit = () => {
-    const { codes, beschreibung, menge, ablaufdatum, mindestmenge } = formData;
+  const handleSubmit = async () => {
+    const { gwId, beschreibung, menge, ablaufdatum, mindestmenge, regalId } =
+      formData;
 
-    if (!codes || !beschreibung || !menge || !ablaufdatum || !mindestmenge) {
+    if (
+      !gwId ||
+      !beschreibung ||
+      !menge ||
+      !ablaufdatum ||
+      !mindestmenge ||
+      !regalId
+    ) {
       Alert.alert("Fehler", "Bitte füllen Sie alle Felder aus.");
+      console.log(formData);
     } else {
       console.log("Alle Felder sind befüllt:", formData);
+
+      try {
+        const existingArtikel = await ArtikelService.getArtikelById(gwId);
+        const existingRegal = await RegalService.getRegalById(regalId);
+        if (existingArtikel) {
+          Alert.alert("Fehler", "GWID existiert bereits");
+        } else if (!existingRegal) {
+          Alert.alert("Fehler", "Regal existiert nicht");
+        } else {
+          console.log(existingRegal);
+          await ArtikelService.createArtikel({
+            gwId,
+            beschreibung,
+            menge: parseInt(menge),
+            ablaufdatum,
+            mindestMenge: parseInt(mindestmenge),
+            regalId,
+          });
+          Alert.alert("Erfolg", "Artikel erfolgreich gespeichert!");
+        }
+      } catch (error) {
+        console.error("Fehler beim Speichern:", error);
+        Alert.alert("Fehler", "Artikel konnte nicht gespeichert werden.");
+      }
     }
   };
 
   return (
-    <View
+    <ScrollView
       style={{
         flex: 1,
         padding: 15,
@@ -35,7 +71,7 @@ export default function IndexScreen() {
     >
       <View>
         <Text style={styles.subHeader}>Lagerung</Text>
-        <MiniStorageMenu />
+        <MiniStorageMenu formData={formData} setFormData={setFormData} />
       </View>
 
       <View style={[siteStyles.longLine, { marginVertical: 10 }]}></View>
@@ -53,7 +89,7 @@ export default function IndexScreen() {
           <Text style={{ color: "#30A6DE", fontSize: 16 }}>Fertig</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 

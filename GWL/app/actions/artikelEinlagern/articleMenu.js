@@ -27,9 +27,9 @@ export default function ArticleMenu({ formData, setFormData }) {
       >
         <View style={{ flex: 1 }}>
           <TextInputField
-            value={formData.codes}
+            value={formData.gwId}
             onChangeText={(text) =>
-              setFormData((prevData) => ({ ...prevData, codes: text }))
+              setFormData((prevData) => ({ ...prevData, gwId: text }))
             }
           />
         </View>
@@ -38,7 +38,7 @@ export default function ArticleMenu({ formData, setFormData }) {
           onPress={() => {
             navigation.navigate("Scan", {
               onScan: (code) => {
-                setFormData((prevData) => ({ ...prevData, codes: code }));
+                setFormData((prevData) => ({ ...prevData, gwId: code }));
               },
             });
           }}
