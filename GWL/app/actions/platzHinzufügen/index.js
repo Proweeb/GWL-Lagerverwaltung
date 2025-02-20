@@ -8,10 +8,15 @@ import {
 } from "react-native";
 import React, { Component, useState } from "react";
 import RegalService from "../../../database/datamapper/RegalHelper";
-
 import { useNavigation } from "@react-navigation/native";
-
 import { MaterialIcons } from "@expo/vector-icons";
+import { styles } from "../../../components/styles";
+import TextInputField from "../artikelEinlagern/textInputField";
+import { column } from "@nozbe/watermelondb/QueryDescription";
+import { RFPercentage } from "react-native-responsive-fontsize";
+import { widthPercentageToDP } from "react-native-responsive-screen";
+import { useEffect } from "react";
+
 
 export default function IndexScreen() {
   const [name, setName] = useState("");
@@ -26,6 +31,8 @@ export default function IndexScreen() {
           "Fehlende Angaben",
           "Bitte fülle alle Felder aus, bevor du speicherst."
         );
+        
+        
         return;
       }
 
@@ -40,7 +47,7 @@ export default function IndexScreen() {
         "Erfolgreich gespeichert!",
         `Das Regal wurde mit folgenden Daten angelegt:\n\n📌 Name: ${name}\n📦 Fach: ${fach}\n🔢 Code: ${code}`
       );
-
+      navigation.navigate("Home");
       console.log("Regal erfolgreich erstellt.");
       const regal = await RegalService.getRegalById(code);
       console.log(regal);
@@ -103,8 +110,16 @@ export default function IndexScreen() {
             onChangeText={setCode}
           />
         </View>
+
+        
         <TouchableOpacity
-          onPress={() => navigation.navigate("Scan")}
+          onPress={() => {
+            navigation.navigate("Scan", {
+              onScan: (code) => {
+                setCode(code)
+              },
+            });
+          }}
           style={{
             marginLeft: 10,
             width: 40,
