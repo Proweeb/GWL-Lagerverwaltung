@@ -17,7 +17,6 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 import { widthPercentageToDP } from "react-native-responsive-screen";
 import { useEffect } from "react";
 
-
 export default function IndexScreen() {
   const [name, setName] = useState("");
   const [fach, setFach] = useState("");
@@ -31,8 +30,6 @@ export default function IndexScreen() {
           "Fehlende Angaben",
           "Bitte fülle alle Felder aus, bevor du speicherst."
         );
-        
-        
         return;
       }
 
@@ -62,13 +59,19 @@ export default function IndexScreen() {
 
   const inputStyle = {
     height: 40,
-    borderColor: "gray",
+    borderColor: "transparent",
     borderWidth: 1,
     width: "100%",
     paddingHorizontal: 10,
     borderRadius: 10,
-    backgroundColor: "transparent",
+    backgroundColor: styles.white,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5, // For Android
   };
+  
 
   return (
     <View
@@ -76,42 +79,44 @@ export default function IndexScreen() {
         flex: 1,
         justifyContent: "flex-start",
         padding: 20,
-        backgroundColor: "#ffffff",
+        backgroundColor: styles.backgroundColor,
       }}
     >
-      <Text style={{ fontSize: 16, marginBottom: 30 }}>Lagerung</Text>
-
+      <Text style={{ fontSize: 16, marginBottom: 30, fontWeight: "bold" }}>Lagerung</Text>
+      <Text style={{ fontSize: RFPercentage(1.8), marginBottom: 5 }}>Regal Name</Text>
       <View style={{ marginBottom: 10 }}>
         <TextInput
           style={inputStyle}
-          placeholder="Regal Name"
+          
           value={name}
           onChangeText={setName}
         />
       </View>
 
+      <Text style={{ fontSize: RFPercentage(1.8), marginBottom: 5 }}>Fach Name</Text>
       <View style={{ marginBottom: 10 }}>
         <TextInput
           style={inputStyle}
-          placeholder="Fach Name"
+          
           value={fach}
           onChangeText={setFach}
         />
       </View>
 
+      <Text style={{ fontSize: RFPercentage(1.8), marginBottom: 5 }}>RegalID</Text>
       <View
         style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}
       >
+        
         <View style={{ flex: 1 }}>
           <TextInput
             style={inputStyle}
-            placeholder="Regal ID"
+            
             value={code}
             onChangeText={setCode}
           />
         </View>
 
-        
         <TouchableOpacity
           onPress={() => {
             navigation.navigate("Scan", {
