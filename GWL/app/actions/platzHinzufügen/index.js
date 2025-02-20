@@ -71,7 +71,6 @@ export default function IndexScreen() {
     shadowRadius: 4,
     elevation: 5, // For Android
   };
-  
 
   return (
     <View
@@ -82,46 +81,38 @@ export default function IndexScreen() {
         backgroundColor: styles.backgroundColor,
       }}
     >
-      <Text style={{ fontSize: 16, marginBottom: 30, fontWeight: "bold" }}>Lagerung</Text>
-      <Text style={{ fontSize: RFPercentage(1.8), marginBottom: 5 }}>Regal Name</Text>
+      <Text style={{ fontSize: 16, marginBottom: 30, fontWeight: "bold" }}>
+        Lagerung
+      </Text>
+      <Text style={{ fontSize: RFPercentage(1.8), marginBottom: 5 }}>
+        Regal Name
+      </Text>
       <View style={{ marginBottom: 10 }}>
-        <TextInput
-          style={inputStyle}
-          
-          value={name}
-          onChangeText={setName}
-        />
+        <TextInput style={inputStyle} value={name} onChangeText={setName} />
       </View>
 
-      <Text style={{ fontSize: RFPercentage(1.8), marginBottom: 5 }}>Fach Name</Text>
+      <Text style={{ fontSize: RFPercentage(1.8), marginBottom: 5 }}>
+        Fach Name
+      </Text>
       <View style={{ marginBottom: 10 }}>
-        <TextInput
-          style={inputStyle}
-          
-          value={fach}
-          onChangeText={setFach}
-        />
+        <TextInput style={inputStyle} value={fach} onChangeText={setFach} />
       </View>
 
-      <Text style={{ fontSize: RFPercentage(1.8), marginBottom: 5 }}>RegalID</Text>
+      <Text style={{ fontSize: RFPercentage(1.8), marginBottom: 5 }}>
+        RegalID
+      </Text>
       <View
         style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}
       >
-        
         <View style={{ flex: 1 }}>
-          <TextInput
-            style={inputStyle}
-            
-            value={code}
-            onChangeText={setCode}
-          />
+          <TextInput style={inputStyle} value={code} onChangeText={setCode} />
         </View>
 
         <TouchableOpacity
           onPress={() => {
             navigation.navigate("Scan", {
               onScan: (code) => {
-                setCode(code)
+                setCode(code);
               },
             });
           }}
@@ -143,12 +134,20 @@ export default function IndexScreen() {
           <Text style={{ color: "black", fontSize: 20 }}>[III]</Text>
         </TouchableOpacity>
       </View>
-      <View style={{ marginTop: "auto", alignItems: "center" }}>
+      <View style={{ marginTop: 50, alignItems: "center" }}>
         <TouchableOpacity
           onPress={handleSubmit}
-          style={{ backgroundColor: "#dcebf9", padding: 10, borderRadius: 5 }}
+          style={{
+            backgroundColor: "#dcebf9",
+            padding: 10,
+            borderRadius: 5,
+            height: 50,
+            width: 100,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
         >
-          <Text style={{ color: "#30A6DE", fontSize: 16 }}>Fertig</Text>
+          <Text style={{ color: "#30A6DE", fontSize: 20 }}>Fertig</Text>
         </TouchableOpacity>
       </View>
     </View>

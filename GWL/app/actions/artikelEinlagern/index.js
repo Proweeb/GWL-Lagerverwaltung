@@ -8,8 +8,10 @@ import { useState } from "react";
 import { Alert } from "react-native";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper.js";
 import RegalService from "../../../database/datamapper/RegalHelper.js";
+import { useNavigation } from "@react-navigation/native";
 
 export default function IndexScreen() {
+  const navigation = useNavigation();
   const [formData, setFormData] = useState({
     gwId: "",
     beschreibung: "",
@@ -54,6 +56,7 @@ export default function IndexScreen() {
             regalId,
           });
           Alert.alert("Erfolg", "Artikel erfolgreich gespeichert!");
+          navigation.navigate("Home");
         }
       } catch (error) {
         console.error("Fehler beim Speichern:", error);
@@ -81,12 +84,20 @@ export default function IndexScreen() {
         <ArticleMenu formData={formData} setFormData={setFormData} />
       </View>
 
-      <View style={{ marginTop: "auto", alignItems: "center" }}>
+      <View style={{ marginTop: 50, alignItems: "center" }}>
         <TouchableOpacity
-          style={{ backgroundColor: "#dcebf9", padding: 10, borderRadius: 5 }}
+          style={{
+            backgroundColor: "#dcebf9",
+            padding: 10,
+            borderRadius: 5,
+            height: 50,
+            width: 100,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
           onPress={handleSubmit}
         >
-          <Text style={{ color: "#30A6DE", fontSize: 16 }}>Fertig</Text>
+          <Text style={{ color: "#30A6DE", fontSize: 20 }}>Fertig</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
