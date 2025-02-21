@@ -208,6 +208,7 @@ function HomeScreen() {
         containerStyle={{
           paddingHorizontal: Dimensions.get("window").width > 599 ? 50 : 35,
           overflow: "hidden",
+          height: "100%",
         }}
       >
         <InventoryWidget></InventoryWidget>
