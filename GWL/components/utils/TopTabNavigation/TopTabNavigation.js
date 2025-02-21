@@ -11,7 +11,6 @@ export default function TopTabNavigation({ state, descriptors, navigation }) {
           const { options } = descriptors[route.key];
           const label = options.title || route.name;
           const isFocused = state.index === index;
-          console.log(label);
 
           const iconname =
             label === "Importieren" ? "tray-arrow-down" : "tray-arrow-up";

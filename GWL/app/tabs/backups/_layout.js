@@ -19,7 +19,7 @@ export default function BackupNavigator() {
         transitionSpec: {
           animation: "timing",
           config: {
-            duration: 150,
+            duration: 500,
             easing: Easing.inOut(Easing.ease),
           },
         },

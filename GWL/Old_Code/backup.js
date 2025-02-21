@@ -1,5 +1,5 @@
 import { Pressable, Text, View } from "react-native";
-import { styles } from "../../components/styles";
+import { styles } from "../components/styles";
 import { useNavigation } from "@react-navigation/native";
 
 export default function BackupScreen() {
