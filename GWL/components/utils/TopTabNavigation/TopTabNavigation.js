@@ -1,19 +1,20 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import LinearGradient from "react-native-linear-gradient"; // Import the gradient
 
 export default function TopTabNavigation({ state, descriptors, navigation }) {
   return (
     <View style={{ backgroundColor: "white", width: "100%" }}>
-      <Text style={TopBarStyles.scanModeText}>Scan Mode</Text>
+      <Text style={TopBarStyles.scanModeText}>Backup Modus</Text>
       <View style={TopBarStyles.container}>
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
           const label = options.title || route.name;
           const isFocused = state.index === index;
+          console.log(label);
 
           const iconname =
-            label === "Barcode" ? "barcode-outline" : "qr-code-outline";
+            label === "Importieren" ? "tray-arrow-down" : "tray-arrow-up";
 
           const onPress = () => {
             const event = navigation.emit({
@@ -38,7 +39,11 @@ export default function TopTabNavigation({ state, descriptors, navigation }) {
                   style={TopBarStyles.insetShadow}
                 />
               )}
-              <Ionicons name={iconname} size={20} color={"black"} />
+              <MaterialCommunityIcons
+                name={iconname}
+                size={20}
+                color={"black"}
+              />
             </TouchableOpacity>
           );
         })}

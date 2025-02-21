@@ -11,7 +11,7 @@ import { styles } from "../../components/styles";
 // Import Screens
 import InventurScreen from "./inventur";
 import HomeScreen from "./home";
-import BackupScreen from "./backup";
+import BackupNavigator from "./backups/_layout";
 import LogsScreen from "./logs";
 import WarenScreen from "./waren";
 // Import Custom Tab Bar (if you have one)
@@ -99,7 +99,7 @@ export default function BottomTabNavigator() {
       {/* Backup Tab */}
       <Tab.Screen
         name="Backup"
-        component={BackupScreen}
+        component={BackupNavigator}
         options={{
           title: "Backup",
           tabBarIcon: ({ color, size }) => (
