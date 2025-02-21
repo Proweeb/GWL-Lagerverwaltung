@@ -187,6 +187,7 @@ function HomeScreen() {
         flexValue={0.9}
         containerFlex={0.7}
         title={"Benachrichtungen"}
+        containerStyle={{ overflow: "hidden" }}
       />
       <HomeWidget
         flexValue={0.95}
@@ -195,6 +196,7 @@ function HomeScreen() {
         containerStyle={{
           justifyContent: "center",
           alignItems: "center",
+          overflow: "hidden",
         }}
       >
         <ActionGrid actions={actions} />
@@ -205,6 +207,7 @@ function HomeScreen() {
         title={"Lagerbewegungen"}
         containerStyle={{
           paddingHorizontal: Dimensions.get("window").width > 599 ? 50 : 35,
+          overflow: "hidden",
         }}
       >
         <InventoryWidget></InventoryWidget>
