@@ -11,7 +11,7 @@ import RegalService from "../../../database/datamapper/RegalHelper";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { styles } from "../../../components/styles";
-import TextInputField from "../artikelEinlagern/textInputField";
+import TextInputField from "../../../components/utils/TextInputs/textInputField";
 import { column } from "@nozbe/watermelondb/QueryDescription";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { widthPercentageToDP } from "react-native-responsive-screen";

@@ -1,5 +1,5 @@
 import { Text, View } from "react-native";
-import { styles } from "../../../components/styles";
+import { styles } from "../../styles";
 import { TextInput } from "react-native-gesture-handler";
 
 export default function TextInputField(props) {

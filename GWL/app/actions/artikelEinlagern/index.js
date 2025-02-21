@@ -1,8 +1,8 @@
 import { Text, View, ScrollView } from "react-native";
 import { styles } from "../../../components/styles";
 import { TextInput } from "react-native-gesture-handler";
-import ArticleMenu from "./articleMenu.js";
-import MiniStorageMenu from "./miniStorageMenu.js";
+import ArticleMenu from "../../../components/utils/InputMenus/articleMenu.js";
+import MiniStorageMenu from "../../../components/utils/InputMenus/miniStorageMenu.js";
 import { TouchableOpacity } from "react-native";
 import { useState } from "react";
 import { Alert } from "react-native";
@@ -70,6 +70,7 @@ export default function IndexScreen() {
       style={{
         flex: 1,
         padding: 15,
+        backgroundColor: styles.backgroundColor,
       }}
     >
       <View>

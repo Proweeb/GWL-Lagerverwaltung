@@ -1,7 +1,7 @@
 import { Text, View, TouchableOpacity } from "react-native";
-import { styles } from "../../../components/styles";
+import { styles } from "../../styles";
 import { TextInput } from "react-native-gesture-handler";
-import TextInputField from "./textInputField";
+import TextInputField from "../TextInputs/textInputField";
 import { column } from "@nozbe/watermelondb/QueryDescription";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { widthPercentageToDP } from "react-native-responsive-screen";
