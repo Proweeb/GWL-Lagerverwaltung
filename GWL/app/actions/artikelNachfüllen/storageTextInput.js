@@ -1,21 +1,19 @@
-import { Text, View, TouchableOpacity } from "react-native";
-import { styles } from "../../styles";
-import { TextInput } from "react-native-gesture-handler";
-import TextInputField from "../TextInputs/textInputField";
-import { column } from "@nozbe/watermelondb/QueryDescription";
+import { Text, View, ScrollView } from "react-native";
+import { styles } from "../../../components/styles";
+import TextInputField from "../../../components/utils/TextInputs/textInputField";
+import ArticleMenu from "../../../components/utils/InputMenus/articleMenu";
+import { useState } from "react";
+import { TouchableOpacity } from "react-native-gesture-handler";
 import { RFPercentage } from "react-native-responsive-fontsize";
-import { widthPercentageToDP } from "react-native-responsive-screen";
 import { useNavigation } from "@react-navigation/native";
-import { useEffect, useState } from "react";
 
-export default function MiniStorageMenu({ formData, setFormData }) {
+export default function StorageTextInput({ formData, setFormData }) {
   const navigation = useNavigation();
 
   return (
     <View
       style={{
         flexDirection: "column",
-        margin: 10,
       }}
     >
       <Text style={{ fontSize: RFPercentage(1.8) }}>RegalID</Text>
@@ -40,6 +38,7 @@ export default function MiniStorageMenu({ formData, setFormData }) {
             navigation.navigate("Scan", {
               onScan: (code) => {
                 setFormData((prevData) => ({ ...prevData, regalId: code }));
+                //console.log(code);
               },
             });
           }}

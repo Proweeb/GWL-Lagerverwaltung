@@ -21,7 +21,7 @@ export default function ArticleMenu({ formData, setFormData }) {
       <View
         style={{
           flexDirection: "row",
-          alignItems: "center",
+          alignItems: "flex-end",
           width: "100%",
         }}
       >
@@ -50,7 +50,6 @@ export default function ArticleMenu({ formData, setFormData }) {
             backgroundColor: styles.white,
             justifyContent: "center",
             alignItems: "center",
-            alignSelf: "flex-end",
             elevation: 5,
           }}
         >

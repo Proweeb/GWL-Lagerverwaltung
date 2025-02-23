@@ -1,24 +1,19 @@
-import { Text, View, TouchableOpacity } from "react-native";
-import { styles } from "../../styles";
-import { TextInput } from "react-native-gesture-handler";
-import TextInputField from "../TextInputs/textInputField";
-import { column } from "@nozbe/watermelondb/QueryDescription";
+import { Text, View, ScrollView } from "react-native";
+import { styles } from "../../../components/styles";
+import TextInputField from "../../../components/utils/TextInputs/textInputField";
+import ArticleMenu from "../../../components/utils/InputMenus/articleMenu";
+import { useState } from "react";
+import { TouchableOpacity } from "react-native-gesture-handler";
 import { RFPercentage } from "react-native-responsive-fontsize";
-import { widthPercentageToDP } from "react-native-responsive-screen";
 import { useNavigation } from "@react-navigation/native";
-import { useEffect, useState } from "react";
+import Feather from "@expo/vector-icons/Feather";
 
-export default function MiniStorageMenu({ formData, setFormData }) {
+export default function ArticleTextInput({ formData, setFormData }) {
   const navigation = useNavigation();
 
   return (
-    <View
-      style={{
-        flexDirection: "column",
-        margin: 10,
-      }}
-    >
-      <Text style={{ fontSize: RFPercentage(1.8) }}>RegalID</Text>
+    <View>
+      <Text style={{ fontSize: RFPercentage(1.8) }}>GWID</Text>
       <View
         style={{
           flexDirection: "row",
@@ -28,9 +23,9 @@ export default function MiniStorageMenu({ formData, setFormData }) {
       >
         <View style={{ flex: 1 }}>
           <TextInputField
-            value={formData.regalId}
+            value={formData.gwId}
             onChangeText={(text) =>
-              setFormData((prevData) => ({ ...prevData, regalId: text }))
+              setFormData((prevData) => ({ ...prevData, gwId: text }))
             }
           />
         </View>
@@ -39,7 +34,7 @@ export default function MiniStorageMenu({ formData, setFormData }) {
           onPress={() => {
             navigation.navigate("Scan", {
               onScan: (code) => {
-                setFormData((prevData) => ({ ...prevData, regalId: code }));
+                setgwId(code);
               },
             });
           }}
