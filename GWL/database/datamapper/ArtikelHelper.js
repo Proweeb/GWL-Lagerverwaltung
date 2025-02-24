@@ -91,6 +91,12 @@ async function deleteArtikel(gwid) {
     await artikel[0].destroyPermanently();
   });
 }
+
+async function getArtikelByRegalId(regal_id) {
+  const regal = await RegalService.getRegalById(regal_id)
+  return await regal.artikel.fetch()
+}
+
 async function deleteAllData() {
   return await database.write(async () => {
     const allArtikel = await database.get("artikel").query().fetch();
@@ -111,6 +117,7 @@ const ArtikelService = {
   updateArtikel,
   deleteArtikel,
   deleteAllData,
+  getArtikelByRegalId,
 };
 
 export default ArtikelService;
