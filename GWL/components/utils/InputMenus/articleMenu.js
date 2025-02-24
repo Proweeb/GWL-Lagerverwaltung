@@ -67,6 +67,7 @@ export default function ArticleMenu({ formData, setFormData }) {
       />
       <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>Menge</Text>
       <TextInputField
+        inputMode={"numeric"}
         value={formData.menge}
         onChangeText={(text) =>
           setFormData((prevData) => ({ ...prevData, menge: text }))
@@ -85,6 +86,7 @@ export default function ArticleMenu({ formData, setFormData }) {
         Mindestmenge
       </Text>
       <TextInputField
+        inputMode={"numeric"}
         value={formData.mindestmenge}
         onChangeText={(text) =>
           setFormData((prevData) => ({ ...prevData, mindestmenge: text }))

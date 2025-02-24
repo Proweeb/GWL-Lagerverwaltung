@@ -8,17 +8,32 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 import { useNavigation } from "@react-navigation/native";
 import Feather from "@expo/vector-icons/Feather";
 import ArticleTextInput from "./articleTextInput";
-import StorageTextInput from "../../../Old_Code/Arun/storageTextInput.js";
 import { Alert } from "react-native";
+import OverviewWithQuantity from "./overviewWithQuantity.js";
 
 export default function IndexScreen() {
   const [gwId, setGwId] = useState("");
-
-  const [existingArticle, setExistingArticle] = useState(false);
+  const [menge, setMenge] = useState(0);
+  const [showMengeOverview, setShowMengeOverview] = useState(false);
+  const [foundArticle, setFoundArticle] = useState(null);
 
   const navigation = useNavigation();
 
   const handleCancel = () => navigation.navigate("Home");
+
+  const showOverview = () => {
+    if (showMengeOverview) {
+      return (
+        <OverviewWithQuantity
+          menge={menge}
+          setMenge={setMenge}
+          setShowMengeOverview={setShowMengeOverview}
+          foundArticle={foundArticle}
+        />
+      );
+    }
+    return null;
+  };
 
   return (
     <View
@@ -33,7 +48,9 @@ export default function IndexScreen() {
         <ArticleTextInput
           gwId={gwId}
           setGwId={setGwId}
-          setExistingArticle={setExistingArticle}
+          setShowMengeOverview={setShowMengeOverview}
+          setMenge={setMenge}
+          setFoundArticle={setFoundArticle}
         />
       </View>
 
@@ -53,7 +70,7 @@ export default function IndexScreen() {
         </TouchableOpacity>
       </View>
 
-      {}
+      {showOverview()}
     </View>
   );
 }
