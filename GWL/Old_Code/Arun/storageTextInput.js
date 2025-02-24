@@ -1,7 +1,7 @@
 import { Text, View, ScrollView } from "react-native";
-import { styles } from "../../../components/styles";
-import TextInputField from "../../../components/utils/TextInputs/textInputField";
-import ArticleMenu from "../../../components/utils/InputMenus/articleMenu";
+import { styles } from "../../components/styles";
+import TextInputField from "../../components/utils/TextInputs/textInputField";
+import ArticleMenu from "../../components/utils/InputMenus/articleMenu";
 import { useState } from "react";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { RFPercentage } from "react-native-responsive-fontsize";
