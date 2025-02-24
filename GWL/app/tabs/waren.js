@@ -15,8 +15,7 @@ export default function WarenScreen() {
     >
       
       <Button 
-        title="Go to Listeimportieren" 
-        onPress={() => navigation.navigate('listeImportieren')} 
+        title="Waren" 
       />
     </View>
   );

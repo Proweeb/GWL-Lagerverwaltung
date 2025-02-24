@@ -45,7 +45,8 @@
     "react-native-screens": "3.31.1",
     "react-native-tab-view": "^4.0.5",
     "react-native-toast-message": "^2.2.1",
-    "react-native-vision-camera": "^4.6.3"
+    "react-native-vision-camera": "^4.6.3",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
