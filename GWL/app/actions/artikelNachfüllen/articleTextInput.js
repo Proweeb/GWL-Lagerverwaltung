@@ -1,8 +1,8 @@
-import { Text, View, ScrollView } from "react-native";
+import { Text, View, ScrollView, Keyboard } from "react-native";
 import { styles } from "../../../components/styles";
 import TextInputField from "../../../components/utils/TextInputs/textInputField";
 import ArticleMenu from "../../../components/utils/InputMenus/articleMenu";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useNavigation } from "@react-navigation/native";
@@ -14,9 +14,31 @@ import RegalService from "../../../database/datamapper/RegalHelper.js";
 export default function ArticleTextInput({
   gwId,
   setGwId,
-  setExistingArticle,
+  setShowMengeOverview,
+  setMenge,
+  setFoundArticle,
 }) {
   const navigation = useNavigation();
+  const [dbArtikel, setDbArtikel] = useState("-1");
+
+  useEffect(() => {
+    if (dbArtikel === "-1") {
+      return;
+    }
+    if (!dbArtikel) {
+      Alert.alert("Fehler", "Artikel existiert nicht");
+      console.log("Artikel existiert nicht");
+      setShowMengeOverview(false);
+    } else {
+      console.log("Artikel gefunden!");
+      console.log(dbArtikel);
+      setFoundArticle(dbArtikel);
+      setMenge(dbArtikel.menge);
+      setShowMengeOverview(true);
+      Keyboard.dismiss();
+      setDbArtikel("-1");
+    }
+  }, [dbArtikel]);
 
   const handleSearch = async () => {
     if (!gwId) {
@@ -26,15 +48,7 @@ export default function ArticleTextInput({
       console.log("Alle Felder sind befüllt:", gwId);
 
       try {
-        const existingArtikel = await ArtikelService.getArtikelById(gwId);
-
-        if (!existingArtikel) {
-          console.log("Artikel existiert nicht");
-          setExistingArticle(false);
-        } else {
-          console.log("Artikel gefunden!");
-          setExistingArticle(true);
-        }
+        setDbArtikel(await ArtikelService.getArtikelById(gwId));
       } catch (error) {
         console.error("Fehler beim Finden:", error);
         Alert.alert("Fehler", "Fehler bei Artikelsuche.");
