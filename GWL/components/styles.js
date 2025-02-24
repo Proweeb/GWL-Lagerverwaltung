@@ -75,6 +75,7 @@ export const styles = {
       borderRadius: 10,
       width: "100%",
       alignItems: "center",
+      marginBottom: 10,
   },
   buttonText: {
       color: "#202020",
