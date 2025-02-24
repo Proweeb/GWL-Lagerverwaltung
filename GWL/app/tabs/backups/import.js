@@ -44,7 +44,6 @@ const ImportScreen = () => {
 
         let allSheetsData = {};
 
-        // Loop through all sheets in the Excel file
         workbook.SheetNames.forEach((sheetName) => {
           const sheet = workbook.Sheets[sheetName];
           const parsedData = XLSX.utils.sheet_to_json(sheet);
@@ -67,7 +66,7 @@ const ImportScreen = () => {
     }
   };
 
-  // Handle Import function that receives jsonData
+  
   const handleImport = async() => {
     if (!jsonData) {
       Alert.alert("Fehler", "Es gibt keine Daten zu importieren.");
