@@ -9,6 +9,9 @@ import {
 import * as XLSX from "xlsx";
 import * as DocumentPicker from "expo-document-picker";
 import { styles } from "../../../components/styles";
+import RegalService from "../../../database/datamapper/RegalHelper";
+import ArtikelService from "../../../database/datamapper/ArtikelHelper";
+import LogService from "../../../database/datamapper/LogHelper";
 
 const ImportScreen = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -65,15 +68,74 @@ const ImportScreen = () => {
   };
 
   // Handle Import function that receives jsonData
-  const handleImport = () => {
+  const handleImport = async() => {
     if (!jsonData) {
       Alert.alert("Fehler", "Es gibt keine Daten zu importieren.");
       return;
     }
 
     console.log("Importing Data:", jsonData);
-    // Here you can send jsonData to an API or process it further
+    try {
+      // Upload Regale first
+      for (const regal of jsonData.Regale) {
+        await RegalService.createRegal(regal);
+      }
+  
+      // Upload Artikel
+      for (const artikel of jsonData.Artikel) {
+        await ArtikelService.createArtikel(artikel);
+      }
+  
+      // Upload Logs
+      for (const log of jsonData.Logs) {
+        await LogService.createLog(log, log.gw_id, log.regal_id);
+      }
+
+      //getAllLogs();
+      
+      //getAllRegale();
+     
+      //getAllArtikel();
+    
+  
+      console.log("Daten erfolgreich hochgeladen!");
+    } catch (error) {
+      console.error("Fehler beim Hochladen der Daten:", error);
+    }
+
+   
   };
+
+  async function getAllLogs() {
+    try {
+      const logs = await LogService.getAllLogs();
+      console.log("Alle Logs:", logs);
+      return logs;
+    } catch (error) {
+      console.error("Fehler beim Abrufen der Logs:", error);
+    }
+  }
+  
+    
+  async function getAllArtikel() {
+    try {
+      const artikel = await ArtikelService.getAllArtikel();
+      console.log("Alle Artikel:", artikel);
+      return artikel;
+    } catch (error) {
+      console.error("Fehler beim Abrufen der Artikel:", error);
+    }
+  }
+
+  async function getAllRegale() {
+    try {
+      const regale = await RegalService.getAllRegal();
+      console.log("Alle Regale:", regale);
+      return regale;
+    } catch (error) {
+      console.error("Fehler beim Abrufen der Regale:", error);
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -92,13 +154,19 @@ const ImportScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {jsonData && (
-        <ScrollView style={styles.jsonContainer}>
-          <Text style={styles.jsonText}>{JSON.stringify(jsonData, null, 2)}</Text>
-        </ScrollView>
-      )}
+      
     </View>
   );
 };
 
 export default ImportScreen;
+
+
+
+
+////{jsonData && (
+////  <ScrollView style={styles.jsonContainer}>
+////  <Text style={styles.jsonText}>{JSON.stringify(jsonData, null, 2)}</Text>
+////</ScrollView>
+////)}
+
