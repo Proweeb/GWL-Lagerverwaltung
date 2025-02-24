@@ -67,12 +67,12 @@ const TopBarStyles = StyleSheet.create({
     borderRadius: 13,
     marginLeft: 20,
     marginBottom: 10,
-    padding: 10,
+    padding: 0,
     width: 100,
     elevation: 2,
   },
   tabButton: {
-    padding: 10,
+    padding: 12,
     position: "relative",
   },
   insetShadow: {

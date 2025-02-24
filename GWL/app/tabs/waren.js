@@ -1,7 +1,9 @@
-import { Text, View } from "react-native";
+import { Button, Text, View } from "react-native";
 import { styles } from "../../components/styles";
+import { useNavigation } from "@react-navigation/native";
 
 export default function WarenScreen() {
+  const navigation = useNavigation();
   return (
     <View
       style={{
@@ -11,7 +13,11 @@ export default function WarenScreen() {
         backgroundColor: styles.backgroundColor,
       }}
     >
-      <Text>👤 Profile Screen</Text>
+      
+      <Button 
+        title="Go to Listeimportieren" 
+        onPress={() => navigation.navigate('listeImportieren')} 
+      />
     </View>
   );
 }

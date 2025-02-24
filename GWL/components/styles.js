@@ -29,6 +29,61 @@ export const styles = {
   text: {
     fontSize: RFPercentage(1.7),
   },
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    padding: 16,
+    
+  },
+  title: {
+      fontSize: 24,
+      fontWeight: "bold",
+      color: "white",
+      marginBottom: 20,
+  },
+  card: {
+      backgroundColor: "#f8f8ff",
+      padding: 20,
+      borderRadius: 15,
+      width: "90%",
+      alignItems: "center",
+  },
+  fileBox: {
+      backgroundColor: "#d9d9d9",
+      padding: 10,
+      borderRadius: 10,
+      marginBottom: 15,
+      width: "100%",
+      alignItems: "center",
+  },
+  fileText: {
+      color: "#202020",
+  },
+  buttonWhite: {
+      backgroundColor: "#ffffff",
+      padding: 10,
+      borderRadius: 10,
+      width: "100%",
+      alignItems: "center",
+      marginBottom: 10,
+  },
+  buttonBlue: {
+      backgroundColor: "#70BBDF33",
+      padding: 10,
+      borderRadius: 10,
+      width: "100%",
+      alignItems: "center",
+  },
+  buttonText: {
+      color: "#202020",
+      fontWeight: "bold",
+  },
+  buttonTextLightBlue: {
+    color: "#30A6DE",
+    fontWeight: "bold",
+},
   //Accent Colors
   //light
   lightLightBlue: "#70BBDF33",
