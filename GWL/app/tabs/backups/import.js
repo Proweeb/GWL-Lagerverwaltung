@@ -30,40 +30,50 @@ const ImportScreen = () => {
   };
 
   const parseExcel = async (file) => {
-        try {
-            const response = await fetch(file.uri);
-            const blob = await response.blob();
-            const reader = new FileReader();
+    try {
+      const response = await fetch(file.uri);
+      const blob = await response.blob();
+      const reader = new FileReader();
 
-            reader.onload = (e) => {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: "array" });
+      reader.onload = (e) => {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
 
-                let allSheetsData = {};
+        let allSheetsData = {};
 
-                // Loop through all sheets in the Excel file
-                workbook.SheetNames.forEach((sheetName) => {
-                    const sheet = workbook.Sheets[sheetName];
-                    const parsedData = XLSX.utils.sheet_to_json(sheet);
+        // Loop through all sheets in the Excel file
+        workbook.SheetNames.forEach((sheetName) => {
+          const sheet = workbook.Sheets[sheetName];
+          const parsedData = XLSX.utils.sheet_to_json(sheet);
 
-                    if (parsedData.length > 0) {
-                        allSheetsData[sheetName] = parsedData;
-                    }
-                });
+          if (parsedData.length > 0) {
+            allSheetsData[sheetName] = parsedData;
+          }
+        });
 
-                if (Object.keys(allSheetsData).length > 0) {
-                    setJsonData(allSheetsData);
-                } else {
-                    Alert.alert("Fehler", "Keine Daten gefunden.");
-                }
-            };
-
-            reader.readAsArrayBuffer(blob);
-        } catch (error) {
-            Alert.alert("Fehler", "Datei konnte nicht verarbeitet werden.");
+        if (Object.keys(allSheetsData).length > 0) {
+          setJsonData(allSheetsData);
+        } else {
+          Alert.alert("Fehler", "Keine Daten gefunden.");
         }
-    };
+      };
 
+      reader.readAsArrayBuffer(blob);
+    } catch (error) {
+      Alert.alert("Fehler", "Datei konnte nicht verarbeitet werden.");
+    }
+  };
+
+  // Handle Import function that receives jsonData
+  const handleImport = () => {
+    if (!jsonData) {
+      Alert.alert("Fehler", "Es gibt keine Daten zu importieren.");
+      return;
+    }
+
+    console.log("Importing Data:", jsonData);
+    // Here you can send jsonData to an API or process it further
+  };
 
   return (
     <View style={styles.container}>
@@ -77,8 +87,8 @@ const ImportScreen = () => {
         <TouchableOpacity style={styles.buttonWhite} onPress={pickFile}>
           <Text style={styles.buttonText}>Hochladen</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.buttonBlue}>
-                    <Text style={styles.buttonTextLightBlue}>Importieren</Text>
+        <TouchableOpacity style={styles.buttonBlue} onPress={handleImport}>
+          <Text style={styles.buttonTextLightBlue}>Importieren</Text>
         </TouchableOpacity>
       </View>
 
