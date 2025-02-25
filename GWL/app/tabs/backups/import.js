@@ -174,137 +174,85 @@ const ImportScreen = () => {
 
   return (
     <View style={styles.container}>
-        <Text style={styles.title}>Excel Datei Importieren</Text>
-        <View style={styles.card}>
-          <View style={styles.fileBox}>
-            <Text style={styles.fileText}>
-              {selectedFile ? selectedFile.name : "Keine Datei ausgewählt"}
-            </Text>
-          </View>
-          <TouchableOpacity style={styles.buttonWhite} onPress={pickFile}>
-            <Text style={styles.buttonText}>Hochladen</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.buttonBlue} onPress={handleImport}>
-            <Text style={styles.buttonTextLightBlue}>Importieren</Text>
-          </TouchableOpacity>
+      <Text style={styles.title}>Excel Datei Importieren</Text>
+      <View style={styles.card}>
+        <View style={styles.fileBox}>
+          <Text style={styles.fileText}>
+            {selectedFile ? selectedFile.name : "Keine Datei ausgewählt"}
+          </Text>
         </View>
-
-      
-
-        <ScrollView style = {styles.scrollContainer}>
-
-        <Text style={styles.subHeader}>Artikel Vorschau</Text>
-        <View style={localStyles.table}>
-          <View style={[localStyles.row, localStyles.rowBorder]}>
-            <View style={localStyles.cell}><Text style={localStyles.tableContent}>Produkt Name</Text></View>
-            <View style={localStyles.cell}><Text style={localStyles.tableContent}>Produkt ID</Text></View>
-            <View style={localStyles.cell}><Text style={localStyles.tableContent}>Menge</Text></View>
-            <View style={localStyles.cell}><Text style={localStyles.tableContent}>Status</Text></View>
-          </View>
-
-          {jsonData && jsonData.Artikel ? (
-            jsonData.Artikel.map((item, index) => (
+        <TouchableOpacity style={styles.buttonWhite} onPress={pickFile}>
+          <Text style={styles.buttonText}>Hochladen</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.buttonBlue} onPress={handleImport} disabled={!jsonData}>
+          <Text style={styles.buttonTextLightBlue}>Importieren</Text>
+        </TouchableOpacity>
+      </View>
+  
+      {selectedFile && jsonData && (
+        <ScrollView style={styles.scrollContainer}>
+          {/* Artikel Vorschau */}
+          <Text style={styles.subHeader}>Artikel Vorschau</Text>
+          <View style={localStyles.table}>
+            <View style={[localStyles.row, localStyles.rowBorder]}>
+              <View style={localStyles.cell}><Text style={localStyles.tableContent}>Name</Text></View>
+              <View style={localStyles.cell}><Text style={localStyles.tableContent}>Produkt ID</Text></View>
+              <View style={localStyles.cell}><Text style={localStyles.tableContent}>Ablaufdatum</Text></View>
+              <View style={localStyles.cell}><Text style={localStyles.tableContent}>Menge</Text></View>
+            </View>
+  
+            {jsonData.Artikel.map((item, index) => (
               <View key={index} style={[localStyles.row, localStyles.rowBorder]}>
                 <View style={localStyles.cell}><Text style={localStyles.name}>{item.beschreibung}</Text></View>
                 <View style={localStyles.cell}><Text style={localStyles.cellText}>{item.gwId}</Text></View>
+                <View style={localStyles.cell}><Text style={localStyles.cellText}>{item.ablaufdatum}</Text></View>
                 <View style={localStyles.cell}><Text style={localStyles.cellText}>{item.menge}</Text></View>
-                <View style={localStyles.cell}><Text style={localStyles.cellText}>{item.status}</Text></View>
               </View>
-            ))
-          ) : (
-            <Text>Keine Artikel vorhanden</Text>
-          )}
-        </View>
-
-
-
-
-        <Text style={styles.subHeader}>Regale Vorschau</Text>
-        <View style={localStyles.table}>
-          <View style={[localStyles.row, localStyles.rowBorder]}>
-            <View style={localStyles.cell}><Text style={localStyles.tableContent}>Regal Name</Text></View>
-            <View style={localStyles.cell}><Text style={localStyles.tableContent}>Regal ID</Text></View>
-            <View style={localStyles.cell}><Text style={localStyles.tableContent}>Fach Name</Text></View>
+            ))}
           </View>
-
-          {jsonData && jsonData.Regale ? (
-            jsonData.Regale.map((item, index) => (
+  
+          {/* Regale Vorschau */}
+          <Text style={styles.subHeader}>Regale Vorschau</Text>
+          <View style={localStyles.table}>
+            <View style={[localStyles.row, localStyles.rowBorder]}>
+              <View style={localStyles.cell}><Text style={localStyles.tableContent}>Regal Name</Text></View>
+              <View style={localStyles.cell}><Text style={localStyles.tableContent}>Regal ID</Text></View>
+              <View style={localStyles.cell}><Text style={localStyles.tableContent}>Fach Name</Text></View>
+            </View>
+  
+            {jsonData.Regale.map((item, index) => (
               <View key={index} style={[localStyles.row, localStyles.rowBorder]}>
                 <View style={localStyles.cell}><Text style={localStyles.name}>{item.regalName}</Text></View>
                 <View style={localStyles.cell}><Text style={localStyles.cellText}>{item.regalId}</Text></View>
                 <View style={localStyles.cell}><Text style={localStyles.cellText}>{item.fachName}</Text></View>
               </View>
-            ))
-          ) : (
-            <Text>Keine Regale vorhanden</Text>
-          )}
-        </View>
-
-
-
-
-
-        <Text style={styles.subHeader}>Logs Vorschau</Text>
-        <View style={localStyles.table}>
-          <View style={[localStyles.row, localStyles.rowBorder]}>
-            <View style={localStyles.cell}><Text style={localStyles.tableContent}>Log ID</Text></View>
-            <View style={localStyles.cell}><Text style={localStyles.tableContent}>GW ID</Text></View>
-            <View style={localStyles.cell}><Text style={localStyles.tableContent}>Regal ID</Text></View>
-            <View style={localStyles.cell}><Text style={localStyles.tableContent}>Menge</Text></View>
+            ))}
           </View>
-
-          {jsonData && jsonData.Logs ? (
-            jsonData.Logs.map((item, index) => (
+  
+          {/* Logs Vorschau */}
+          <Text style={styles.subHeader}>Lagerbewegungen Vorschau</Text>
+          <View style={localStyles.table}>
+            <View style={[localStyles.row, localStyles.rowBorder]}>
+              <View style={localStyles.cell}><Text style={localStyles.tableContent}>Beschreibung</Text></View>
+              <View style={localStyles.cell}><Text style={localStyles.tableContent}>Artikel ID</Text></View>
+              <View style={localStyles.cell}><Text style={localStyles.tableContent}>Regal ID</Text></View>
+              <View style={localStyles.cell}><Text style={localStyles.tableContent}>Menge</Text></View>
+            </View>
+  
+            {jsonData.Logs.map((item, index) => (
               <View key={index} style={[localStyles.row, localStyles.rowBorder]}>
                 <View style={localStyles.cell}><Text style={localStyles.name}>{item.beschreibung}</Text></View>
                 <View style={localStyles.cell}><Text style={localStyles.cellText}>{item.gwId}</Text></View>
                 <View style={localStyles.cell}><Text style={localStyles.cellText}>{item.regalId}</Text></View>
                 <View style={localStyles.cell}><Text style={localStyles.cellText}>{item.menge}</Text></View>
               </View>
-            ))
-          ) : (
-            <Text>Keine Logs vorhanden</Text>
-          )}
-        </View>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            ))}
+          </View>
         </ScrollView>
-        
-
-
-
-
-
-
-
-
-
-
-
-
-      </View>
-
-
-    
-
-    
-
-    
-
+      )}
+    </View>
   );
+  
 };
 
 export default ImportScreen;
