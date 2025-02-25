@@ -96,19 +96,25 @@ async function getArtikelByRegalId(regal_id) {
   const regal = await RegalService.getRegalById(regal_id)
   return await regal.artikel.fetch()
 }
-
 async function deleteAllData() {
   return await database.write(async () => {
+    const batchOperations = [];
+
     const allArtikel = await database.get("artikel").query().fetch();
+    allArtikel.forEach((artikel) => batchOperations.push(artikel.prepareDestroyPermanently()));
+
     const allLogs = await database.get("logs").query().fetch();
+    allLogs.forEach((log) => batchOperations.push(log.prepareDestroyPermanently()));
+
     const allRegale = await database.get("regale").query().fetch();
-    await database.batch(
-      ...allArtikel.map((artikel) => artikel.prepareDestroyPermanently()),
-      ...allLogs.map((log) => log.prepareDestroyPermanently()),
-      ...allRegale.map((regal) => regal.prepareDestroyPermanently())
-    );
+    allRegale.forEach((regal) => batchOperations.push(regal.prepareDestroyPermanently()));
+
+    if (batchOperations.length > 0) {
+      await database.batch(...batchOperations);
+    }
   });
 }
+
 
 const ArtikelService = {
   createArtikel,

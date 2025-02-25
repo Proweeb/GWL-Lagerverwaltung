@@ -26,6 +26,7 @@ export const styles = {
     fontWeight: "700",
     textAlign: "left",
     color: "#292D32",
+    marginBottom: 10
   },
 
   text: {
@@ -38,6 +39,7 @@ export const styles = {
     alignItems: "center",
     backgroundColor: "#ffffff",
     padding: 16,
+    
   },
 
   title: {
@@ -51,13 +53,15 @@ export const styles = {
     backgroundColor: "#f8f8ff",
     padding: 20,
     borderRadius: 15,
-    width: "90%",
+    width: "100%",
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5, // Android shadow
+    marginBottom: 50,
+    
   },
 
   fileBox: {
