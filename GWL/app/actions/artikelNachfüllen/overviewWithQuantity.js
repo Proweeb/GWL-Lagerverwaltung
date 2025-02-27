@@ -13,16 +13,18 @@ export default function OverviewWithQuantity({
   setShowMengeOverview,
   foundArticle,
 }) {
+  const [nachfüllmenge, setNachfüllmenge] = useState(0);
+  const [showValue, setShowValue] = useState(0);
   const handleFertig = async () => {
     setShowMengeOverview(false);
-    if (menge == "") {
-      menge = 0;
+    if (nachfüllmenge == "") {
+      setNachfüllmenge(0);
     }
     await ArtikelService.updateArtikel(foundArticle.gwId, {
       gwId: foundArticle.gwId,
       firmenId: foundArticle.firmenId,
       beschreibung: foundArticle.beschreibung,
-      menge: menge,
+      menge: menge + Number(nachfüllmenge),
       mindestMenge: foundArticle.mindestMenge,
       ablaufdatum: foundArticle.ablaufdatum,
       regalId: foundArticle.regalId,
@@ -60,17 +62,36 @@ export default function OverviewWithQuantity({
           flex: 1,
         }}
       >
+        <View>
+          <Text style={[siteStyles.textStyle, { color: "white" }]}>
+            Aktuelle Menge vom Artikel: {menge}
+          </Text>
+        </View>
+
+        <View>
+          <Text
+            style={[
+              siteStyles.textStyle,
+              { color: "white", marginTop: "25%", fontSize: RFPercentage(2.5) },
+            ]}
+          >
+            Nachfüllmenge:
+          </Text>
+        </View>
+
         <View
           style={{
             justifyContent: "center",
             alignItems: "center",
             flexDirection: "row",
             width: "100%",
-            marginTop: "25%",
           }}
         >
           <TouchableOpacity
-            onPress={() => setMenge(Number(menge) - 1)}
+            onPress={() => {
+              setNachfüllmenge(nachfüllmenge - 1);
+              setShowValue(nachfüllmenge);
+            }}
             style={siteStyles.touchableStyle}
           >
             <Feather name="minus" size={50} color="white" />
@@ -78,13 +99,16 @@ export default function OverviewWithQuantity({
 
           <TextInput
             style={siteStyles.inputStyle}
-            value={String(menge)}
-            onChangeText={(text) => setMenge(text)}
+            value={nachfüllmenge}
+            onChangeText={(text) => setNachfüllmenge(text)}
             inputMode={"numeric"}
           ></TextInput>
 
           <TouchableOpacity
-            onPress={() => setMenge(Number(menge) + 1)}
+            onPress={() => {
+              setNachfüllmenge(nachfüllmenge + 1);
+              setShowValue(nachfüllmenge);
+            }}
             style={siteStyles.touchableStyle}
           >
             <Feather name="plus" size={50} color="white" />
