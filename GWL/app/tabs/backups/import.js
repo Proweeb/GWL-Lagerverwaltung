@@ -25,6 +25,7 @@ const ImportScreen = () => {
       Alert.alert("Fehler", "Dateiauswahl fehlgeschlagen");
     }
   };
+
   const parseExcel = async (file) => {
     try {
       const response = await fetch(file.uri);
@@ -65,7 +66,6 @@ const ImportScreen = () => {
     }
   };
   
-
   const handleImport = async () => {
     if (!jsonData) {
       Alert.alert("Fehler", "Es gibt keine Daten zu importieren.");
@@ -136,8 +136,7 @@ const ImportScreen = () => {
    }
     
   };
-
-    
+  
   async function getAllLogs() {
     try {
       const logs = await LogService.getAllLogs();
@@ -147,8 +146,7 @@ const ImportScreen = () => {
       console.error("Fehler beim Abrufen der Logs:", error);
     }
   }
-  
-    
+      
   async function getAllArtikel() {
     try {
       const artikel = await ArtikelService.getAllArtikel();
