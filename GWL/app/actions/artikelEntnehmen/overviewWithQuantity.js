@@ -16,20 +16,35 @@ export default function OverviewWithQuantity({
 }) {
   const [nachfüllmenge, setNachfüllmenge] = useState(0);
 
+  const handleMengeShow = () => {
+    if (menge - Number(nachfüllmenge) < 0) {
+      return 0;
+    } else {
+      return menge - Number(nachfüllmenge);
+    }
+  };
+
   const handleFertig = async () => {
     setShowMengeOverview(false);
     if (nachfüllmenge == "") {
       setNachfüllmenge(0);
     }
+
+    if (menge - Number(nachfüllmenge) < 0) {
+      setMenge(0);
+      setNachfüllmenge(0);
+    }
+
     await ArtikelService.updateArtikel(foundArticle.gwId, {
       gwId: foundArticle.gwId,
       firmenId: foundArticle.firmenId,
       beschreibung: foundArticle.beschreibung,
-      menge: menge + Number(nachfüllmenge),
+      menge: menge - Number(nachfüllmenge),
       mindestMenge: foundArticle.mindestMenge,
       ablaufdatum: foundArticle.ablaufdatum,
       regalId: foundArticle.regalId,
     });
+
     Alert.alert(
       "Erfolg",
       "Menge erfolgreich geändert\nNeue Menge: " + foundArticle.menge
@@ -61,7 +76,7 @@ export default function OverviewWithQuantity({
       >
         <View>
           <Text style={[siteStyles.textStyle, { color: "white" }]}>
-            Aktuelle Menge vom Artikel: {Number(menge) + Number(nachfüllmenge)}
+            Aktuelle Menge vom Artikel: {handleMengeShow()}
           </Text>
         </View>
 
@@ -72,7 +87,7 @@ export default function OverviewWithQuantity({
               { color: "white", marginTop: "25%", fontSize: RFPercentage(2.5) },
             ]}
           >
-            Nachfüllmenge:
+            Entnahmemenge:
           </Text>
         </View>
 
@@ -89,8 +104,6 @@ export default function OverviewWithQuantity({
               if (Number(nachfüllmenge) != 0) {
                 setNachfüllmenge(nachfüllmenge - 1);
               }
-
-              //setShowValue(nachfüllmenge);
             }}
             style={siteStyles.touchableStyle}
           >
@@ -100,13 +113,22 @@ export default function OverviewWithQuantity({
           <TextInput
             style={siteStyles.inputStyle}
             value={String(nachfüllmenge)}
-            onChangeText={(text) => setNachfüllmenge(text)}
+            onChangeText={(text) => {
+              if (Number(text) > menge) {
+                setNachfüllmenge(menge);
+              } else {
+                setNachfüllmenge(text);
+              }
+            }}
             inputMode={"numeric"}
           ></TextInput>
 
           <TouchableOpacity
             onPress={() => {
-              setNachfüllmenge(nachfüllmenge + 1);
+              if (handleMengeShow() != 0) {
+                setNachfüllmenge(nachfüllmenge + 1);
+              }
+
               //setShowValue(nachfüllmenge);
             }}
             style={siteStyles.touchableStyle}
