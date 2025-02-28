@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { Text, View, TouchableOpacity, Alert, ScrollView, StyleSheet} from "react-native";
+import {
+  Text,
+  View,
+  TouchableOpacity,
+  Alert,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
 import * as XLSX from "xlsx";
 import * as DocumentPicker from "expo-document-picker";
 import { styles } from "../../../components/styles";
@@ -7,7 +14,6 @@ import RegalService from "../../../database/datamapper/RegalHelper";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper";
 import LogService from "../../../database/datamapper/LogHelper";
 import { database } from "../../../database/database";
-
 
 const ImportScreen = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -25,46 +31,46 @@ const ImportScreen = () => {
       Alert.alert("Fehler", "Dateiauswahl fehlgeschlagen");
     }
   };
+
   const parseExcel = async (file) => {
     try {
       const response = await fetch(file.uri);
       const blob = await response.blob();
       const reader = new FileReader();
-  
+
       reader.onload = (e) => {
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: "array" });
         let allSheetsData = {};
-  
+
         workbook.SheetNames.forEach((sheetName) => {
           const sheet = workbook.Sheets[sheetName];
           let parsedData = XLSX.utils.sheet_to_json(sheet);
-  
+
           if (parsedData.length > 0) {
             // Convert every value in the object to a string
-            parsedData = parsedData.map(row =>
+            parsedData = parsedData.map((row) =>
               Object.fromEntries(
                 Object.entries(row).map(([key, value]) => [key, String(value)])
               )
             );
-  
+
             allSheetsData[sheetName] = parsedData;
           }
         });
-  
+
         if (Object.keys(allSheetsData).length > 0) {
           setJsonData(allSheetsData);
         } else {
           Alert.alert("Fehler", "Keine Daten gefunden.");
         }
       };
-  
+
       reader.readAsArrayBuffer(blob);
     } catch (error) {
       Alert.alert("Fehler", "Datei konnte nicht verarbeitet werden.");
     }
   };
-  
 
   const handleImport = async () => {
     if (!jsonData) {
@@ -72,7 +78,7 @@ const ImportScreen = () => {
       return;
     }
     try {
-      console.log(JSON.stringify(jsonData))
+      console.log(JSON.stringify(jsonData));
       console.log("Backup der aktuellen Datenbank wird erstellt...");
       const backup = await backupDatabase();
       console.log("Bestehende Datenbank wird gelöscht...");
@@ -85,15 +91,11 @@ const ImportScreen = () => {
       console.error("Fehler beim Import:", error);
       Alert.alert("Fehler", "Datenimport fehlgeschlagen.");
     }
-      
-  
-
-
   };
 
   const backupDatabase = async () => {
     try {
-      console.log("Here")
+      console.log("Here");
       const regale = await RegalService.getAllRegal();
       const artikel = await ArtikelService.getAllArtikel();
       const logs = await LogService.getAllLogs();
@@ -105,39 +107,37 @@ const ImportScreen = () => {
   };
 
   const insertData = async (data) => {
-   try{
-    for (const regal of data.Regale) {
-      
-      regal.regalId = String(regal.regalId)
-      console.log("Regal:")
-      await console.log(regal)
-      await RegalService.createRegal(regal);
-    }
-    for (const artikel of data.Artikel) {
-      artikel.gwId = String(artikel.gwId)
-      artikel.firmenId = String(artikel.firmenId)
-      artikel.kunde =  String(artikel.kunde)
-      artikel.regalId = String(artikel.regalId)
-      console.log("Artikel:")
-      await console.log(artikel)
-      await ArtikelService.createArtikel(artikel);
-    }
-    for (const log of data.Logs) {
-      log.gwId = String(log.gwId)
-      log.gwId = String(log.regalId)
-      await console.log(log)
-      await LogService.createLog(log, log.gwId, log.regalId);
-    }
+    try {
+      for (const regal of data.Regale) {
+        regal.regalId = String(regal.regalId);
+        console.log("Regal:");
+        await console.log(regal);
+        await RegalService.createRegal(regal);
+      }
+      for (const artikel of data.Artikel) {
+        artikel.gwId = String(artikel.gwId);
+        artikel.firmenId = String(artikel.firmenId);
+        artikel.kunde = String(artikel.kunde);
+        artikel.menge = Number(artikel.menge);
+        artikel.mindestMenge = Number(artikel.mindestMenge);
 
-    
-   }
-   catch(error){
-    console.log(error)
-   }
-    
+        artikel.regalId = String(artikel.regalId);
+        console.log("Artikel:");
+        await console.log(artikel);
+        await ArtikelService.createArtikel(artikel);
+      }
+      for (const log of data.Logs) {
+        log.gwId = String(log.gwId);
+        log.regalId = String(log.regalId);
+        log.menge = Number(log.menge);
+        await console.log(log);
+        await LogService.createLog(log, log.gwId, log.regalId);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-    
   async function getAllLogs() {
     try {
       const logs = await LogService.getAllLogs();
@@ -147,8 +147,7 @@ const ImportScreen = () => {
       console.error("Fehler beim Abrufen der Logs:", error);
     }
   }
-  
-    
+
   async function getAllArtikel() {
     try {
       const artikel = await ArtikelService.getAllArtikel();
@@ -168,9 +167,6 @@ const ImportScreen = () => {
       console.error("Fehler beim Abrufen der Regale:", error);
     }
   }
-  
-
-
 
   return (
     <View style={styles.container}>
@@ -184,67 +180,124 @@ const ImportScreen = () => {
         <TouchableOpacity style={styles.buttonWhite} onPress={pickFile}>
           <Text style={styles.buttonText}>Hochladen</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.buttonBlue} onPress={handleImport} disabled={!jsonData}>
+        <TouchableOpacity
+          style={styles.buttonBlue}
+          onPress={handleImport}
+          disabled={!jsonData}
+        >
           <Text style={styles.buttonTextLightBlue}>Importieren</Text>
         </TouchableOpacity>
       </View>
-  
+
       {selectedFile && jsonData && (
         <ScrollView style={styles.scrollContainer}>
           {/* Artikel Vorschau */}
           <Text style={styles.subHeader}>Artikel Vorschau</Text>
           <View style={localStyles.table}>
             <View style={[localStyles.row, localStyles.rowBorder]}>
-              <View style={localStyles.cell}><Text style={localStyles.tableContent}>Name</Text></View>
-              <View style={localStyles.cell}><Text style={localStyles.tableContent}>Produkt ID</Text></View>
-              <View style={localStyles.cell}><Text style={localStyles.tableContent}>Ablaufdatum</Text></View>
-              <View style={localStyles.cell}><Text style={localStyles.tableContent}>Menge</Text></View>
+              <View style={localStyles.cell}>
+                <Text style={localStyles.tableContent}>Name</Text>
+              </View>
+              <View style={localStyles.cell}>
+                <Text style={localStyles.tableContent}>Produkt ID</Text>
+              </View>
+              <View style={localStyles.cell}>
+                <Text style={localStyles.tableContent}>Ablaufdatum</Text>
+              </View>
+              <View style={localStyles.cell}>
+                <Text style={localStyles.tableContent}>Menge</Text>
+              </View>
             </View>
-  
+
             {jsonData.Artikel.map((item, index) => (
-              <View key={index} style={[localStyles.row, localStyles.rowBorder]}>
-                <View style={localStyles.cell}><Text style={localStyles.name}>{item.beschreibung}</Text></View>
-                <View style={localStyles.cell}><Text style={localStyles.cellText}>{item.gwId}</Text></View>
-                <View style={localStyles.cell}><Text style={localStyles.cellText}>{item.ablaufdatum}</Text></View>
-                <View style={localStyles.cell}><Text style={localStyles.cellText}>{item.menge}</Text></View>
+              <View
+                key={index}
+                style={[localStyles.row, localStyles.rowBorder]}
+              >
+                <View style={localStyles.cell}>
+                  <Text style={localStyles.name}>{item.beschreibung}</Text>
+                </View>
+                <View style={localStyles.cell}>
+                  <Text style={localStyles.cellText}>{item.gwId}</Text>
+                </View>
+                <View style={localStyles.cell}>
+                  <Text style={localStyles.cellText}>{item.ablaufdatum}</Text>
+                </View>
+                <View style={localStyles.cell}>
+                  <Text style={localStyles.cellText}>{item.menge}</Text>
+                </View>
               </View>
             ))}
           </View>
-  
+
           {/* Regale Vorschau */}
           <Text style={styles.subHeader}>Regale Vorschau</Text>
           <View style={localStyles.table}>
             <View style={[localStyles.row, localStyles.rowBorder]}>
-              <View style={localStyles.cell}><Text style={localStyles.tableContent}>Regal Name</Text></View>
-              <View style={localStyles.cell}><Text style={localStyles.tableContent}>Regal ID</Text></View>
-              <View style={localStyles.cell}><Text style={localStyles.tableContent}>Fach Name</Text></View>
+              <View style={localStyles.cell}>
+                <Text style={localStyles.tableContent}>Regal Name</Text>
+              </View>
+              <View style={localStyles.cell}>
+                <Text style={localStyles.tableContent}>Regal ID</Text>
+              </View>
+              <View style={localStyles.cell}>
+                <Text style={localStyles.tableContent}>Fach Name</Text>
+              </View>
             </View>
-  
+
             {jsonData.Regale.map((item, index) => (
-              <View key={index} style={[localStyles.row, localStyles.rowBorder]}>
-                <View style={localStyles.cell}><Text style={localStyles.name}>{item.regalName}</Text></View>
-                <View style={localStyles.cell}><Text style={localStyles.cellText}>{item.regalId}</Text></View>
-                <View style={localStyles.cell}><Text style={localStyles.cellText}>{item.fachName}</Text></View>
+              <View
+                key={index}
+                style={[localStyles.row, localStyles.rowBorder]}
+              >
+                <View style={localStyles.cell}>
+                  <Text style={localStyles.name}>{item.regalName}</Text>
+                </View>
+                <View style={localStyles.cell}>
+                  <Text style={localStyles.cellText}>{item.regalId}</Text>
+                </View>
+                <View style={localStyles.cell}>
+                  <Text style={localStyles.cellText}>{item.fachName}</Text>
+                </View>
               </View>
             ))}
           </View>
-  
+
           {/* Logs Vorschau */}
           <Text style={styles.subHeader}>Lagerbewegungen Vorschau</Text>
           <View style={localStyles.table}>
             <View style={[localStyles.row, localStyles.rowBorder]}>
-              <View style={localStyles.cell}><Text style={localStyles.tableContent}>Beschreibung</Text></View>
-              <View style={localStyles.cell}><Text style={localStyles.tableContent}>Artikel ID</Text></View>
-              <View style={localStyles.cell}><Text style={localStyles.tableContent}>Regal ID</Text></View>
-              <View style={localStyles.cell}><Text style={localStyles.tableContent}>Menge</Text></View>
+              <View style={localStyles.cell}>
+                <Text style={localStyles.tableContent}>Beschreibung</Text>
+              </View>
+              <View style={localStyles.cell}>
+                <Text style={localStyles.tableContent}>Artikel ID</Text>
+              </View>
+              <View style={localStyles.cell}>
+                <Text style={localStyles.tableContent}>Regal ID</Text>
+              </View>
+              <View style={localStyles.cell}>
+                <Text style={localStyles.tableContent}>Menge</Text>
+              </View>
             </View>
-  
+
             {jsonData.Logs.map((item, index) => (
-              <View key={index} style={[localStyles.row, localStyles.rowBorder]}>
-                <View style={localStyles.cell}><Text style={localStyles.name}>{item.beschreibung}</Text></View>
-                <View style={localStyles.cell}><Text style={localStyles.cellText}>{item.gwId}</Text></View>
-                <View style={localStyles.cell}><Text style={localStyles.cellText}>{item.regalId}</Text></View>
-                <View style={localStyles.cell}><Text style={localStyles.cellText}>{item.menge}</Text></View>
+              <View
+                key={index}
+                style={[localStyles.row, localStyles.rowBorder]}
+              >
+                <View style={localStyles.cell}>
+                  <Text style={localStyles.name}>{item.beschreibung}</Text>
+                </View>
+                <View style={localStyles.cell}>
+                  <Text style={localStyles.cellText}>{item.gwId}</Text>
+                </View>
+                <View style={localStyles.cell}>
+                  <Text style={localStyles.cellText}>{item.regalId}</Text>
+                </View>
+                <View style={localStyles.cell}>
+                  <Text style={localStyles.cellText}>{item.menge}</Text>
+                </View>
               </View>
             ))}
           </View>
@@ -252,13 +305,9 @@ const ImportScreen = () => {
       )}
     </View>
   );
-  
 };
 
 export default ImportScreen;
-
-
-
 
 const localStyles = StyleSheet.create({
   scrollContainer: {

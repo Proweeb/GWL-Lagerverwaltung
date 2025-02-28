@@ -4,6 +4,7 @@ import RegalService from "./RegalHelper";
 
 async function createArtikel(artikelData) {
   return database.write(async () => {
+    const regal = await RegalService.getRegalById(artikelData.regalId);
     return await database.get("artikel").create((artikel) => {
       artikel.gwId = artikelData.gwId;
       artikel.firmenId = artikelData.firmenId;
@@ -13,9 +14,9 @@ async function createArtikel(artikelData) {
       artikel.kunde = artikelData.kunde;
       artikel.ablaufdatum = artikelData.ablaufdatum;
 
-      //NEU 19.02
-      if (artikelData.regalId) {
-        artikel.regal.set(artikelData.regalId);
+      // NEU 19.02
+      if (regal) {
+        artikel.regal.set(regal);
       }
     });
   });
@@ -93,28 +94,33 @@ async function deleteArtikel(gwid) {
 }
 
 async function getArtikelByRegalId(regal_id) {
-  const regal = await RegalService.getRegalById(regal_id)
-  return await regal.artikel.fetch()
+  const regal = await RegalService.getRegalById(regal_id);
+  return await regal.artikel.fetch();
 }
 async function deleteAllData() {
   return await database.write(async () => {
     const batchOperations = [];
 
     const allArtikel = await database.get("artikel").query().fetch();
-    allArtikel.forEach((artikel) => batchOperations.push(artikel.prepareDestroyPermanently()));
+    allArtikel.forEach((artikel) =>
+      batchOperations.push(artikel.prepareDestroyPermanently())
+    );
 
     const allLogs = await database.get("logs").query().fetch();
-    allLogs.forEach((log) => batchOperations.push(log.prepareDestroyPermanently()));
+    allLogs.forEach((log) =>
+      batchOperations.push(log.prepareDestroyPermanently())
+    );
 
     const allRegale = await database.get("regale").query().fetch();
-    allRegale.forEach((regal) => batchOperations.push(regal.prepareDestroyPermanently()));
+    allRegale.forEach((regal) =>
+      batchOperations.push(regal.prepareDestroyPermanently())
+    );
 
     if (batchOperations.length > 0) {
       await database.batch(...batchOperations);
     }
   });
 }
-
 
 const ArtikelService = {
   createArtikel,
