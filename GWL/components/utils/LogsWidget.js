@@ -3,6 +3,7 @@ import { View, Text, FlatList, StyleSheet } from "react-native";
 import { Q } from "@nozbe/watermelondb";
 import LogService from "../../database/datamapper/LogHelper";
 import { database } from "../../database/database";
+import { styles } from "../styles";
 
 const LogsWidget = ({ selectedMonth }) => {
   const [logs, setLogs] = useState([]);
@@ -26,7 +27,7 @@ const LogsWidget = ({ selectedMonth }) => {
           )
         )
         .fetch(); // Fetch instead of observe
-      console.log(logsQuery.length);
+
       if (logsQuery.length === 0) {
         setLogs([]);
         return;
@@ -36,7 +37,6 @@ const LogsWidget = ({ selectedMonth }) => {
         logsQuery.map(async (log) => {
           const artikel = await log.artikel.fetch();
           const regal = await log.regal.fetch();
-          console.log(regal);
 
           return {
             beschreibung: log.beschreibung,
@@ -44,6 +44,7 @@ const LogsWidget = ({ selectedMonth }) => {
             regalName: regal.regalName,
             artikelName: artikel.gwId, // Artikel Name
             createdAt: log.createdAt,
+            id: log.id,
           };
         })
       );
@@ -55,33 +56,41 @@ const LogsWidget = ({ selectedMonth }) => {
   };
 
   const renderLogItem = ({ item }) => (
-    <View style={styles.logItem}>
-      <Text style={styles.time}>{item.createdAt.toDateString()}</Text>
-      <Text style={styles.beschreibung}>{item.beschreibung}</Text>
-      <Text style={styles.artikel}>Artikel: #{item.artikelName}</Text>
-      <Text style={styles.regal}>Regal: #{item.regalName}</Text>
-      <Text style={styles.menge}>Menge: {item.menge}</Text>
+    <View style={customStyles.logItem}>
+      <Text style={customStyles.time}>{item.createdAt.toDateString()}</Text>
+      <Text style={customStyles.beschreibung}>{item.beschreibung}</Text>
+      <Text style={customStyles.artikel}>Artikel: #{item.artikelName}</Text>
+      <Text style={customStyles.regal}>Regal: #{item.regalName}</Text>
+      <Text style={customStyles.menge}>Menge: {item.menge}</Text>
     </View>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={customStyles.container}>
       <FlatList
         data={logs}
         renderItem={renderLogItem}
         keyExtractor={(item) => item.id}
+        style={{ elevation: 5, flex: 1 }}
       />
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: { padding: 10, backgroundColor: "#f8f8f8", borderRadius: 10 },
-  logItem: {
-    backgroundColor: "#fff",
+const customStyles = StyleSheet.create({
+  container: {
     padding: 10,
-    marginBottom: 8,
+    backgroundColor: styles.backgroundColor,
+    borderRadius: 10,
+    flex: 1,
+    gap: 10,
+  },
+  logItem: {
+    backgroundColor: styles.white,
+    padding: 10,
     borderRadius: 5,
+    elevation: 1,
+    marginBottom: 8,
   },
   time: { fontWeight: "bold", color: "#333" },
   beschreibung: { fontSize: 16, marginBottom: 5 },
