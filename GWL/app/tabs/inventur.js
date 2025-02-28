@@ -1,13 +1,261 @@
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  Alert,
+  TextInput,
+  KeyboardAvoidingView,
+} from "react-native";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { RFPercentage } from "react-native-responsive-fontsize";
+import ArtikelService from "../../database/datamapper/ArtikelHelper";
+import TextInputField from "../../components/utils/TextInputs/textInputField";
+import { styles } from "../../components/styles";
+import { Platform, TouchableWithoutFeedback, Keyboard } from "react-native";
 
-export default function InventurScreen() {
+const InventoryScreen = () => {
   const navigation = useNavigation();
+  const [gwId, setGwId] = useState("");
+  const [artikelList, setArtikelList] = useState([]);
+  const [changedMenge, setChangedMenge] = useState({}); // Stores temporary values
+
+  useEffect(() => {
+    if (gwId === "") {
+      handleSearch();
+    }
+  }, [gwId]); // Runs when `gwId` changes
+
+  useEffect(() => {
+    const fetchArtikel = async () => {
+      try {
+        const artikelData = await ArtikelService.getAllArtikel();
+        setArtikelList(artikelData);
+      } catch (error) {
+        console.error("Fehler beim Laden der Artikel:", error);
+      }
+    };
+
+    fetchArtikel();
+  }, []);
+
+  const handleSearch = async () => {
+    if (!gwId) {
+      try {
+        const artikelData = await ArtikelService.getAllArtikel();
+        setArtikelList(artikelData);
+      } catch (error) {
+        console.error("Fehler beim Laden der Artikel:", error);
+      }
+      return;
+    }
+
+    try {
+      const artikel = await ArtikelService.getArtikelById(gwId);
+      if (!artikel) {
+        Alert.alert("Fehler", "Artikel nicht gefunden.");
+      } else {
+        setArtikelList([artikel]);
+      }
+    } catch (error) {
+      console.error("Fehler beim Finden des Artikels:", error);
+      Alert.alert("Fehler", "Fehler bei der Artikelsuche.");
+    }
+  };
+
+  const handleUpdateMenge = async () => {
+    try {
+      const updates = Object.entries(changedMenge).map(
+        async ([id, newMenge]) => {
+          const artikel = await ArtikelService.getArtikelById(id);
+          await ArtikelService.updateArtikel(id, {
+            gwId: artikel.gwId,
+            firmenId: artikel.firmenId,
+            beschreibung: artikel.beschreibung,
+            menge: Number(newMenge),
+            mindestMenge: artikel.mindestMenge,
+            ablaufdatum: artikel.ablaufdatum,
+            regalId: artikel.regalId,
+          });
+        }
+      );
+
+      await Promise.all(updates);
+
+      // Refresh the list
+      const artikelData = await ArtikelService.getAllArtikel();
+      setArtikelList(artikelData);
+      setChangedMenge({}); // Clear temporary state
+
+      Alert.alert("Erfolg", "Alle Mengen wurden aktualisiert.");
+    } catch (error) {
+      console.error("Fehler beim Aktualisieren der Mengen:", error);
+      Alert.alert("Fehler", "Mengen konnten nicht aktualisiert werden.");
+    }
+  };
 
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text></Text>
+    <View
+      style={{
+        backgroundColor: styles.backgroundColor,
+        flex: 1,
+        alignItems: "center",
+      }}
+    >
+      <View style={{ width: "95%", borderRadius: 20, padding: 20 }}>
+        <Text style={{ fontSize: RFPercentage(1.8) }}>GWID</Text>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "flex-end",
+            width: "100%",
+          }}
+        >
+          <View style={{ flex: 1 }}>
+            <TextInputField value={gwId} onChangeText={setGwId} />
+          </View>
+          {gwId !== "" && (
+            <TouchableOpacity
+              onPress={() => setGwId("")}
+              style={{
+                marginLeft: 10,
+                width: 40,
+                height: 40,
+                borderRadius: 10,
+                backgroundColor: styles.white,
+                justifyContent: "center",
+                alignItems: "center",
+                elevation: 3,
+              }}
+            >
+              <MaterialCommunityIcons
+                name={"arrow-u-left-bottom"}
+                size={24}
+                color={"black"}
+              />
+            </TouchableOpacity>
+          )}
+          {gwId === "" && (
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate("Scan", { onScan: (code) => setGwId(code) })
+              }
+              style={{
+                marginLeft: 10,
+                width: 40,
+                height: 40,
+                borderRadius: 10,
+                backgroundColor: styles.white,
+                justifyContent: "center",
+                alignItems: "center",
+                elevation: 3,
+              }}
+            >
+              <Text style={{ color: "black", fontSize: 20 }}>[III]</Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            onPress={handleSearch}
+            style={{
+              marginLeft: 10,
+              width: 40,
+              height: 40,
+              borderRadius: 10,
+              backgroundColor: styles.white,
+              justifyContent: "center",
+              alignItems: "center",
+              elevation: 3,
+            }}
+          >
+            <Feather name="search" size={24} color="black" />
+          </TouchableOpacity>
+        </View>
+      </View>
+      <FlatList
+        style={{ width: "100%" }}
+        data={artikelList}
+        keyExtractor={(item) => item.id}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        removeClippedSubviews={false}
+        renderItem={({ item }) => (
+          <InventoryItem
+            item={item}
+            changedMenge={changedMenge}
+            setChangedMenge={setChangedMenge}
+          />
+        )}
+      />
+      <View style={{ alignItems: "center" }}>
+        <TouchableOpacity
+          onPress={handleUpdateMenge}
+          style={{
+            backgroundColor: "#dcebf9",
+            padding: 10,
+            borderRadius: 5,
+            height: 50,
+            alignItems: "center",
+            justifyContent: "center",
+            marginBottom: 10,
+            width: "auto",
+          }}
+        >
+          <Text style={{ color: "#30A6DE", fontSize: 20 }}>Fertig</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
-}
+};
+
+const InventoryItem = ({ item, changedMenge, setChangedMenge }) => {
+  return (
+    <View style={{ alignItems: "center" }}>
+      <View
+        style={{
+          backgroundColor: styles.backgroundColor,
+          width: "90%",
+          borderRadius: 20,
+          elevation: 2,
+          padding: 20,
+          margin: 20,
+        }}
+      >
+        <Text style={styles.subHeader}>{item.beschreibung}</Text>
+        <Text style={styles.subHeader}>ID: {item.gwId}</Text>
+        <Text style={styles.subHeader}>Soll: {item.menge}</Text>
+        <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
+          <View style={{ width: "20%" }}>
+            <Text style={styles.subHeader}>Haben:</Text>
+          </View>
+          <View
+            style={{
+              alignItems: "flex-start",
+              justifyContent: "center",
+              borderRadius: 10,
+              backgroundColor: styles.white,
+              elevation: 2,
+              paddingLeft: 5,
+              width: "80%",
+            }}
+          >
+            <TextInput
+              style={[styles.subHeader, { marginBottom: 0, width: "100%" }]}
+              keyboardType="numeric"
+              defaultValue={changedMenge[item.gwId] || ""}
+              onChangeText={(text) => {
+                setChangedMenge((prev) => ({
+                  ...prev,
+                  [item.gwId]: text,
+                }));
+              }}
+            />
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+};
+
+export default InventoryScreen;
