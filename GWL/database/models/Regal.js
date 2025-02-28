@@ -12,6 +12,7 @@ class Regal extends Model {
   @field("regal_id") regalId;
   @field("fach_name") fachName;
   @field("regal_name") regalName;
+
   @date("created_at") createdAt;
   @date("updated_at") updatedAt;
 
