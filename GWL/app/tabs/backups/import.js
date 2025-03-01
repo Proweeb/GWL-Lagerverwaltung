@@ -13,7 +13,7 @@ import { styles } from "../../../components/styles";
 import RegalService from "../../../database/datamapper/RegalHelper";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper";
 import LogService from "../../../database/datamapper/LogHelper";
-import { database } from "../../../database/database";
+import stringToDate from "../../../components/utils/Functions/parseDate";
 
 const ImportScreen = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -120,6 +120,11 @@ const ImportScreen = () => {
         artikel.kunde = String(artikel.kunde);
         artikel.menge = Number(artikel.menge);
         artikel.mindestMenge = Number(artikel.mindestMenge);
+        artikel.ablaufdatum = stringToDate(
+          artikel.ablaufdatum,
+          "dd.MM.yyyy",
+          "."
+        ).getTime();
 
         artikel.regalId = String(artikel.regalId);
         console.log("Artikel:");
@@ -130,7 +135,8 @@ const ImportScreen = () => {
         log.gwId = String(log.gwId);
         log.regalId = String(log.regalId);
         log.menge = Number(log.menge);
-        await console.log(log);
+        log.createdAt = stringToDate(log.datum, "dd.MM.yyyy", ".").getTime();
+        // await console.log(log);
         await LogService.createLog(log, log.gwId, log.regalId);
       }
     } catch (error) {

@@ -5,25 +5,26 @@ import LogService from "../../database/datamapper/LogHelper";
 import { database } from "../../database/database";
 import { styles } from "../styles";
 
-const LogsWidget = ({ selectedMonth }) => {
+const LogsWidget = ({ startDate, endDate }) => {
   const [logs, setLogs] = useState([]);
 
   useEffect(() => {
-    fetchLogsForMonth(selectedMonth);
-  }, [selectedMonth]);
+    fetchLogsForMonth(startDate, endDate);
+  }, [startDate, endDate]);
 
-  const fetchLogsForMonth = async (month) => {
+  const fetchLogsForMonth = async (startDate, endDate) => {
     try {
-      const startDate = new Date(new Date().getFullYear(), month - 1, 1);
-      const endDate = new Date(new Date().getFullYear(), month + 1, 0);
-
       const logsCollection = database.get("logs");
 
       const logsQuery = await logsCollection
         .query(
-          Q.and(
-            Q.where("created_at", Q.gt(startDate.getTime())),
-            Q.where("created_at", Q.lt(endDate.getTime()))
+          // Q.and(
+          //   Q.where("created_at", Q.gt(startDate.getTime())),
+          //   Q.where("created_at", Q.lt(endDate.getTime()))
+          // )
+          Q.where(
+            "created_at",
+            Q.between(startDate.getTime(), endDate.getTime())
           )
         )
         .fetch(); // Fetch instead of observe
@@ -57,7 +58,14 @@ const LogsWidget = ({ selectedMonth }) => {
 
   const renderLogItem = ({ item }) => (
     <View style={customStyles.logItem}>
-      <Text style={customStyles.time}>{item.createdAt.toDateString()}</Text>
+      <Text style={customStyles.time}>
+        {item.createdAt.toLocaleString("de-DE", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          weekday: "short",
+        })}
+      </Text>
       <Text style={customStyles.beschreibung}>{item.beschreibung}</Text>
       <Text style={customStyles.artikel}>Artikel: #{item.artikelName}</Text>
       <Text style={customStyles.regal}>Regal: #{item.regalName}</Text>

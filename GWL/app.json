@@ -26,6 +26,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "backgroundColor": "#ffffff",
+      "allowBackup": true,
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO",
@@ -57,6 +59,9 @@
         "expo-build-properties",
         {
           "android": {
+            "colors": {
+              "androidAccentColor": "#0000FF"
+            },
             "kotlinVersion": "1.8.10",
             "compileSdkVersion": 34,
             "targetSdkVersion": 34,

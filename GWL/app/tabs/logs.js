@@ -1,68 +1,165 @@
-import { Text, View } from "react-native";
+import {
+  Text,
+  View,
+  TouchableOpacity,
+  TextInput,
+  StyleSheet,
+} from "react-native";
 import { styles } from "../../components/styles";
-import React, { useState } from "react";
-import { Picker } from "@react-native-picker/picker";
+import React, { useState, useEffect } from "react";
 import LogsWidget from "../../components/utils/LogsWidget";
-import { StyleSheet } from "react-native";
+import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
+import { database } from "../../database/database";
+import { Q } from "@nozbe/watermelondb";
+import { useIsFocused } from "@react-navigation/native";
+import HomeWidget from "../../components/utils/HomeWidget/homeWidget";
 
 export default function LogsScreen() {
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
-  const germanMonths = [
-    { label: "Januar", value: 1 },
-    { label: "Februar", value: 2 },
-    { label: "März", value: 3 },
-    { label: "April", value: 4 },
-    { label: "Mai", value: 5 },
-    { label: "Juni", value: 6 },
-    { label: "Juli", value: 7 },
-    { label: "August", value: 8 },
-    { label: "September", value: 9 },
-    { label: "Oktober", value: 10 },
-    { label: "November", value: 11 },
-    { label: "Dezember", value: 12 },
-  ];
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
+  const [minDate, setMinDate] = useState(new Date());
+  const [maxDate, setMaxDate] = useState(new Date());
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    async function getEarliestAndLatestLogs() {
+      const logsCollection = database.get("logs");
+
+      // Query to get the earliest created_at
+      const earliestLog = await logsCollection
+        .query(Q.sortBy("created_at", Q.asc), Q.take(1))
+
+        .fetch();
+
+      // Query to get the latest created_at
+      const latestLog = await logsCollection
+        .query(
+          Q.sortBy("created_at", Q.desc),
+          Q.take(1) // Sort descending (latest)
+        )
+
+        .fetch();
+
+      // Get the earliest and latest logs
+      const earliestCreatedAt = new Date(earliestLog[0].createdAt);
+      const latestCreatedAt = new Date(latestLog[0].createdAt);
+
+      // Adjust dates by creating new Date instances
+      const adjustedStartDate = new Date(earliestCreatedAt);
+      adjustedStartDate.setDate(adjustedStartDate.getDate() - 1);
+
+      const adjustedEndDate = new Date(latestCreatedAt);
+      adjustedEndDate.setDate(adjustedEndDate.getDate() + 1);
+
+      // Update state
+      setStartDate(earliestCreatedAt);
+      setEndDate(latestCreatedAt);
+      setMaxDate(latestCreatedAt);
+      setMinDate(earliestCreatedAt);
+
+      return { earliestCreatedAt, latestCreatedAt };
+    }
+    getEarliestAndLatestLogs();
+    //fetchLogsDateRange();
+  }, [isFocused]);
+
+  const showDatePicker = (currentDate, setDate) => {
+    DateTimePickerAndroid.open({
+      value: currentDate,
+      onChange: (event, selectedDate) => {
+        if (event.type === "set" && selectedDate) {
+          setDate(selectedDate);
+        }
+      },
+      mode: "date",
+      display: "calendar",
+      maximumDate: maxDate,
+      minimumDate: minDate,
+    });
+  };
 
   return (
     <View
-      style={{ flex: 1, padding: 10, backgroundColor: styles.backgroundColor }}
+      style={{
+        flex: 1,
+        padding: 10,
+        backgroundColor: styles.backgroundColor,
+      }}
     >
-      <View style={customStyles.pickerContainer}>
-        <Picker
-          selectedValue={selectedMonth}
-          onValueChange={(value) => setSelectedMonth(value)}
-          style={customStyles.picker}
-          itemStyle={customStyles.pickerItem}
-        >
-          {germanMonths.map((month) => (
-            <Picker.Item
-              key={month.value}
-              label={month.label}
-              value={month.value}
-            />
-          ))}
-        </Picker>
+      <View style={{ width: "100%", alignItems: "center", paddingTop: 20 }}>
+        <View style={customStyles.dateContainer}>
+          <View style={customStyles.dateWrapper}>
+            <Text style={customStyles.label}>Von</Text>
+            <TouchableOpacity
+              onPress={() => showDatePicker(startDate, setStartDate)}
+              activeOpacity={0.9}
+            >
+              <TextInput
+                style={customStyles.inputContainer}
+                value={startDate.toLocaleString("de-DE", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                })}
+                editable={false}
+              />
+            </TouchableOpacity>
+          </View>
+          <View style={customStyles.dateWrapper}>
+            <Text style={customStyles.label}>Bis</Text>
+            <TouchableOpacity
+              onPress={() => showDatePicker(endDate, setEndDate)}
+              activeOpacity={0.9}
+            >
+              <TextInput
+                style={customStyles.inputContainer}
+                value={endDate.toLocaleString("de-DE", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                })}
+                editable={false}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
-
-      <LogsWidget selectedMonth={selectedMonth} />
+      <LogsWidget startDate={startDate} endDate={endDate} />
     </View>
   );
 }
 
 const customStyles = StyleSheet.create({
-  pickerContainer: {
-    width: "100%",
-    backgroundColor: "#f0f0f0",
-    borderRadius: 10,
-    paddingVertical: 5,
-    paddingHorizontal: 15,
+  dateContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 20,
+    width: "80%",
+    backgroundColor: styles.white,
+    borderRadius: 10,
+    padding: 10,
+    elevation: 5,
   },
-  picker: {
-    height: 50,
+  dateWrapper: {
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 5,
     color: "#333",
+    textAlign: "center",
+    fontWeight: "bold",
   },
-  pickerItem: {
+  inputContainer: {
+    width: "100%",
+    backgroundColor: styles.backgroundColor,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    textAlign: "center",
     fontSize: 16,
     color: "#333",
+    elevation: 2,
   },
 });
