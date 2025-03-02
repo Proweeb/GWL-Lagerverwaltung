@@ -63,18 +63,30 @@ export default function LogsScreen() {
     //fetchLogsDateRange();
   }, [isFocused]);
 
-  const showDatePicker = (currentDate, setDate) => {
+  const showDatePicker = (currentDate, setDate, isStart) => {
     DateTimePickerAndroid.open({
       value: currentDate,
       onChange: (event, selectedDate) => {
         if (event.type === "set" && selectedDate) {
-          setDate(selectedDate);
+          let adjustedDate = new Date(selectedDate);
+
+          if (isStart) {
+            // Set time to 00:00:00 for start date
+            adjustedDate.setHours(0, 0, 0, 0);
+          } else {
+            // Set time to 23:59:59 for end date
+            adjustedDate.setHours(23, 59, 59, 999);
+          }
+
+          setDate(adjustedDate);
+          console.log("Selected Date:", adjustedDate);
         }
       },
       mode: "date",
       display: "calendar",
       maximumDate: maxDate,
       minimumDate: minDate,
+      backgroundColor: "black",
     });
   };
 
@@ -86,12 +98,18 @@ export default function LogsScreen() {
         backgroundColor: styles.backgroundColor,
       }}
     >
-      <View style={{ width: "100%", alignItems: "center", paddingTop: 20 }}>
+      <View
+        style={{
+          width: "100%",
+          alignItems: "center",
+          paddingTop: 20,
+        }}
+      >
         <View style={customStyles.dateContainer}>
           <View style={customStyles.dateWrapper}>
             <Text style={customStyles.label}>Von</Text>
             <TouchableOpacity
-              onPress={() => showDatePicker(startDate, setStartDate)}
+              onPress={() => showDatePicker(startDate, setStartDate, true)}
               activeOpacity={0.9}
             >
               <TextInput
@@ -108,7 +126,7 @@ export default function LogsScreen() {
           <View style={customStyles.dateWrapper}>
             <Text style={customStyles.label}>Bis</Text>
             <TouchableOpacity
-              onPress={() => showDatePicker(endDate, setEndDate)}
+              onPress={() => showDatePicker(endDate, setEndDate, false)}
               activeOpacity={0.9}
             >
               <TextInput

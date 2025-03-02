@@ -12,6 +12,7 @@ class Log extends Model {
 
   @field("beschreibung") beschreibung;
   @field("menge") menge;
+  @field("gesamt_menge") gesamtMenge;
 
   @date("created_at") createdAt;
   @date("updated_at") updatedAt;

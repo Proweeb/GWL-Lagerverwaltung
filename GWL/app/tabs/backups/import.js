@@ -13,7 +13,8 @@ import { styles } from "../../../components/styles";
 import RegalService from "../../../database/datamapper/RegalHelper";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper";
 import LogService from "../../../database/datamapper/LogHelper";
-import stringToDate from "../../../components/utils/Functions/parseDate";
+import { stringToDate } from "../../../components/utils/Functions/parseDate";
+import { parseCustomDate } from "../../../components/utils/Functions/parseDate";
 
 const ImportScreen = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -135,8 +136,12 @@ const ImportScreen = () => {
         log.gwId = String(log.gwId);
         log.regalId = String(log.regalId);
         log.menge = Number(log.menge);
-        log.createdAt = stringToDate(log.datum, "dd.MM.yyyy", ".").getTime();
-        // await console.log(log);
+        log.createdAt = parseCustomDate(
+          log.datum,
+          "dd.mm.yyyy hh:mm"
+        ).getTime();
+        console.log("Log:");
+        console.log(log);
         await LogService.createLog(log, log.gwId, log.regalId);
       }
     } catch (error) {

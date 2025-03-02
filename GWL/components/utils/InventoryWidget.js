@@ -16,6 +16,10 @@ const InventoryWidget = () => {
         const subscription = logsCollection
           .query(
             Q.sortBy("created_at", "desc"),
+            Q.or(
+              Q.where("beschreibung", "Entnehmen"),
+              Q.where("beschreibung", "Einlagern")
+            ),
             Q.take(3) // Limit to the latest 3 logs
           )
           .observe()

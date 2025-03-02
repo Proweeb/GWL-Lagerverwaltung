@@ -32,9 +32,10 @@ export const lagerSchema = appSchema({
       name: "logs",
       columns: [
         { name: "beschreibung", type: "string" },
-        { name: "regal_id", type: "string", isIndexed: true }, // Foreign key to regale
-        { name: "gw_id", type: "string", isIndexed: true }, // Foreign key to artikel
-        { name: "menge", type: "number" },
+        { name: "regal_id", type: "string", isOptional: true }, // Foreign key to regale
+        { name: "gw_id", type: "string", isOptional: true }, // Foreign key to artikel
+        { name: "menge", type: "number", isOptional: true },
+        { name: "gesamt_menge", type: "number", isOptional: true },
         { name: "created_at", type: "number" },
         { name: "updated_at", type: "number" },
       ],

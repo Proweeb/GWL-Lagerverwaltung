@@ -41,9 +41,9 @@ export async function testInsertAndFetch() {
     for (let i = 0; i < 3; i++) {
       logPromises1.push(
         database.get("logs").create((log) => {
-          log.beschreibung = `Test Log ${i + 1}`;
+          log.beschreibung = `Entnehmen`;
           log.datum = new Date().toISOString();
-          log.menge = 10;
+          log.menge = -5;
           log.artikel.set(artikels[i]); // Link to corresponding artikel
           log.regal.set(regal);
         })
@@ -59,7 +59,7 @@ export async function testInsertAndFetch() {
     for (let i = 0; i < 2; i++) {
       logPromises2.push(
         database.get("logs").create((log) => {
-          log.beschreibung = `Test Log ${i + 4}`;
+          log.beschreibung = `Einlagern`;
           log.datum = new Date().toISOString();
           log.menge = 2;
           log.artikel.set(artikels[i]); // Use same 2 artikels for logs

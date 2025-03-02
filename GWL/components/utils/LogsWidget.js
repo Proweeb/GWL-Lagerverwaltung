@@ -42,8 +42,8 @@ const LogsWidget = ({ startDate, endDate }) => {
           return {
             beschreibung: log.beschreibung,
             menge: log.menge,
-            regalName: regal.regalName,
-            artikelName: artikel.gwId, // Artikel Name
+            regalName: regal ? regal.regalName : "",
+            artikelName: artikel ? artikel.beschreibung : "", // Artikel Name
             createdAt: log.createdAt,
             id: log.id,
           };
@@ -63,11 +63,13 @@ const LogsWidget = ({ startDate, endDate }) => {
           year: "numeric",
           month: "2-digit",
           day: "2-digit",
-          weekday: "short",
+          //weekday: "short",
+          hour: "2-digit",
+          minute: "2-digit",
         })}
       </Text>
       <Text style={customStyles.beschreibung}>{item.beschreibung}</Text>
-      <Text style={customStyles.artikel}>Artikel: #{item.artikelName}</Text>
+      <Text style={customStyles.artikel}>GWID: {item.beschreibung}</Text>
       <Text style={customStyles.regal}>Regal: #{item.regalName}</Text>
       <Text style={customStyles.menge}>Menge: {item.menge}</Text>
     </View>
