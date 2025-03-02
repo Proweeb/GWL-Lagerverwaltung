@@ -34,31 +34,49 @@ const WarenScreen = () => {
 
   async function orderArtikel() {
     try {
-      const allArtikel = await ArtikelService.getAllArtikel();
-      // const allRegale = [];
-      // for (const item of allArtikel) {
-      //   allRegale.push(item._raw.regal_id);
-      // }
-
-      //console.log("Alle Regale:", allRegale);
-      const regaleundso =  await RegalService.getAllRegal();
-      
-      console.log(regaleundso)
+      const regaleundso = await RegalService.getAllRegal();
+      console.log("Regale:", regaleundso);
+  
+      const orderedData = {}; // This object will store our results
+  
       for (let i = 0; i < regaleundso.length; i++) {
-        const artikel = await ArtikelService.getArtikelByRegalId(regaleundso[i].regalId)
-        console.log(regaleundso[i].regalId);
-        for( let i = 0; i < artikel.length; i++){
-          
-          console.log("Artikel:" + artikel[i].gwId)
+        const regalId = regaleundso[i].regalId;
+        const artikel = await ArtikelService.getArtikelByRegalId(regalId);
+        
+        console.log("Regal ID:", regalId);
+        if(artikel[0]){
+          console.log("Artikel:", artikel[0].gwId);
+        }
+        else{
+          console.log("keine Artikel")
         }
         
+  
+        // If there are no articles, skip to the next regal
+        if (artikel.length === 0) {
+          continue;
+        }
+  
+        // Save the artikel data into the object with regalId as the key
+        orderedData[regalId] = artikel.map(item => ({
+          gwId: item.gwId,
+          beschreibung: item.beschreibung,
+          menge: item.menge,
+          mindestmenge: item.mindestmenge,
+        }));
+  
+        // Logging the orderedData object for verification
+        console.log("Ordered Data:", orderedData);
       }
-
-      
+  
+      // Do something with the orderedData, for example, you can save it to a state if you need to display it
+      // setOrderedData(orderedData);
+  
     } catch (error) {
       console.error("Fehler beim Abrufen der Artikel:", error);
     }
   }
+  
 
   async function LoadArtikel() {
     try {
