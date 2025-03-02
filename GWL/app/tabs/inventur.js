@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, FlatList, TouchableOpacity, Alert } from "react-native";
-import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { RFPercentage } from "react-native-responsive-fontsize";
 import ArtikelService from "../../database/datamapper/ArtikelHelper";
-import TextInputField from "../../components/utils/TextInputs/textInputField";
 import { styles } from "../../components/styles";
 import * as FileSystem from "expo-file-system";
 import XLSX from "xlsx";
@@ -12,10 +9,14 @@ import { useFocusEffect } from "@react-navigation/native";
 import * as MailComposer from "expo-mail-composer";
 import LogService from "../../database/datamapper/LogHelper";
 import InventoryItem from "../../components/oneTimeUse/InventoryItem";
-import { ScrollView } from "react-native-gesture-handler";
+import WeiterButton from "../../components/oneTimeUse/WeiterButton";
+import FertigButton from "../../components/utils/FertigButton.js";
+import ZurückButton from "../../components/oneTimeUse/ZurückButton";
+import SearchBar from "../../components/utils/SearchBar";
+import ArtikelVorschau from "../../components/oneTimeUse/ArtikelVorschau";
+import InventurButton from "../../components/oneTimeUse/InventurButton.js";
 
 const InventoryScreen = () => {
-  const navigation = useNavigation();
   const [gwId, setGwId] = useState("");
   const [inventur, setInventur] = useState("");
   const [artikelList, setArtikelList] = useState([]);
@@ -176,93 +177,10 @@ const InventoryScreen = () => {
       }}
     >
       {!inventur ? (
-        <TouchableOpacity
-          onPress={startInventur}
-          style={{
-            backgroundColor: "#30A6DE",
-            padding: 15,
-            borderRadius: 10,
-            alignItems: "center",
-            justifyContent: "center",
-            top: "45%",
-          }}
-        >
-          <Text style={{ color: "white", fontSize: 18 }}>Inventur starten</Text>
-        </TouchableOpacity>
+        <InventurButton onPress={startInventur}></InventurButton>
       ) : (
         <>
-          <View style={{ width: "95%", borderRadius: 20, padding: 20 }}>
-            <Text style={{ fontSize: RFPercentage(1.8) }}>GWID</Text>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "flex-end",
-                width: "100%",
-              }}
-            >
-              <View style={{ flex: 1 }}>
-                <TextInputField value={gwId} onChangeText={setGwId} />
-              </View>
-              {gwId !== "" && (
-                <TouchableOpacity
-                  onPress={() => setGwId("")}
-                  style={{
-                    marginLeft: 10,
-                    width: 40,
-                    height: 40,
-                    borderRadius: 10,
-                    backgroundColor: styles.white,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    elevation: 3,
-                  }}
-                >
-                  <MaterialCommunityIcons
-                    name={"arrow-u-left-bottom"}
-                    size={24}
-                    color={"black"}
-                  />
-                </TouchableOpacity>
-              )}
-              {gwId === "" && (
-                <TouchableOpacity
-                  onPress={() =>
-                    navigation.navigate("Scan", {
-                      onScan: (code) => setGwId(code),
-                    })
-                  }
-                  style={{
-                    marginLeft: 10,
-                    width: 40,
-                    height: 40,
-                    borderRadius: 10,
-                    backgroundColor: styles.white,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    elevation: 3,
-                  }}
-                >
-                  <Text style={{ color: "black", fontSize: 20 }}>[III]</Text>
-                </TouchableOpacity>
-              )}
-              <TouchableOpacity
-                onPress={handleSearch}
-                style={{
-                  marginLeft: 10,
-                  width: 40,
-                  height: 40,
-                  borderRadius: 10,
-                  backgroundColor: styles.white,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  elevation: 3,
-                }}
-              >
-                <Feather name="search" size={24} color="black" />
-              </TouchableOpacity>
-            </View>
-          </View>
-
+          <SearchBar gwId={gwId} setGwId={setGwId} onSearch={handleSearch} />
           {!showPreview && (
             <FlatList
               style={{ width: "100%" }}
@@ -288,40 +206,11 @@ const InventoryScreen = () => {
                 paddingHorizontal: 20,
               }}
             >
-              <Text
-                style={{
-                  fontSize: 20,
-                  fontWeight: "bold",
-                  textAlign: "center",
-                }}
-              >
-                Artikel Vorschau
-              </Text>
-              <FlatList
-                data={artikelList}
-                keyExtractor={(item) => item.gwId.toString()}
-                renderItem={({ item }) => (
-                  <View
-                    style={{
-                      justifyContent: "space-between",
-                      paddingVertical: 5,
-                      backgroundColor: styles.backgroundColor,
-                      width: "90%",
-                      borderRadius: 20,
-                      elevation: 2,
-                      padding: 20,
-                      margin: 5,
-                      alignSelf: "center",
-                    }}
-                  >
-                    <Text style={styles.subHeader}>
-                      Beschreibung: {item.beschreibung}
-                    </Text>
-                    <Text style={styles.subHeader}>ID: {item.gwId}</Text>
-                    <Text style={styles.subHeader}>Menge: {item.menge}</Text>
-                  </View>
-                )}
-                contentContainerStyle={{ paddingBottom: 20 }}
+              <ArtikelVorschau
+                artikelList={artikelList}
+                setShowPreview={setShowPreview}
+                handleUpdateMenge={handleUpdateMenge}
+                handleExportToEmail={handleExportToEmail}
               />
               <View
                 style={{
@@ -330,64 +219,28 @@ const InventoryScreen = () => {
                   alignItems: "center",
                 }}
               >
-                <TouchableOpacity
+                <ZurückButton
                   onPress={() => {
                     setShowPreview(false);
                   }}
-                  style={{
-                    backgroundColor: "#ff4d4d",
-                    padding: 10,
-                    borderRadius: 5,
-                    height: 50,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    margin: 10,
-                    width: "auto",
-                  }}
-                >
-                  <Text style={{ color: "white", fontSize: 20 }}>Zurück</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
+                ></ZurückButton>
+                <FertigButton
                   onPress={() => {
                     handleUpdateMenge();
                     handleExportToEmail();
                   }}
-                  style={{
-                    backgroundColor: "#00cc00",
-                    padding: 10,
-                    borderRadius: 5,
-                    height: 50,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: "auto",
-                    margin: 10,
-                  }}
-                >
-                  <Text style={{ color: "white", fontSize: 20 }}>Fertig</Text>
-                </TouchableOpacity>
+                ></FertigButton>
               </View>
             </View>
           )}
           {!showPreview && (
             <View style={{ alignItems: "center" }}>
-              <TouchableOpacity
+              <WeiterButton
                 onPress={() => {
                   handleUpdateMenge();
                   setShowPreview(true);
                 }}
-                style={{
-                  backgroundColor: "#dcebf9",
-                  padding: 10,
-                  borderRadius: 5,
-                  height: 50,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginBottom: 10,
-                  width: "auto",
-                }}
-              >
-                <Text style={{ color: "#30A6DE", fontSize: 20 }}>Weiter</Text>
-              </TouchableOpacity>
+              ></WeiterButton>
             </View>
           )}
         </>
