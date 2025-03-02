@@ -52,7 +52,7 @@ export default function BottomTabNavigator() {
       {/* Waren Tab */}
       <Tab.Screen
         name="Waren"
-        component={WarenScreen}
+        component={WarenScreen} //LagerNavigator 
         options={{
           title: "Waren",
           tabBarIcon: ({ color, size }) => (

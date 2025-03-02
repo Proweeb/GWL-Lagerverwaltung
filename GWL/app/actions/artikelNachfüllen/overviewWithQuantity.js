@@ -7,6 +7,7 @@ import Feather from "@expo/vector-icons/Feather";
 import { Pressable } from "react-native";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper";
 import { Alert } from "react-native";
+import LogService from "../../../database/datamapper/LogHelper";
 
 export default function OverviewWithQuantity({
   menge,
@@ -21,19 +22,29 @@ export default function OverviewWithQuantity({
     if (nachfüllmenge == "") {
       setNachfüllmenge(0);
     }
+    const regal = await foundArticle.regal.fetch();
+
     await ArtikelService.updateArtikel(foundArticle.gwId, {
       gwId: foundArticle.gwId,
       firmenId: foundArticle.firmenId,
       beschreibung: foundArticle.beschreibung,
-      menge: menge + Number(nachfüllmenge),
+      menge: menge,
       mindestMenge: foundArticle.mindestMenge,
       ablaufdatum: foundArticle.ablaufdatum,
-      regalId: foundArticle.regalId,
+      regalId: regal.regalId,
     });
-    Alert.alert(
-      "Erfolg",
-      "Menge erfolgreich geändert\nNeue Menge: " + foundArticle.menge
+
+    await LogService.createLog(
+      {
+        beschreibung: "Nachfüllen",
+        menge: nachfüllmenge,
+        gesamtMenge: menge,
+      },
+      foundArticle.gwId,
+      regal.regalId
     );
+
+    Alert.alert("Erfolg", "Menge erfolgreich geändert\nNeue Menge: " + menge);
   };
   return (
     <Pressable
@@ -61,7 +72,7 @@ export default function OverviewWithQuantity({
       >
         <View>
           <Text style={[siteStyles.textStyle, { color: "white" }]}>
-            Aktuelle Menge vom Artikel: {Number(menge) + Number(nachfüllmenge)}
+            Aktuelle Menge vom Artikel: {menge}
           </Text>
         </View>
 
@@ -88,6 +99,7 @@ export default function OverviewWithQuantity({
             onPress={() => {
               if (Number(nachfüllmenge) != 0) {
                 setNachfüllmenge(nachfüllmenge - 1);
+                setMenge(Number(menge) - 1);
               }
 
               //setShowValue(nachfüllmenge);
@@ -107,7 +119,7 @@ export default function OverviewWithQuantity({
           <TouchableOpacity
             onPress={() => {
               setNachfüllmenge(nachfüllmenge + 1);
-              //setShowValue(nachfüllmenge);
+              setMenge(Number(menge) + 1);
             }}
             style={siteStyles.touchableStyle}
           >
