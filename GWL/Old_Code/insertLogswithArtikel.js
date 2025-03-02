@@ -13,7 +13,7 @@ export async function testInsertAndFetch() {
 
     // Create 3 artikel records
     const artikelPromises = [];
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 300; i++) {
       artikelPromises.push(
         database.get("artikel").create((artikel) => {
           artikel.gwId = `${i + 1}`;

@@ -6,12 +6,18 @@ import RegalService from "./RegalHelper";
 import { Q } from "@nozbe/watermelondb";
 
 async function createLog(logData, artikelId, regalId) {
-  const artikel = await ArtikelService.getArtikelById(artikelId);
-  const regal = await RegalService.getRegalById(regalId);
+  let artikel = null;
+  let regal = null;
+  if (artikelId !== null) {
+    artikel = await ArtikelService.getArtikelById(artikelId);
+  }
+  if (regalId !== null) {
+    regal = await RegalService.getRegalById(regalId);
+  }
   return await database.write(async () => {
     return database.get("logs").create((log) => {
       log.beschreibung = logData.beschreibung;
-      log.menge = logData.menge;
+      log.menge = logData.mengea;
       log.gesamtMenge = logData.gesamtMenge;
       log.artikel.set(artikel);
       log.regal.set(regal);
