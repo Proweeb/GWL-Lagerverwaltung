@@ -42,6 +42,7 @@ const LogsWidget = ({ startDate, endDate }) => {
           return {
             beschreibung: log.beschreibung,
             menge: log.menge,
+            gesamtMenge: log.gesamtMenge,
             regalName: regal ? regal.regalName : "",
             artikelName: artikel ? artikel.beschreibung : "", // Artikel Name
             createdAt: log.createdAt,
@@ -69,9 +70,10 @@ const LogsWidget = ({ startDate, endDate }) => {
         })}
       </Text>
       <Text style={customStyles.beschreibung}>{item.beschreibung}</Text>
-      <Text style={customStyles.artikel}>GWID: {item.beschreibung}</Text>
+      <Text style={customStyles.artikel}>GWID: {item.artikelName}</Text>
       <Text style={customStyles.regal}>Regal: #{item.regalName}</Text>
       <Text style={customStyles.menge}>Menge: {item.menge}</Text>
+      <Text style={customStyles.menge}>GesamtMenge: {item.gesamtMenge}</Text>
     </View>
   );
 
