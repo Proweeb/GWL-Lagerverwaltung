@@ -8,6 +8,7 @@ import ArtikelService from "../../database/datamapper/ArtikelHelper";
 import RegalService from "../../database/datamapper/RegalHelper";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 
+
 const WarenScreen = () => {
   const navigation = useNavigation();
   const [jsonData, setJsonData] = useState([]);
@@ -34,17 +35,26 @@ const WarenScreen = () => {
   async function orderArtikel() {
     try {
       const allArtikel = await ArtikelService.getAllArtikel();
-      const allRegale = [];
-      for (const item of allArtikel) {
-        allRegale.push(item._raw.regal_id);
+      // const allRegale = [];
+      // for (const item of allArtikel) {
+      //   allRegale.push(item._raw.regal_id);
+      // }
+
+      //console.log("Alle Regale:", allRegale);
+      const regaleundso =  await RegalService.getAllRegal();
+      
+      console.log(regaleundso)
+      for (let i = 0; i < regaleundso.length; i++) {
+        const artikel = await ArtikelService.getArtikelByRegalId(regaleundso[i].regalId)
+        console.log(regaleundso[i].regalId);
+        for( let i = 0; i < artikel.length; i++){
+          
+          console.log("Artikel:" + artikel[i].gwId)
+        }
+        
       }
 
-      console.log("Alle Regale:", allRegale);
-
-      for (let i = 0; i < allRegale.length; i++) {
-        const artikelliste = await ArtikelService.getArtikelByRegalId(allRegale[i]);
-        console.log(artikelliste);
-      }
+      
     } catch (error) {
       console.error("Fehler beim Abrufen der Artikel:", error);
     }
@@ -56,7 +66,7 @@ const WarenScreen = () => {
       console.log("Alle Artikel:", artikel);
       setJsonData(artikel);
     } catch (error) {
-      console.error("Fehler beim Abrufen der Artikel:", error);
+      console.error("Fehler beim Abrufen der Artikel1:", error);
     }
   }
 
@@ -138,11 +148,11 @@ const WarenScreen = () => {
 
       {/* Buttons */}
       <TouchableOpacity style={styles.buttonWhite} onPress={LoadArtikel}>
-        <Text numberOfLines={1} style={styles.buttonText}>1</Text>
+        <Text numberOfLines={1} style={styles.buttonText}>LoadArtikel</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.buttonWhite} onPress={orderArtikel}>
-        <Text numberOfLines={1} style={styles.buttonText}>2</Text>
+        <Text numberOfLines={1} style={styles.buttonText}>orderArtikel</Text>
       </TouchableOpacity>
 
       {/* Table */}
