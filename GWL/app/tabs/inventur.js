@@ -107,6 +107,7 @@ const InventoryScreen = () => {
         attachments: [fileUri],
       });
       setInventur(false);
+      setShowPreview(false);
     } catch (error) {
       console.error("Fehler beim Exportieren per E-Mail:", error);
       Alert.alert("Fehler", "Excel-Datei konnte nicht gesendet werden.");
