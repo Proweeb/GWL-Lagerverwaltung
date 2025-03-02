@@ -57,7 +57,7 @@ export const CustomTabBar = ({ state, descriptors, navigation }) => {
               <MaterialCommunityIcons
                 name={iconName}
                 size={iconSize}
-                color={isFocused ? styles.blue : "grey"}
+                color={isFocused ? styles.blue : "black"}
               />
               {isFocused && (
                 <Text
