@@ -44,6 +44,7 @@ export async function testInsertAndFetch() {
           log.beschreibung = `Entnehmen`;
           log.datum = new Date().toISOString();
           log.menge = -5;
+          log.gesamtMenge = 20;
           log.artikel.set(artikels[i]); // Link to corresponding artikel
           log.regal.set(regal);
         })
@@ -62,6 +63,7 @@ export async function testInsertAndFetch() {
           log.beschreibung = `Einlagern`;
           log.datum = new Date().toISOString();
           log.menge = 2;
+          log.gesamtMenge = 22;
           log.artikel.set(artikels[i]); // Use same 2 artikels for logs
           log.regal.set(regal);
         })
