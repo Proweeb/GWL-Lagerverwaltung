@@ -15,6 +15,8 @@ import ArtikelService from "../../database/datamapper/ArtikelHelper";
 import TextInputField from "../../components/utils/TextInputs/textInputField";
 import { styles } from "../../components/styles";
 import { Platform, TouchableWithoutFeedback, Keyboard } from "react-native";
+import * as FileSystem from "expo-file-system";
+import XLSX from "xlsx";
 
 const InventoryScreen = () => {
   const navigation = useNavigation();
@@ -40,6 +42,58 @@ const InventoryScreen = () => {
 
     fetchArtikel();
   }, []);
+
+  const handleExportToExcel = async () => {
+    try {
+      const dataForExcel = artikelList.map((item) => ({
+        ID: item.gwId,
+        Beschreibung: item.beschreibung,
+        Soll: item.menge,
+        Haben: changedMenge[item.gwId] || item.menge,
+        Datum: new Date().toLocaleDateString(),
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(dataForExcel);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Inventory Data");
+
+      const excelOutput = XLSX.write(wb, { type: "base64", bookType: "xlsx" });
+
+      const now = new Date();
+      const formattedDate = now
+        .toISOString()
+        .replace(/T/, "_")
+        .replace(/:/g, "-")
+        .split(".")[0];
+      const fileName = `Inventur_${formattedDate}.xlsx`;
+
+      if (Platform.OS === "android") {
+        const permissions =
+          await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+        if (!permissions.granted) {
+          Alert.alert("Fehler", "Zugriff wurde verweigert.");
+          return;
+        }
+
+        const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(
+          permissions.directoryUri,
+          fileName,
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        );
+
+        // Write file content
+        await FileSystem.writeAsStringAsync(fileUri, excelOutput, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+
+        Alert.alert("Erfolg", `Datei gespeichert als: ${fileName}`);
+        return;
+      }
+    } catch (error) {
+      console.error("Fehler beim Exportieren:", error);
+      Alert.alert("Fehler", "Excel-Datei konnte nicht erstellt werden.");
+    }
+  };
 
   const handleSearch = async () => {
     if (!gwId) {
@@ -88,8 +142,6 @@ const InventoryScreen = () => {
       const artikelData = await ArtikelService.getAllArtikel();
       setArtikelList(artikelData);
       setChangedMenge({}); // Clear temporary state
-
-      Alert.alert("Erfolg", "Alle Mengen wurden aktualisiert.");
     } catch (error) {
       console.error("Fehler beim Aktualisieren der Mengen:", error);
       Alert.alert("Fehler", "Mengen konnten nicht aktualisiert werden.");
@@ -190,7 +242,10 @@ const InventoryScreen = () => {
       />
       <View style={{ alignItems: "center" }}>
         <TouchableOpacity
-          onPress={handleUpdateMenge}
+          onPress={() => {
+            handleUpdateMenge();
+            handleExportToExcel();
+          }}
           style={{
             backgroundColor: "#dcebf9",
             padding: 10,

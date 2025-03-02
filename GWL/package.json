@@ -13,6 +13,8 @@
     "@expo/config-plugins": "~8.0.0",
     "@expo/vector-icons": "^14.0.3",
     "@nozbe/watermelondb": "^0.27.1",
+    "@react-native-community/datetimepicker": "8.0.1",
+    "@react-native-picker/picker": "2.7.5",
     "@react-navigation/bottom-tabs": "^6.x",
     "@react-navigation/material-top-tabs": "^6.x",
     "@react-navigation/native": "6.x",
@@ -46,9 +48,7 @@
     "react-native-tab-view": "^4.0.5",
     "react-native-toast-message": "^2.2.1",
     "react-native-vision-camera": "^4.6.3",
-    "xlsx": "^0.18.5",
-    "@react-native-picker/picker": "2.7.5",
-    "@react-native-community/datetimepicker": "8.0.1"
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
