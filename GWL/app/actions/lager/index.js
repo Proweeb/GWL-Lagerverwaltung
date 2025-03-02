@@ -9,6 +9,10 @@ import { styles } from "../../../components/styles";
 import { MaterialIcons } from "@expo/vector-icons";
 
 export default function IndexScreen() {
+
+
+
+  
   const data = [
     { name: "Baby Oil", id: "#3451F", menge: "x3", status: "out" },
     { name: "Kiwi", id: "#6341E", menge: "x265", status: "high" },

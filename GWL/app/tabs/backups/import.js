@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Text,
   View,
@@ -13,13 +13,14 @@ import { styles } from "../../../components/styles";
 import RegalService from "../../../database/datamapper/RegalHelper";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper";
 import LogService from "../../../database/datamapper/LogHelper";
-import { stringToDate } from "../../../components/utils/Functions/parseDate";
-import { parseCustomDate } from "../../../components/utils/Functions/parseDate";
+import { stringToDate, parseCustomDate } from "../../../components/utils/Functions/parseDate";
+import { useFocusEffect } from "@react-navigation/native"; // Import useFocusEffect from react-navigation
 
-const ImportScreen = () => {
+const ImportScreen = ({ navigation }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [jsonData, setJsonData] = useState(null);
 
+  // Handle file picker for Excel files
   const pickFile = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
@@ -33,6 +34,7 @@ const ImportScreen = () => {
     }
   };
 
+  // Parse the selected Excel file
   const parseExcel = async (file) => {
     try {
       const response = await fetch(file.uri);
@@ -49,13 +51,11 @@ const ImportScreen = () => {
           let parsedData = XLSX.utils.sheet_to_json(sheet);
 
           if (parsedData.length > 0) {
-            // Convert every value in the object to a string
             parsedData = parsedData.map((row) =>
               Object.fromEntries(
                 Object.entries(row).map(([key, value]) => [key, String(value)])
               )
             );
-
             allSheetsData[sheetName] = parsedData;
           }
         });
@@ -73,6 +73,7 @@ const ImportScreen = () => {
     }
   };
 
+  // Handle the import of data into the database
   const handleImport = async () => {
     if (!jsonData) {
       Alert.alert("Fehler", "Es gibt keine Daten zu importieren.");
@@ -94,6 +95,7 @@ const ImportScreen = () => {
     }
   };
 
+  // Backup existing database data
   const backupDatabase = async () => {
     try {
       console.log("Here");
@@ -107,12 +109,12 @@ const ImportScreen = () => {
     }
   };
 
+  // Insert new data into the database
   const insertData = async (data) => {
     try {
       for (const regal of data.Regale) {
         regal.regalId = String(regal.regalId);
-        console.log("Regal:");
-        await console.log(regal);
+        console.log("Regal:", regal);
         await RegalService.createRegal(regal);
       }
       for (const artikel of data.Artikel) {
@@ -121,27 +123,17 @@ const ImportScreen = () => {
         artikel.kunde = String(artikel.kunde);
         artikel.menge = Number(artikel.menge);
         artikel.mindestMenge = Number(artikel.mindestMenge);
-        artikel.ablaufdatum = stringToDate(
-          artikel.ablaufdatum,
-          "dd.MM.yyyy",
-          "."
-        ).getTime();
-
+        artikel.ablaufdatum = stringToDate(artikel.ablaufdatum, "dd.MM.yyyy", ".").getTime();
         artikel.regalId = String(artikel.regalId);
-        console.log("Artikel:");
-        await console.log(artikel);
+        console.log("Artikel:", artikel);
         await ArtikelService.createArtikel(artikel);
       }
       for (const log of data.Logs) {
         log.gwId = String(log.gwId);
         log.regalId = String(log.regalId);
         log.menge = Number(log.menge);
-        log.createdAt = parseCustomDate(
-          log.datum,
-          "dd.mm.yyyy hh:mm"
-        ).getTime();
-        console.log("Log:");
-        console.log(log);
+        log.createdAt = parseCustomDate(log.datum, "dd.mm.yyyy hh:mm").getTime();
+        console.log("Log:", log);
         await LogService.createLog(log, log.gwId, log.regalId);
       }
     } catch (error) {
@@ -149,165 +141,134 @@ const ImportScreen = () => {
     }
   };
 
-  async function getAllLogs() {
-    try {
-      const logs = await LogService.getAllLogs();
-      console.log("Alle Logs:", logs);
-      return logs;
-    } catch (error) {
-      console.error("Fehler beim Abrufen der Logs:", error);
-    }
-  }
-
-  async function getAllArtikel() {
-    try {
-      const artikel = await ArtikelService.getAllArtikel();
-      console.log("Alle Artikel:", artikel);
-      return artikel;
-    } catch (error) {
-      console.error("Fehler beim Abrufen der Artikel:", error);
-    }
-  }
-
-  async function getAllRegale() {
-    try {
-      const regale = await RegalService.getAllRegal();
-      console.log("Alle Regale:", regale);
-      return regale;
-    } catch (error) {
-      console.error("Fehler beim Abrufen der Regale:", error);
-    }
-  }
+  // Reset state when screen is focused
+  useFocusEffect(
+    React.useCallback(() => {
+      setSelectedFile(null);
+      setJsonData(null);
+    }, [])
+  );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Excel Datei Importieren</Text>
+      <Text numberOfLines={1} style={styles.title}>Excel Datei Importieren</Text>
       <View style={styles.card}>
         <View style={styles.fileBox}>
-          <Text style={styles.fileText}>
+          <Text numberOfLines={1} style={styles.fileText}>
             {selectedFile ? selectedFile.name : "Keine Datei ausgewählt"}
           </Text>
         </View>
         <TouchableOpacity style={styles.buttonWhite} onPress={pickFile}>
-          <Text style={styles.buttonText}>Hochladen</Text>
+          <Text numberOfLines={1} style={styles.buttonText}>Hochladen</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.buttonBlue}
           onPress={handleImport}
           disabled={!jsonData}
         >
-          <Text style={styles.buttonTextLightBlue}>Importieren</Text>
+          <Text numberOfLines={1} style={styles.buttonTextLightBlue}>Importieren</Text>
         </TouchableOpacity>
       </View>
 
       {selectedFile && jsonData && (
         <ScrollView style={styles.scrollContainer}>
           {/* Artikel Vorschau */}
-          <Text style={styles.subHeader}>Artikel Vorschau</Text>
+          <Text numberOfLines={1} style={styles.subHeader}>Artikel Vorschau</Text>
           <View style={localStyles.table}>
             <View style={[localStyles.row, localStyles.rowBorder]}>
               <View style={localStyles.cell}>
-                <Text style={localStyles.tableContent}>Name</Text>
+                <Text numberOfLines={1} style={localStyles.tableContent}>Name</Text>
               </View>
               <View style={localStyles.cell}>
-                <Text style={localStyles.tableContent}>Produkt ID</Text>
+                <Text numberOfLines={1} style={localStyles.tableContent}>Produkt ID</Text>
               </View>
               <View style={localStyles.cell}>
-                <Text style={localStyles.tableContent}>Ablaufdatum</Text>
+                <Text numberOfLines={1} style={localStyles.tableContent}>Ablaufdatum</Text>
               </View>
               <View style={localStyles.cell}>
-                <Text style={localStyles.tableContent}>Menge</Text>
+                <Text numberOfLines={1} style={localStyles.tableContent}>Menge</Text>
               </View>
             </View>
 
             {jsonData.Artikel.map((item, index) => (
-              <View
-                key={index}
-                style={[localStyles.row, localStyles.rowBorder]}
-              >
+              <View key={index} style={[localStyles.row, localStyles.rowBorder]}>
                 <View style={localStyles.cell}>
-                  <Text style={localStyles.name}>{item.beschreibung}</Text>
+                  <Text numberOfLines={1} style={localStyles.name}>{item.beschreibung}</Text>
                 </View>
                 <View style={localStyles.cell}>
-                  <Text style={localStyles.cellText}>{item.gwId}</Text>
+                  <Text numberOfLines={1} style={localStyles.cellText}>{item.gwId}</Text>
                 </View>
                 <View style={localStyles.cell}>
-                  <Text style={localStyles.cellText}>{item.ablaufdatum}</Text>
+                  <Text numberOfLines={1} style={localStyles.cellText}>{item.ablaufdatum}</Text>
                 </View>
                 <View style={localStyles.cell}>
-                  <Text style={localStyles.cellText}>{item.menge}</Text>
+                  <Text numberOfLines={1} style={localStyles.cellText}>{item.menge}</Text>
                 </View>
               </View>
             ))}
           </View>
 
           {/* Regale Vorschau */}
-          <Text style={styles.subHeader}>Regale Vorschau</Text>
+          <Text numberOfLines={1} style={styles.subHeader}>Regale Vorschau</Text>
           <View style={localStyles.table}>
             <View style={[localStyles.row, localStyles.rowBorder]}>
               <View style={localStyles.cell}>
-                <Text style={localStyles.tableContent}>Regal Name</Text>
+                <Text numberOfLines={1} style={localStyles.tableContent}>Regal Name</Text>
               </View>
               <View style={localStyles.cell}>
-                <Text style={localStyles.tableContent}>Regal ID</Text>
+                <Text numberOfLines={1} style={localStyles.tableContent}>Regal ID</Text>
               </View>
               <View style={localStyles.cell}>
-                <Text style={localStyles.tableContent}>Fach Name</Text>
+                <Text numberOfLines={1} style={localStyles.tableContent}>Fach Name</Text>
               </View>
             </View>
 
             {jsonData.Regale.map((item, index) => (
-              <View
-                key={index}
-                style={[localStyles.row, localStyles.rowBorder]}
-              >
+              <View key={index} style={[localStyles.row, localStyles.rowBorder]}>
                 <View style={localStyles.cell}>
-                  <Text style={localStyles.name}>{item.regalName}</Text>
+                  <Text numberOfLines={1} style={localStyles.name}>{item.regalName}</Text>
                 </View>
                 <View style={localStyles.cell}>
-                  <Text style={localStyles.cellText}>{item.regalId}</Text>
+                  <Text numberOfLines={1} style={localStyles.cellText}>{item.regalId}</Text>
                 </View>
                 <View style={localStyles.cell}>
-                  <Text style={localStyles.cellText}>{item.fachName}</Text>
+                  <Text numberOfLines={1} style={localStyles.cellText}>{item.fachName}</Text>
                 </View>
               </View>
             ))}
           </View>
 
           {/* Logs Vorschau */}
-          <Text style={styles.subHeader}>Lagerbewegungen Vorschau</Text>
+          <Text numberOfLines={1} style={styles.subHeader}>Lagerbewegungen Vorschau</Text>
           <View style={localStyles.table}>
             <View style={[localStyles.row, localStyles.rowBorder]}>
               <View style={localStyles.cell}>
-                <Text style={localStyles.tableContent}>Beschreibung</Text>
+                <Text numberOfLines={1} style={localStyles.tableContent}>Beschreibung</Text>
               </View>
               <View style={localStyles.cell}>
-                <Text style={localStyles.tableContent}>Artikel ID</Text>
+                <Text numberOfLines={1} style={localStyles.tableContent}>Artikel ID</Text>
               </View>
               <View style={localStyles.cell}>
-                <Text style={localStyles.tableContent}>Regal ID</Text>
+                <Text numberOfLines={1} style={localStyles.tableContent}>Regal ID</Text>
               </View>
               <View style={localStyles.cell}>
-                <Text style={localStyles.tableContent}>Menge</Text>
+                <Text numberOfLines={1} style={localStyles.tableContent}>Menge</Text>
               </View>
             </View>
 
             {jsonData.Logs.map((item, index) => (
-              <View
-                key={index}
-                style={[localStyles.row, localStyles.rowBorder]}
-              >
+              <View key={index} style={[localStyles.row, localStyles.rowBorder]}>
                 <View style={localStyles.cell}>
-                  <Text style={localStyles.name}>{item.beschreibung}</Text>
+                  <Text numberOfLines={1} style={localStyles.name}>{item.beschreibung}</Text>
                 </View>
                 <View style={localStyles.cell}>
-                  <Text style={localStyles.cellText}>{item.gwId}</Text>
+                  <Text numberOfLines={1} style={localStyles.cellText}>{item.gwId}</Text>
                 </View>
                 <View style={localStyles.cell}>
-                  <Text style={localStyles.cellText}>{item.regalId}</Text>
+                  <Text numberOfLines={1} style={localStyles.cellText}>{item.regalId}</Text>
                 </View>
                 <View style={localStyles.cell}>
-                  <Text style={localStyles.cellText}>{item.menge}</Text>
+                  <Text numberOfLines={1} style={localStyles.cellText}>{item.menge}</Text>
                 </View>
               </View>
             ))}
@@ -320,14 +281,8 @@ const ImportScreen = () => {
 
 export default ImportScreen;
 
+// Local Styles
 const localStyles = StyleSheet.create({
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: styles.backgroundColor,
-    paddingVertical: 20,
-  },
   table: {
     borderRadius: 20,
     backgroundColor: "#F8F8FF",
@@ -336,24 +291,14 @@ const localStyles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 4,
-    width: 349,
+    width: "100%",
     marginBottom: 20,
     padding: 5,
-  },
-  regalBez: {
-    color: "#292D32", // Text color
-    fontFamily: "Inter", // Font family
-    fontSize: 12, // Font size in points
-    fontStyle: "normal", // Normal font style
-    fontWeight: "400", // Font weight
-    lineHeight: 16, // lineHeight, you can adjust it based on your design preference
-    marginBottom: 10,
   },
   tableContent: {
     color: "#AFAFAF",
     fontFamily: "Inter",
     fontSize: 12,
-    fontStyle: "normal",
     fontWeight: "400",
   },
   row: {
@@ -362,13 +307,8 @@ const localStyles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
     paddingHorizontal: 10,
-    marginBottom: 5,
+    marginBottom: 2,
     height: 35,
-  },
-  cellText: {
-    fontSize: 12,
-    color: "#AFAFAF",
-    textAlign: "center",
   },
   cell: {
     fontSize: 12,
@@ -382,39 +322,14 @@ const localStyles = StyleSheet.create({
     borderBottomWidth: 2,
     borderBottomColor: "#ffffff",
   },
-  out: {
-    backgroundColor: "#FFEEEE",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
-    color: "red",
-    fontSize: 10,
-    textAlign: "center",
-    width: 40,
-  },
-  high: {
-    backgroundColor: "#DFFFD8",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
-    color: "green",
-    fontSize: 10,
-    textAlign: "center",
-    width: 40,
-  },
-  low: {
-    backgroundColor: "#FFF4D8",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
-    color: "orange",
-    fontSize: 10,
-    textAlign: "center",
-    width: 40,
-  },
   name: {
     fontSize: 12,
     color: "#333",
     textAlign: "left",
+  },
+  cellText: {
+    fontSize: 12,
+    color: "#AFAFAF",
+    textAlign: "center",
   },
 });
