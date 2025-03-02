@@ -75,6 +75,19 @@ export default function IndexScreen() {
             regalId,
           });
 
+          await LogService.createLog(
+            {
+              beschreibung: "Einlagern",
+              menge: nachfüllmenge,
+              gesamtMenge: menge,
+            },
+            gwId,
+            regalId
+          );
+
+          await LogService.createLog({
+            beschreibung: "lagerplatz hinzugefügt",
+          });
           console.log("Artikel gespeichert, GWID: " + gwId);
           Alert.alert("Erfolg", "Regal und Artikel erfolgreich gespeichert!");
           navigation.navigate("Home");

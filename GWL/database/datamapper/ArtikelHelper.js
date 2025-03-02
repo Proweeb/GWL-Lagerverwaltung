@@ -61,25 +61,6 @@ async function updateArtikel(gwid, updatedData) {
   });
 }
 
-// async function assignArtikelToRegal(artikelId, regalId) {
-//   return await database.write(async () => {
-//     const artikel = await database
-//       .get("artikel")
-//       .query(
-//         Q.where("gw_id", artikelId) // Artikel mit gw_id suchen
-//       )
-//       .fetch();
-
-//     if (artikel.length === 0) {
-//       throw new Error("Artikel nicht gefunden");
-//     }
-
-//     await artikel[0].update((art) => {
-//       art.regal.set(regalId); // Beziehung zum Regal setzen
-//     });
-//   });
-// }
-
 async function deleteArtikel(gwid) {
   return await database.write(async () => {
     const artikel = await database

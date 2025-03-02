@@ -7,6 +7,7 @@ import Feather from "@expo/vector-icons/Feather";
 import { Pressable } from "react-native";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper";
 import { Alert } from "react-native";
+import LogService from "../../../database/datamapper/LogHelper";
 
 export default function OverviewWithQuantity({
   menge,
@@ -17,10 +18,10 @@ export default function OverviewWithQuantity({
   const [nachfüllmenge, setNachfüllmenge] = useState(0);
 
   const handleMengeShow = () => {
-    if (menge - Number(nachfüllmenge) < 0) {
+    if (menge < 0) {
       return 0;
     } else {
-      return menge - Number(nachfüllmenge);
+      return menge;
     }
   };
 
@@ -35,15 +36,26 @@ export default function OverviewWithQuantity({
       setNachfüllmenge(0);
     }
 
+    const regal = await foundArticle.regal.fetch();
     await ArtikelService.updateArtikel(foundArticle.gwId, {
       gwId: foundArticle.gwId,
       firmenId: foundArticle.firmenId,
       beschreibung: foundArticle.beschreibung,
-      menge: menge - Number(nachfüllmenge),
+      menge,
       mindestMenge: foundArticle.mindestMenge,
       ablaufdatum: foundArticle.ablaufdatum,
-      regalId: foundArticle.regalId,
+      regalId: regal.regalId,
     });
+
+    await LogService.createLog(
+      {
+        beschreibung: "Entnehmen",
+        menge: nachfüllmenge * -1,
+        gesamtMenge: menge,
+      },
+      foundArticle.gwId,
+      regal.regalId
+    );
 
     Alert.alert(
       "Erfolg",
@@ -103,6 +115,7 @@ export default function OverviewWithQuantity({
             onPress={() => {
               if (Number(nachfüllmenge) != 0) {
                 setNachfüllmenge(nachfüllmenge - 1);
+                setMenge(Number(menge) + 1);
               }
             }}
             style={siteStyles.touchableStyle}
@@ -127,6 +140,7 @@ export default function OverviewWithQuantity({
             onPress={() => {
               if (handleMengeShow() != 0) {
                 setNachfüllmenge(nachfüllmenge + 1);
+                setMenge(Number(menge) - 1);
               }
 
               //setShowValue(nachfüllmenge);

@@ -9,6 +9,7 @@ import { Alert } from "react-native";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper.js";
 import RegalService from "../../../database/datamapper/RegalHelper.js";
 import { useNavigation } from "@react-navigation/native";
+import LogService from "../../../database/datamapper/LogHelper.js";
 
 export default function IndexScreen() {
   const navigation = useNavigation();
@@ -56,6 +57,15 @@ export default function IndexScreen() {
             regalId,
           });
           Alert.alert("Erfolg", "Artikel erfolgreich gespeichert!");
+          await LogService.createLog(
+            {
+              beschreibung: "Einlagern",
+              menge: parseInt(menge),
+              gesamtMenge: parseInt(menge),
+            },
+            gwId,
+            regalId
+          );
           navigation.navigate("Home");
         }
       } catch (error) {
