@@ -296,31 +296,32 @@ const InventoryScreen = () => {
               >
                 Artikel Vorschau
               </Text>
-              <ScrollView style={{ flex: 1 }}>
-                <View style={{ padding: 10 }}>
-                  {artikelList.map((item) => (
-                    <View
-                      key={item.gwId}
-                      style={{
-                        justifyContent: "space-between",
-                        paddingVertical: 5,
-                        backgroundColor: styles.backgroundColor,
-                        width: "90%",
-                        borderRadius: 20,
-                        elevation: 2,
-                        padding: 20,
-                        margin: 5,
-                      }}
-                    >
-                      <Text style={styles.subHeader}>
-                        Beschreibung: {item.beschreibung}
-                      </Text>
-                      <Text style={styles.subHeader}>ID: {item.gwId}</Text>
-                      <Text style={styles.subHeader}>Menge: {item.menge}</Text>
-                    </View>
-                  ))}
-                </View>
-              </ScrollView>
+              <FlatList
+                data={artikelList}
+                keyExtractor={(item) => item.gwId.toString()}
+                renderItem={({ item }) => (
+                  <View
+                    style={{
+                      justifyContent: "space-between",
+                      paddingVertical: 5,
+                      backgroundColor: styles.backgroundColor,
+                      width: "90%",
+                      borderRadius: 20,
+                      elevation: 2,
+                      padding: 20,
+                      margin: 5,
+                      alignSelf: "center",
+                    }}
+                  >
+                    <Text style={styles.subHeader}>
+                      Beschreibung: {item.beschreibung}
+                    </Text>
+                    <Text style={styles.subHeader}>ID: {item.gwId}</Text>
+                    <Text style={styles.subHeader}>Menge: {item.menge}</Text>
+                  </View>
+                )}
+                contentContainerStyle={{ paddingBottom: 20 }}
+              />
               <View
                 style={{
                   flexDirection: "row",
