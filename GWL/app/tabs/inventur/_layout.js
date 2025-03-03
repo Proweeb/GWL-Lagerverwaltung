@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { View } from "react-native";
-import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import { createStackNavigator } from "@react-navigation/stack";
 import { useIsFocused } from "@react-navigation/native";
 import InventoryScreen from "./inventur";
 import InventurButton from "../../../components/oneTimeUse/InventurButton";
 
-const Tab = createMaterialTopTabNavigator();
+const Stack = createStackNavigator();
 
 export default function InventurNavigator() {
   const [inventur, setInventur] = useState(false);
@@ -18,8 +18,8 @@ export default function InventurNavigator() {
   return (
     <View style={{ flex: 1 }}>
       {isFocused && !inventur && <InventurButton onPress={startInventur} />}
-      <Tab.Navigator>
-        <Tab.Screen name="Inventur" options={{ title: "Importieren" }}>
+      <Stack.Navigator>
+        <Stack.Screen name="start" options={{ title: "" }}>
           {(props) => (
             <InventoryScreen
               {...props}
@@ -27,8 +27,8 @@ export default function InventurNavigator() {
               setInventur={setInventur}
             />
           )}
-        </Tab.Screen>
-      </Tab.Navigator>
+        </Stack.Screen>
+      </Stack.Navigator>
     </View>
   );
 }
