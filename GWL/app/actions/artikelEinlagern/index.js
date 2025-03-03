@@ -51,9 +51,9 @@ export default function IndexScreen() {
           await ArtikelService.createArtikel({
             gwId,
             beschreibung,
-            menge: parseInt(menge),
+            menge: Number(menge),
             ablaufdatum,
-            mindestMenge: parseInt(mindestmenge),
+            mindestMenge: Number(mindestmenge),
             regalId,
           });
           Alert.alert("Erfolg", "Artikel erfolgreich gespeichert!");
