@@ -14,6 +14,7 @@ import { StyleSheet } from "react-native";
 import ArtikelService from "../../database/datamapper/ArtikelHelper";
 import RegalService from "../../database/datamapper/RegalHelper";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
+import { FlashList } from "@shopify/flash-list";
 
 const WarenScreen = () => {
   const navigation = useNavigation();
@@ -218,11 +219,12 @@ const WarenScreen = () => {
         </View>
 
         {/* FlatList */}
-        <FlatList
+        <FlashList
           data={jsonData}
           keyExtractor={(item, index) => index.toString()}
           renderItem={renderItem}
           contentContainerStyle={localStyles.listContainer}
+          estimatedItemSize={37}
         />
       </View>
     </View>
@@ -246,6 +248,8 @@ const localStyles = StyleSheet.create({
     width: "100%",
     marginBottom: 20,
     padding: 5,
+
+    flex: 1,
   },
   tableContent: {
     color: "#AFAFAF",

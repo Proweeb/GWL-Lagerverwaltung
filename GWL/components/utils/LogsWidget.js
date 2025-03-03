@@ -4,6 +4,7 @@ import { Q } from "@nozbe/watermelondb";
 import LogService from "../../database/datamapper/LogHelper";
 import { database } from "../../database/database";
 import { styles } from "../styles";
+import { FlashList } from "@shopify/flash-list";
 
 const LogsWidget = ({ startDate, endDate }) => {
   const [logs, setLogs] = useState([]);
@@ -79,11 +80,11 @@ const LogsWidget = ({ startDate, endDate }) => {
 
   return (
     <View style={customStyles.container}>
-      <FlatList
+      <FlashList
         data={logs}
         renderItem={renderLogItem}
         keyExtractor={(item) => item.id}
-        style={{ elevation: 5, flex: 1 }}
+        estimatedItemSize={130}
       />
     </View>
   );
@@ -96,6 +97,8 @@ const customStyles = StyleSheet.create({
     borderRadius: 10,
     flex: 1,
     gap: 10,
+    elevation: 5,
+    flex: 1,
   },
   logItem: {
     backgroundColor: styles.white,

@@ -42,6 +42,7 @@ export default function IndexScreen() {
       try {
         const existingArtikel = await ArtikelService.getArtikelById(gwId);
         const existingRegal = await RegalService.getRegalById(regalId);
+        console.log(menge);
         if (existingArtikel) {
           Alert.alert("Fehler", "GWID existiert bereits");
         } else if (!existingRegal) {

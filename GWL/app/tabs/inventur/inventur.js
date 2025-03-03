@@ -17,6 +17,8 @@ import { TextInput } from "react-native-gesture-handler";
 import { Feather } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { FlashList } from "@shopify/flash-list";
+import SearchBar from "../../../components/utils/SearchBar.js";
 const InventoryScreen = () => {
   const navigation = useNavigation();
   const [gwId, setGwId] = useState("");
@@ -86,18 +88,23 @@ const InventoryScreen = () => {
         Beschreibung: item.beschreibung,
         Soll: item.menge,
         Haben: changedMenge[item.gwId] || item.menge,
-        Datum: new Date().toLocaleDateString(),
+        Datum: new Date().toLocaleString("de-DE", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }),
       }));
       const ws = XLSX.utils.json_to_sheet(dataForExcel);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Inventory Data");
       const excelOutput = XLSX.write(wb, { type: "base64", bookType: "xlsx" });
-      const now = new Date();
-      const formattedDate = now
-        .toISOString()
-        .replace(/T/, "_")
-        .replace(/:/g, "-")
-        .split(".")[0];
+      const formattedDate = new Date().toLocaleString("de-DE", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        minute: "2-digit",
+        hour: "2-digit",
+      });
       const fileName = `Inventur_${formattedDate}.xlsx`;
       const fileUri = FileSystem.documentDirectory + fileName;
       await FileSystem.writeAsStringAsync(fileUri, excelOutput, {
@@ -186,112 +193,34 @@ const InventoryScreen = () => {
         <InventurButton onPress={startInventur}></InventurButton>
       ) : (
         <>
-          <View style={{ width: "95%", borderRadius: 20, padding: 20 }}>
-            <Text style={styles.subHeader}>GWID</Text>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "flex-end",
-                width: "100%",
-              }}
-            >
-              <View style={{ flex: 1, height: 40 }}>
-                <TextInput
-                  value={gwId}
-                  onChangeText={setGwId}
-                  onSubmitEditing={handleSearch} // Triggers search when Enter/Done is pressed
-                  returnKeyType="search" // Sets keyboard button to "Search"
-                  style={{
-                    padding: 10,
-                    fontSize: 16,
-                    backgroundColor: styles.white,
-                    borderRadius: 10,
-                  }}
-                />
-              </View>
-
-              {gwId !== "" && (
-                <TouchableOpacity
-                  onPress={() => setGwId("")}
-                  style={{
-                    marginLeft: 10,
-                    width: 40,
-                    height: 40,
-                    borderRadius: 10,
-                    backgroundColor: styles.white,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    elevation: 3,
-                  }}
-                >
-                  <MaterialCommunityIcons
-                    name={"arrow-u-left-bottom"}
-                    size={24}
-                    color={"black"}
-                  />
-                </TouchableOpacity>
-              )}
-
-              {gwId === "" && (
-                <TouchableOpacity
-                  onPress={() => {
-                    setIsScanning(true);
-                    setTimeout(() => {
-                      navigation.navigate("Scan", {
-                        onScan: (code) => {
-                          setGwId(code);
-                        },
-                      });
-                    }, 0);
-                  }}
-                  style={{
-                    marginLeft: 10,
-                    width: 40,
-                    height: 40,
-                    borderRadius: 10,
-                    backgroundColor: styles.white,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    elevation: 3,
-                  }}
-                >
-                  <Text style={{ color: "black", fontSize: 20 }}>[III]</Text>
-                </TouchableOpacity>
-              )}
-
-              <TouchableOpacity
-                onPress={handleSearch}
-                style={{
-                  marginLeft: 10,
-                  width: 40,
-                  height: 40,
-                  borderRadius: 10,
-                  backgroundColor: styles.white,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  elevation: 3,
-                }}
-              >
-                <Feather name="search" size={24} color="black" />
-              </TouchableOpacity>
+          <View style={{ width: "95%", borderRadius: 20 }}>
+            <View style={{ paddingLeft: 20 }}>
+              <Text style={styles.subHeader}>GWID</Text>
             </View>
+            <SearchBar
+              gwId={gwId}
+              setGwId={setGwId}
+              handleSearch={handleSearch}
+              setIsScanning={setIsScanning}
+            />
           </View>
           {!showPreview && (
-            <FlatList
-              style={{ width: "100%" }}
-              data={artikelList}
-              keyExtractor={(item) => item.id}
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-              removeClippedSubviews={false}
-              renderItem={({ item }) => (
-                <InventoryItem
-                  item={item}
-                  changedMenge={changedMenge}
-                  setChangedMenge={setChangedMenge}
-                />
-              )}
-            />
+            <View style={{ flex: 1, width: "100%" }}>
+              <FlashList
+                data={artikelList}
+                keyExtractor={(item) => String(item.id)}
+                estimatedItemSize={30}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+                renderItem={({ item }) => (
+                  <InventoryItem
+                    item={item}
+                    changedMenge={changedMenge}
+                    setChangedMenge={setChangedMenge}
+                  />
+                )}
+              />
+            </View>
           )}
           {showPreview && (
             <View

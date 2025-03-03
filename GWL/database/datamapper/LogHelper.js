@@ -17,7 +17,7 @@ async function createLog(logData, artikelId, regalId) {
   return await database.write(async () => {
     return database.get("logs").create((log) => {
       log.beschreibung = logData.beschreibung;
-      log.menge = logData.mengea;
+      log.menge = logData.menge;
       log.gesamtMenge = logData.gesamtMenge;
       log.artikel.set(artikel);
       log.regal.set(regal);

@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, FlatList } from "react-native";
 import { styles } from "../styles";
+import { FlashList } from "@shopify/flash-list";
 
 const ArtikelVorschau = ({ artikelList, changedMenge }) => {
   return (
@@ -135,8 +136,8 @@ const ArtikelVorschau = ({ artikelList, changedMenge }) => {
             </Text>
           </View>
         </View>
-        <FlatList
-          style={{ flex: 1 }}
+        <FlashList
+          estimatedItemSize={37}
           data={artikelList}
           keyExtractor={(item) => item.gwId.toString()}
           contentContainerStyle={{ paddingBottom: 0 }}

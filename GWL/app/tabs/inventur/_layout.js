@@ -17,9 +17,8 @@ export default function InventurNavigator() {
 
   return (
     <View style={{ flex: 1 }}>
-      {isFocused && !inventur && <InventurButton onPress={startInventur} />}
-      <Stack.Navigator>
-        <Stack.Screen name="start" options={{ title: "" }}>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="start" options={{ title: "hau" }}>
           {(props) => (
             <InventoryScreen
               {...props}
