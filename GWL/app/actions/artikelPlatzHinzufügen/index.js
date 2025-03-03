@@ -78,7 +78,7 @@ export default function IndexScreen() {
           await LogService.createLog(
             {
               beschreibung: "Einlagern",
-              menge: Number(nachfüllmenge),
+              menge: Number(menge),
               gesamtMenge: Number(menge),
             },
             gwId,
