@@ -60,8 +60,8 @@ export default function IndexScreen() {
           await LogService.createLog(
             {
               beschreibung: "Einlagern",
-              menge: parseInt(menge),
-              gesamtMenge: parseInt(menge),
+              menge: Number(menge),
+              gesamtMenge: Number(menge),
             },
             gwId,
             regalId

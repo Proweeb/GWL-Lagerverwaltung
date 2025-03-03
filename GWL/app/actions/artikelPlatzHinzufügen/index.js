@@ -69,17 +69,17 @@ export default function IndexScreen() {
           await ArtikelService.createArtikel({
             gwId,
             beschreibung,
-            menge: parseInt(menge),
+            menge: Number(menge),
             ablaufdatum,
-            mindestMenge: parseInt(mindestmenge),
+            mindestMenge: Number(mindestmenge),
             regalId,
           });
 
           await LogService.createLog(
             {
               beschreibung: "Einlagern",
-              menge: nachfüllmenge,
-              gesamtMenge: menge,
+              menge: Number(nachfüllmenge),
+              gesamtMenge: Number(menge),
             },
             gwId,
             regalId
