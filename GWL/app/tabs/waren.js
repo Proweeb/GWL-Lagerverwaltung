@@ -1,4 +1,11 @@
-import { Button, Text, View, TouchableOpacity, TextInput, FlatList } from "react-native";
+import {
+  Button,
+  Text,
+  View,
+  TouchableOpacity,
+  TextInput,
+  FlatList,
+} from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { styles } from "../../components/styles";
 import { useNavigation } from "@react-navigation/native";
@@ -7,7 +14,6 @@ import { StyleSheet } from "react-native";
 import ArtikelService from "../../database/datamapper/ArtikelHelper";
 import RegalService from "../../database/datamapper/RegalHelper";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
-
 
 const WarenScreen = () => {
   const navigation = useNavigation();
@@ -36,47 +42,43 @@ const WarenScreen = () => {
     try {
       const regaleundso = await RegalService.getAllRegal();
       console.log("Regale:", regaleundso);
-  
+
       const orderedData = {}; // This object will store our results
-  
+
       for (let i = 0; i < regaleundso.length; i++) {
         const regalId = regaleundso[i].regalId;
         const artikel = await ArtikelService.getArtikelByRegalId(regalId);
-        
+
         console.log("Regal ID:", regalId);
-        if(artikel[0]){
+        if (artikel[0]) {
           console.log("Artikel:", artikel[0].gwId);
+        } else {
+          console.log("keine Artikel");
         }
-        else{
-          console.log("keine Artikel")
-        }
-        
-  
+
         // If there are no articles, skip to the next regal
         if (artikel.length === 0) {
           continue;
         }
-  
+
         // Save the artikel data into the object with regalId as the key
-        orderedData[regalId] = artikel.map(item => ({
+        orderedData[regalId] = artikel.map((item) => ({
           gwId: item.gwId,
           beschreibung: item.beschreibung,
           menge: item.menge,
           mindestmenge: item.mindestmenge,
         }));
-  
+
         // Logging the orderedData object for verification
         console.log("Ordered Data:", orderedData);
       }
-  
+
       // Do something with the orderedData, for example, you can save it to a state if you need to display it
       // setOrderedData(orderedData);
-  
     } catch (error) {
       console.error("Fehler beim Abrufen der Artikel:", error);
     }
   }
-  
 
   async function LoadArtikel() {
     try {
@@ -105,16 +107,25 @@ const WarenScreen = () => {
     return (
       <View style={[localStyles.row, localStyles.rowBorder]}>
         <View style={localStyles.cell}>
-          <Text numberOfLines={1} style={localStyles.name}>{beschreibung}</Text>
+          <Text numberOfLines={1} style={localStyles.name}>
+            {beschreibung}
+          </Text>
         </View>
         <View style={localStyles.cell}>
-          <Text numberOfLines={1} style={localStyles.cellText}>{gw_id}</Text>
+          <Text numberOfLines={1} style={localStyles.cellText}>
+            {gw_id}
+          </Text>
         </View>
         <View style={localStyles.cell}>
-          <Text numberOfLines={1} style={localStyles.cellText}>{menge}</Text>
+          <Text numberOfLines={1} style={localStyles.cellText}>
+            {menge}
+          </Text>
         </View>
         <View style={localStyles.cell}>
-          <Text numberOfLines={1} style={[localStyles.cellText, localStyles[status]]}>
+          <Text
+            numberOfLines={1}
+            style={[localStyles.cellText, localStyles[status]]}
+          >
             {status || "Unbekannt"}
           </Text>
         </View>
@@ -162,26 +173,48 @@ const WarenScreen = () => {
         />
       </TouchableOpacity>
 
-     
-
       {/* Buttons */}
       <TouchableOpacity style={styles.buttonWhite} onPress={LoadArtikel}>
-        <Text numberOfLines={1} style={styles.buttonText}>LoadArtikel</Text>
+        <Text numberOfLines={1} style={styles.buttonText}>
+          LoadArtikel
+        </Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.buttonWhite} onPress={orderArtikel}>
-        <Text numberOfLines={1} style={styles.buttonText}>orderArtikel</Text>
+        <Text numberOfLines={1} style={styles.buttonText}>
+          orderArtikel
+        </Text>
       </TouchableOpacity>
 
       {/* Table */}
       <View style={localStyles.table}>
         {/* Table Header */}
         <View style={[localStyles.row, localStyles.rowBorder]}>
-          <View style={localStyles.cell}><Text numberOfLines={1} style={localStyles.tableContent}>Produkt Name</Text></View>
-          <View style={localStyles.cell}><Text numberOfLines={1} style={localStyles.tableContent}>Produkt ID</Text></View>
-          <View style={localStyles.cell}><Text numberOfLines={1} style={localStyles.tableContent}>Menge</Text></View>
-          <View style={localStyles.cell}><Text numberOfLines={1} style={localStyles.tableContent}>Status</Text></View>
-          <View style={localStyles.cell}><Text numberOfLines={1} style={localStyles.tableContent}>Aktion</Text></View>
+          <View style={localStyles.cell}>
+            <Text numberOfLines={1} style={localStyles.tableContent}>
+              Produkt Name
+            </Text>
+          </View>
+          <View style={localStyles.cell}>
+            <Text numberOfLines={1} style={localStyles.tableContent}>
+              Produkt ID
+            </Text>
+          </View>
+          <View style={localStyles.cell}>
+            <Text numberOfLines={1} style={localStyles.tableContent}>
+              Menge
+            </Text>
+          </View>
+          <View style={localStyles.cell}>
+            <Text numberOfLines={1} style={localStyles.tableContent}>
+              Status
+            </Text>
+          </View>
+          <View style={localStyles.cell}>
+            <Text numberOfLines={1} style={localStyles.tableContent}>
+              Aktion
+            </Text>
+          </View>
         </View>
 
         {/* FlatList */}

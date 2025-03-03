@@ -1,33 +1,39 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, TouchableOpacity, Alert } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import ArtikelService from "../../database/datamapper/ArtikelHelper";
-import { styles } from "../../components/styles";
+import { View, Text, FlatList, Alert, TouchableOpacity } from "react-native";
+import ArtikelService from "../../../database/datamapper/ArtikelHelper.js";
+import { styles } from "../../../components/styles.js";
 import * as FileSystem from "expo-file-system";
 import XLSX from "xlsx";
 import { useFocusEffect } from "@react-navigation/native";
 import * as MailComposer from "expo-mail-composer";
-import LogService from "../../database/datamapper/LogHelper";
-import InventoryItem from "../../components/oneTimeUse/InventoryItem";
-import WeiterButton from "../../components/oneTimeUse/WeiterButton";
-import FertigButton from "../../components/utils/FertigButton.js";
-import ZurückButton from "../../components/oneTimeUse/ZurückButton";
-import SearchBar from "../../components/utils/SearchBar";
-import ArtikelVorschau from "../../components/oneTimeUse/ArtikelVorschau";
-import InventurButton from "../../components/oneTimeUse/InventurButton.js";
-
+import LogService from "../../../database/datamapper/LogHelper.js";
+import InventoryItem from "../../../components/oneTimeUse/InventoryItem.js";
+import WeiterButton from "../../../components/oneTimeUse/WeiterButton.js";
+import FertigButton from "../../../components/utils/FertigButton.js";
+import ZurückButton from "../../../components/oneTimeUse/ZurückButton.js";
+import ArtikelVorschau from "../../../components/oneTimeUse/ArtikelVorschau.js";
+import InventurButton from "../../../components/oneTimeUse/InventurButton.js";
+import { TextInput } from "react-native-gesture-handler";
+import { Feather } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 const InventoryScreen = () => {
+  const navigation = useNavigation();
   const [gwId, setGwId] = useState("");
   const [inventur, setInventur] = useState("");
   const [artikelList, setArtikelList] = useState([]);
   const [changedMenge, setChangedMenge] = useState({}); // Stores temporary values
   const [showPreview, setShowPreview] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
 
   useFocusEffect(
     React.useCallback(() => {
-      setInventur(false); // Reset when leaving the screen
-      setShowPreview(false);
-    }, [])
+      if (!isScanning) {
+        setInventur(false); // Reset when leaving the screen
+        setShowPreview(false);
+      }
+      setIsScanning(false);
+    }, [isScanning])
   );
 
   useEffect(() => {
@@ -180,7 +186,96 @@ const InventoryScreen = () => {
         <InventurButton onPress={startInventur}></InventurButton>
       ) : (
         <>
-          <SearchBar gwId={gwId} setGwId={setGwId} onSearch={handleSearch} />
+          <View style={{ width: "95%", borderRadius: 20, padding: 20 }}>
+            <Text style={styles.subHeader}>GWID</Text>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "flex-end",
+                width: "100%",
+              }}
+            >
+              <View style={{ flex: 1, height: 40 }}>
+                <TextInput
+                  value={gwId}
+                  onChangeText={setGwId}
+                  onSubmitEditing={handleSearch} // Triggers search when Enter/Done is pressed
+                  returnKeyType="search" // Sets keyboard button to "Search"
+                  style={{
+                    padding: 10,
+                    fontSize: 16,
+                    backgroundColor: styles.white,
+                    borderRadius: 10,
+                  }}
+                />
+              </View>
+
+              {gwId !== "" && (
+                <TouchableOpacity
+                  onPress={() => setGwId("")}
+                  style={{
+                    marginLeft: 10,
+                    width: 40,
+                    height: 40,
+                    borderRadius: 10,
+                    backgroundColor: styles.white,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    elevation: 3,
+                  }}
+                >
+                  <MaterialCommunityIcons
+                    name={"arrow-u-left-bottom"}
+                    size={24}
+                    color={"black"}
+                  />
+                </TouchableOpacity>
+              )}
+
+              {gwId === "" && (
+                <TouchableOpacity
+                  onPress={() => {
+                    setIsScanning(true);
+                    setTimeout(() => {
+                      navigation.navigate("Scan", {
+                        onScan: (code) => {
+                          setGwId(code);
+                        },
+                      });
+                    }, 0);
+                  }}
+                  style={{
+                    marginLeft: 10,
+                    width: 40,
+                    height: 40,
+                    borderRadius: 10,
+                    backgroundColor: styles.white,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    elevation: 3,
+                  }}
+                >
+                  <Text style={{ color: "black", fontSize: 20 }}>[III]</Text>
+                </TouchableOpacity>
+              )}
+
+              <TouchableOpacity
+                onPress={handleSearch}
+                style={{
+                  marginLeft: 10,
+                  width: 40,
+                  height: 40,
+                  borderRadius: 10,
+                  backgroundColor: styles.white,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  elevation: 3,
+                }}
+              >
+                <Feather name="search" size={24} color="black" />
+              </TouchableOpacity>
+            </View>
+          </View>
           {!showPreview && (
             <FlatList
               style={{ width: "100%" }}
@@ -206,12 +301,12 @@ const InventoryScreen = () => {
                 paddingHorizontal: 20,
               }}
             >
-              <ArtikelVorschau
-                artikelList={artikelList}
-                setShowPreview={setShowPreview}
-                handleUpdateMenge={handleUpdateMenge}
-                handleExportToEmail={handleExportToEmail}
-              />
+              <View style={{ flex: 1 }}>
+                <ArtikelVorschau
+                  artikelList={artikelList}
+                  changedMenge={changedMenge}
+                />
+              </View>
               <View
                 style={{
                   flexDirection: "row",
@@ -237,7 +332,6 @@ const InventoryScreen = () => {
             <View style={{ alignItems: "center" }}>
               <WeiterButton
                 onPress={() => {
-                  handleUpdateMenge();
                   setShowPreview(true);
                 }}
               ></WeiterButton>

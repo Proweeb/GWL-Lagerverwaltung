@@ -9,7 +9,7 @@ import { TouchableOpacity, Image } from "react-native";
 import { styles } from "../../components/styles";
 
 // Import Screens
-import InventurScreen from "./inventur";
+import InventurNavigator from "./inventur/_layout";
 import HomeScreen from "./home";
 import BackupNavigator from "./backups/_layout";
 import LogsScreen from "./logs";
@@ -40,7 +40,7 @@ export default function BottomTabNavigator() {
       {/* Inventur Tab */}
       <Tab.Screen
         name="Inventur"
-        component={InventurScreen}
+        component={InventurNavigator}
         options={{
           title: "Inventur",
           tabBarIcon: ({ color, size }) => (
@@ -52,7 +52,7 @@ export default function BottomTabNavigator() {
       {/* Waren Tab */}
       <Tab.Screen
         name="Waren"
-        component={WarenScreen} //LagerNavigator 
+        component={WarenScreen} //LagerNavigator
         options={{
           title: "Waren",
           tabBarIcon: ({ color, size }) => (
