@@ -20,6 +20,7 @@ const InventoryWidget = () => {
               Q.where("beschreibung", "Entnehmen"),
               Q.where("beschreibung", "Einlagern")
             ),
+            Q.where("is_backup", false),
             Q.take(3) // Limit to the latest 3 logs
           )
           .observe()
@@ -31,6 +32,9 @@ const InventoryWidget = () => {
 
             const logsData = await Promise.all(
               latestLogs.map(async (log) => {
+                if (log.isBackup) {
+                  return;
+                }
                 const artikel = await log.artikel.fetch();
                 const regal = await log.regal.fetch();
 

@@ -87,10 +87,10 @@ async function deleteAllData() {
       batchOperations.push(artikel.prepareDestroyPermanently())
     );
 
-    const allLogs = await database.get("logs").query().fetch();
-    allLogs.forEach((log) =>
-      batchOperations.push(log.prepareDestroyPermanently())
-    );
+    // const allLogs = await database.get("logs").query().fetch();
+    // allLogs.forEach((log) =>
+    //   batchOperations.push(log.prepareDestroyPermanently())
+    // );
 
     const allRegale = await database.get("regale").query().fetch();
     allRegale.forEach((regal) =>

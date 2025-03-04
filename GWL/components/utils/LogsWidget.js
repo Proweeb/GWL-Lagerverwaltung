@@ -37,15 +37,19 @@ const LogsWidget = ({ startDate, endDate }) => {
 
       const logsData = await Promise.all(
         logsQuery.map(async (log) => {
-          const artikel = await log.artikel.fetch();
-          const regal = await log.regal.fetch();
+          let artikel, regal;
+
+          if (!log.isBackup) {
+            artikel = await log.artikel.fetch();
+            regal = await log.regal.fetch();
+          }
 
           return {
             beschreibung: log.beschreibung,
             menge: log.menge,
             gesamtMenge: log.gesamtMenge,
-            regalName: regal ? regal.regalName : "",
-            artikelName: artikel ? artikel.beschreibung : "", // Artikel Name
+            regalName: log.isBackup ? log.regal_id : regal ? regal.regalId : "",
+            artikelName: log.isBackup ? log.gwId : artikel ? artikel.gwId : "", // Artikel Name
             createdAt: log.createdAt,
             id: log.id,
           };

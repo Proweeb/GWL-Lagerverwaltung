@@ -14,6 +14,8 @@ class Log extends Model {
   @field("menge") menge;
   @field("gesamt_menge") gesamtMenge;
 
+  @field("is_backup") isBackup;
+
   @date("created_at") createdAt;
   @date("updated_at") updatedAt;
 

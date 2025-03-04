@@ -13,8 +13,12 @@ import { styles } from "../../../components/styles";
 import RegalService from "../../../database/datamapper/RegalHelper";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper";
 import LogService from "../../../database/datamapper/LogHelper";
-import { stringToDate, parseCustomDate } from "../../../components/utils/Functions/parseDate";
+import {
+  stringToDate,
+  parseCustomDate,
+} from "../../../components/utils/Functions/parseDate";
 import { useFocusEffect } from "@react-navigation/native"; // Import useFocusEffect from react-navigation
+import { database } from "../../../database/database";
 
 const ImportScreen = ({ navigation }) => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -73,6 +77,33 @@ const ImportScreen = ({ navigation }) => {
     }
   };
 
+  async function backupLogsBeforeImport() {
+    await database.write(async () => {
+      const logs = await database.get("logs").query().fetch();
+      const accepted = { Entnehmen: true, Einlagern: true };
+
+      // Use Promise.all to resolve asynchronous map operations
+      const updates = await Promise.all(
+        logs.map(async (log) => {
+          const regal = await log.regal.fetch();
+          const artikel = await log.artikel.fetch();
+          console.log(log.beschreibung);
+
+          return log.prepareUpdate((logRecord) => {
+            logRecord.isBackup = true;
+            // Only update regalId and gwId if the log.beschreibung is accepted
+            if (accepted[log.beschreibung]) {
+              logRecord.regalId = regal.regalId;
+              logRecord.gwId = artikel.gwId;
+            }
+          });
+        })
+      );
+
+      await database.batch(...updates);
+    });
+  }
+
   // Handle the import of data into the database
   const handleImport = async () => {
     if (!jsonData) {
@@ -83,6 +114,10 @@ const ImportScreen = ({ navigation }) => {
       console.log(JSON.stringify(jsonData));
       console.log("Backup der aktuellen Datenbank wird erstellt...");
       const backup = await backupDatabase();
+
+      console.log("Alte Logs werden auf Backup Mode gesetzt.");
+      await backupLogsBeforeImport();
+
       console.log("Bestehende Datenbank wird gelöscht...");
       await ArtikelService.deleteAllData();
       console.log("Neue Datenbank wird erstellt und Daten importiert...");
@@ -123,7 +158,11 @@ const ImportScreen = ({ navigation }) => {
         artikel.kunde = String(artikel.kunde);
         artikel.menge = Number(artikel.menge);
         artikel.mindestMenge = Number(artikel.mindestMenge);
-        artikel.ablaufdatum = stringToDate(artikel.ablaufdatum, "dd.MM.yyyy", ".").getTime();
+        artikel.ablaufdatum = stringToDate(
+          artikel.ablaufdatum,
+          "dd.MM.yyyy",
+          "."
+        ).getTime();
         artikel.regalId = String(artikel.regalId);
         console.log("Artikel:", artikel);
         await ArtikelService.createArtikel(artikel);
@@ -132,7 +171,10 @@ const ImportScreen = ({ navigation }) => {
         log.gwId = String(log.gwId);
         log.regalId = String(log.regalId);
         log.menge = Number(log.menge);
-        log.createdAt = parseCustomDate(log.datum, "dd.mm.yyyy hh:mm").getTime();
+        log.createdAt = parseCustomDate(
+          log.datum,
+          "dd.mm.yyyy hh:mm"
+        ).getTime();
         console.log("Log:", log);
         await LogService.createLog(log, log.gwId, log.regalId);
       }
@@ -151,7 +193,9 @@ const ImportScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text numberOfLines={1} style={styles.title}>Excel Datei Importieren</Text>
+      <Text numberOfLines={1} style={styles.title}>
+        Excel Datei Importieren
+      </Text>
       <View style={styles.card}>
         <View style={styles.fileBox}>
           <Text numberOfLines={1} style={styles.fileText}>
@@ -159,116 +203,179 @@ const ImportScreen = ({ navigation }) => {
           </Text>
         </View>
         <TouchableOpacity style={styles.buttonWhite} onPress={pickFile}>
-          <Text numberOfLines={1} style={styles.buttonText}>Hochladen</Text>
+          <Text numberOfLines={1} style={styles.buttonText}>
+            Hochladen
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.buttonBlue}
           onPress={handleImport}
           disabled={!jsonData}
         >
-          <Text numberOfLines={1} style={styles.buttonTextLightBlue}>Importieren</Text>
+          <Text numberOfLines={1} style={styles.buttonTextLightBlue}>
+            Importieren
+          </Text>
         </TouchableOpacity>
       </View>
 
       {selectedFile && jsonData && (
         <ScrollView style={styles.scrollContainer}>
           {/* Artikel Vorschau */}
-          <Text numberOfLines={1} style={styles.subHeader}>Artikel Vorschau</Text>
+          <Text numberOfLines={1} style={styles.subHeader}>
+            Artikel Vorschau
+          </Text>
           <View style={localStyles.table}>
             <View style={[localStyles.row, localStyles.rowBorder]}>
               <View style={localStyles.cell}>
-                <Text numberOfLines={1} style={localStyles.tableContent}>Name</Text>
+                <Text numberOfLines={1} style={localStyles.tableContent}>
+                  Name
+                </Text>
               </View>
               <View style={localStyles.cell}>
-                <Text numberOfLines={1} style={localStyles.tableContent}>Produkt ID</Text>
+                <Text numberOfLines={1} style={localStyles.tableContent}>
+                  Produkt ID
+                </Text>
               </View>
               <View style={localStyles.cell}>
-                <Text numberOfLines={1} style={localStyles.tableContent}>Ablaufdatum</Text>
+                <Text numberOfLines={1} style={localStyles.tableContent}>
+                  Ablaufdatum
+                </Text>
               </View>
               <View style={localStyles.cell}>
-                <Text numberOfLines={1} style={localStyles.tableContent}>Menge</Text>
+                <Text numberOfLines={1} style={localStyles.tableContent}>
+                  Menge
+                </Text>
               </View>
             </View>
 
             {jsonData.Artikel.map((item, index) => (
-              <View key={index} style={[localStyles.row, localStyles.rowBorder]}>
+              <View
+                key={index}
+                style={[localStyles.row, localStyles.rowBorder]}
+              >
                 <View style={localStyles.cell}>
-                  <Text numberOfLines={1} style={localStyles.name}>{item.beschreibung}</Text>
+                  <Text numberOfLines={1} style={localStyles.name}>
+                    {item.beschreibung}
+                  </Text>
                 </View>
                 <View style={localStyles.cell}>
-                  <Text numberOfLines={1} style={localStyles.cellText}>{item.gwId}</Text>
+                  <Text numberOfLines={1} style={localStyles.cellText}>
+                    {item.gwId}
+                  </Text>
                 </View>
                 <View style={localStyles.cell}>
-                  <Text numberOfLines={1} style={localStyles.cellText}>{item.ablaufdatum}</Text>
+                  <Text numberOfLines={1} style={localStyles.cellText}>
+                    {item.ablaufdatum}
+                  </Text>
                 </View>
                 <View style={localStyles.cell}>
-                  <Text numberOfLines={1} style={localStyles.cellText}>{item.menge}</Text>
+                  <Text numberOfLines={1} style={localStyles.cellText}>
+                    {item.menge}
+                  </Text>
                 </View>
               </View>
             ))}
           </View>
 
           {/* Regale Vorschau */}
-          <Text numberOfLines={1} style={styles.subHeader}>Regale Vorschau</Text>
+          <Text numberOfLines={1} style={styles.subHeader}>
+            Regale Vorschau
+          </Text>
           <View style={localStyles.table}>
             <View style={[localStyles.row, localStyles.rowBorder]}>
               <View style={localStyles.cell}>
-                <Text numberOfLines={1} style={localStyles.tableContent}>Regal Name</Text>
+                <Text numberOfLines={1} style={localStyles.tableContent}>
+                  Regal Name
+                </Text>
               </View>
               <View style={localStyles.cell}>
-                <Text numberOfLines={1} style={localStyles.tableContent}>Regal ID</Text>
+                <Text numberOfLines={1} style={localStyles.tableContent}>
+                  Regal ID
+                </Text>
               </View>
               <View style={localStyles.cell}>
-                <Text numberOfLines={1} style={localStyles.tableContent}>Fach Name</Text>
+                <Text numberOfLines={1} style={localStyles.tableContent}>
+                  Fach Name
+                </Text>
               </View>
             </View>
 
             {jsonData.Regale.map((item, index) => (
-              <View key={index} style={[localStyles.row, localStyles.rowBorder]}>
+              <View
+                key={index}
+                style={[localStyles.row, localStyles.rowBorder]}
+              >
                 <View style={localStyles.cell}>
-                  <Text numberOfLines={1} style={localStyles.name}>{item.regalName}</Text>
+                  <Text numberOfLines={1} style={localStyles.name}>
+                    {item.regalName}
+                  </Text>
                 </View>
                 <View style={localStyles.cell}>
-                  <Text numberOfLines={1} style={localStyles.cellText}>{item.regalId}</Text>
+                  <Text numberOfLines={1} style={localStyles.cellText}>
+                    {item.regalId}
+                  </Text>
                 </View>
                 <View style={localStyles.cell}>
-                  <Text numberOfLines={1} style={localStyles.cellText}>{item.fachName}</Text>
+                  <Text numberOfLines={1} style={localStyles.cellText}>
+                    {item.fachName}
+                  </Text>
                 </View>
               </View>
             ))}
           </View>
 
           {/* Logs Vorschau */}
-          <Text numberOfLines={1} style={styles.subHeader}>Lagerbewegungen Vorschau</Text>
+          <Text numberOfLines={1} style={styles.subHeader}>
+            Lagerbewegungen Vorschau
+          </Text>
           <View style={localStyles.table}>
             <View style={[localStyles.row, localStyles.rowBorder]}>
               <View style={localStyles.cell}>
-                <Text numberOfLines={1} style={localStyles.tableContent}>Beschreibung</Text>
+                <Text numberOfLines={1} style={localStyles.tableContent}>
+                  Beschreibung
+                </Text>
               </View>
               <View style={localStyles.cell}>
-                <Text numberOfLines={1} style={localStyles.tableContent}>Artikel ID</Text>
+                <Text numberOfLines={1} style={localStyles.tableContent}>
+                  Artikel ID
+                </Text>
               </View>
               <View style={localStyles.cell}>
-                <Text numberOfLines={1} style={localStyles.tableContent}>Regal ID</Text>
+                <Text numberOfLines={1} style={localStyles.tableContent}>
+                  Regal ID
+                </Text>
               </View>
               <View style={localStyles.cell}>
-                <Text numberOfLines={1} style={localStyles.tableContent}>Menge</Text>
+                <Text numberOfLines={1} style={localStyles.tableContent}>
+                  Menge
+                </Text>
               </View>
             </View>
 
             {jsonData.Logs.map((item, index) => (
-              <View key={index} style={[localStyles.row, localStyles.rowBorder]}>
+              <View
+                key={index}
+                style={[localStyles.row, localStyles.rowBorder]}
+              >
                 <View style={localStyles.cell}>
-                  <Text numberOfLines={1} style={localStyles.name}>{item.beschreibung}</Text>
+                  <Text numberOfLines={1} style={localStyles.name}>
+                    {item.beschreibung}
+                  </Text>
                 </View>
                 <View style={localStyles.cell}>
-                  <Text numberOfLines={1} style={localStyles.cellText}>{item.gwId}</Text>
+                  <Text numberOfLines={1} style={localStyles.cellText}>
+                    {item.gwId}
+                  </Text>
                 </View>
                 <View style={localStyles.cell}>
-                  <Text numberOfLines={1} style={localStyles.cellText}>{item.regalId}</Text>
+                  <Text numberOfLines={1} style={localStyles.cellText}>
+                    {item.regalId}
+                  </Text>
                 </View>
                 <View style={localStyles.cell}>
-                  <Text numberOfLines={1} style={localStyles.cellText}>{item.menge}</Text>
+                  <Text numberOfLines={1} style={localStyles.cellText}>
+                    {item.menge}
+                  </Text>
                 </View>
               </View>
             ))}

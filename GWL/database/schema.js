@@ -1,7 +1,7 @@
 import { appSchema, tableSchema } from "@nozbe/watermelondb";
 
 export const lagerSchema = appSchema({
-  version: 2, // Incremented version due to schema changes
+  version: 3, // Incremented version due to schema changes
   tables: [
     tableSchema({
       name: "regale",
@@ -36,6 +36,7 @@ export const lagerSchema = appSchema({
         { name: "gw_id", type: "string", isOptional: true }, // Foreign key to artikel
         { name: "menge", type: "number", isOptional: true },
         { name: "gesamt_menge", type: "number", isOptional: true },
+        { name: "is_backup", type: "boolean" },
         { name: "created_at", type: "number" },
         { name: "updated_at", type: "number" },
       ],
