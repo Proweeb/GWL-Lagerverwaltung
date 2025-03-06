@@ -31,7 +31,7 @@ export default function ArticleTextInput({
       setShowMengeOverview(false);
     } else {
       console.log("Artikel gefunden!");
-      console.log(dbArtikel);
+      //qconsole.log(dbArtikel);
       setFoundArticle(dbArtikel);
       setMenge(dbArtikel.menge);
       setShowMengeOverview(true);

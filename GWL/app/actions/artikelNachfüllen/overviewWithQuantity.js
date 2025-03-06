@@ -24,24 +24,12 @@ export default function OverviewWithQuantity({
     }
     const regal = await foundArticle.regal.fetch();
 
-    await ArtikelService.updateArtikel(foundArticle.gwId, {
-      gwId: foundArticle.gwId,
-      firmenId: foundArticle.firmenId,
-      beschreibung: foundArticle.beschreibung,
-      menge: menge,
-      mindestMenge: foundArticle.mindestMenge,
-      ablaufdatum: foundArticle.ablaufdatum,
-      regalId: regal.regalId,
-    });
-
-    await LogService.createLog(
-      {
-        beschreibung: "Nachfüllen",
-        menge: nachfüllmenge,
-        gesamtMenge: menge,
-      },
+    await ArtikelService.updateArtikel(
       foundArticle.gwId,
-      regal.regalId
+      {
+        menge: menge,
+      },
+      1
     );
 
     Alert.alert("Erfolg", "Menge erfolgreich geändert\nNeue Menge: " + menge);

@@ -11,11 +11,16 @@ export async function testInsertAndFetch() {
       ...allLogs.map((log) => log.prepareDestroyPermanently())
     );
 
+    const regal = await database.get("regale").create((regal) => {
+      regal.fachName = "10";
+      regal.regalName = "A5";
+      regal.regalId = "134";
+    });
     // Create 3 artikel records
     const artikelPromises = [];
-    for (let i = 0; i < 300; i++) {
+    for (let i = 0; i < 30; i++) {
       artikelPromises.push(
-        database.get("artikel").create((artikel) => {
+        await database.get("artikel").create((artikel) => {
           artikel.gwId = `${i + 1}`;
           artikel.firmenId = `firmen456_${i + 1}`;
           artikel.beschreibung = `Kiwi ${i + 1}`;
@@ -23,6 +28,7 @@ export async function testInsertAndFetch() {
           artikel.mindestMenge = 10;
           artikel.kunde = "Test Kunde";
           artikel.ablaufdatum = Date.now();
+          artikel.regal.set(regal);
         })
       );
     }
@@ -30,11 +36,6 @@ export async function testInsertAndFetch() {
     const artikels = await Promise.all(artikelPromises);
 
     // Create a single regal record
-    const regal = await database.get("regale").create((regal) => {
-      regal.fachName = "10";
-      regal.regalName = "A5";
-      regal.regalId = "134";
-    });
 
     // Create 3 log records using a loop
     const logPromises1 = [];

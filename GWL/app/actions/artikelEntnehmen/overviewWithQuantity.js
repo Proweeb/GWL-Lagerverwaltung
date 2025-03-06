@@ -1,6 +1,6 @@
 import { Text, TouchableOpacity, View } from "react-native";
 import { styles } from "../../../components/styles";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TextInput } from "react-native-gesture-handler";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import Feather from "@expo/vector-icons/Feather";
@@ -8,6 +8,7 @@ import { Pressable } from "react-native";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper";
 import { Alert } from "react-native";
 import LogService from "../../../database/datamapper/LogHelper";
+import Toast from "react-native-toast-message";
 
 export default function OverviewWithQuantity({
   menge,
@@ -17,11 +18,41 @@ export default function OverviewWithQuantity({
 }) {
   const [nachfüllmenge, setNachfüllmenge] = useState(0);
 
+  useEffect(() => {}, [foundArticle]);
+
   const handleMengeShow = () => {
     if (menge < 0) {
       return 0;
     } else {
       return menge;
+    }
+  };
+
+  const showLowMenge = () => {
+    if (menge === 0) {
+      console.log("low");
+      Toast.show({
+        type: "error",
+        text1: "Artikel: " + foundArticle.beschreibung,
+        text2: "Leer",
+        position: "bottom",
+        autoHide: false,
+        topOffset: 50,
+        swipeable: true,
+      });
+
+      return 0;
+    } else if (menge < foundArticle.mindestMenge) {
+      console.log("low");
+      Toast.show({
+        type: "warning",
+        text1: "Artikel: " + foundArticle.beschreibung,
+        text2: "Wenig",
+        position: "bottom",
+        autoHide: false,
+        topOffset: 50,
+        swipeable: true,
+      });
     }
   };
 
@@ -36,25 +67,16 @@ export default function OverviewWithQuantity({
       setNachfüllmenge(0);
     }
 
-    const regal = await foundArticle.regal.fetch();
-    await ArtikelService.updateArtikel(foundArticle.gwId, {
-      gwId: foundArticle.gwId,
-      firmenId: foundArticle.firmenId,
-      beschreibung: foundArticle.beschreibung,
-      menge,
-      mindestMenge: foundArticle.mindestMenge,
-      ablaufdatum: foundArticle.ablaufdatum,
-      regalId: regal.regalId,
-    });
+    console.log(foundArticle);
 
-    await LogService.createLog(
-      {
-        beschreibung: "Entnehmen",
-        menge: nachfüllmenge * -1,
-        gesamtMenge: menge,
-      },
+    const regal = await foundArticle.regal.fetch();
+
+    await ArtikelService.updateArtikel(
       foundArticle.gwId,
-      regal.regalId
+      {
+        menge: menge,
+      },
+      -1
     );
 
     Alert.alert(
@@ -169,7 +191,9 @@ export default function OverviewWithQuantity({
               justifyContent: "center",
               elevation: 5,
             }}
-            onPress={handleFertig}
+            onPress={() => {
+              handleFertig(), showLowMenge();
+            }}
           >
             <Text style={{ fontSize: RFPercentage(3.5) }}>Fertig</Text>
           </TouchableOpacity>

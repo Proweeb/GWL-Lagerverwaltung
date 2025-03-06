@@ -41,7 +41,7 @@ export default function IndexScreen() {
 
       try {
         const existingArtikel = await ArtikelService.getArtikelById(gwId);
-        const existingRegal = await RegalService.getRegalById(regalId);
+        const existingRegal = await RegalService.getRegalById(String(regalId));
         console.log(menge);
         if (existingArtikel) {
           Alert.alert("Fehler", "GWID existiert bereits");
@@ -58,15 +58,6 @@ export default function IndexScreen() {
             regalId,
           });
           Alert.alert("Erfolg", "Artikel erfolgreich gespeichert!");
-          await LogService.createLog(
-            {
-              beschreibung: "Einlagern",
-              menge: Number(menge),
-              gesamtMenge: Number(menge),
-            },
-            gwId,
-            regalId
-          );
           navigation.navigate("Home");
         }
       } catch (error) {

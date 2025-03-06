@@ -44,8 +44,8 @@ const InventoryWidget = () => {
                   gwid: artikel.gwId,
                   menge: log.menge,
                   status: artikel.status,
-                  fachName: regal.fachName,
-                  regalName: regal.regalName,
+                  // fachName: regal.fachName,
+                  // regalName: regal.regalName,
                   datum: new Date(log.createdAt).toLocaleString("de-DE", {
                     year: "numeric",
                     month: "2-digit",
