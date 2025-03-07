@@ -97,18 +97,17 @@ const LogsWidget = ({ startDate, endDate }) => {
 const customStyles = StyleSheet.create({
   container: {
     padding: 10,
-    backgroundColor: styles.backgroundColor,
+    backgroundColor: styles.white,
     borderRadius: 10,
     flex: 1,
-    gap: 10,
-    elevation: 5,
+    elevation: 0,
     flex: 1,
   },
   logItem: {
     backgroundColor: styles.white,
     padding: 10,
-    borderRadius: 5,
-    elevation: 1,
+    borderRadius: 10,
+    elevation: 3,
     marginBottom: 8,
   },
   time: { fontWeight: "bold", color: "#333" },

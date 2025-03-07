@@ -14,6 +14,7 @@ async function createRegal(regalData) {
       log.regal.set(regal);
       log.createdAt = Date.now();
     });
+    return regal;
   });
 }
 async function getAllRegal() {
@@ -39,6 +40,7 @@ async function updateRegal(regalid, updatedData) {
       reg.fachName = updatedData.fachName;
       reg.regalName = updatedData.regalName;
     });
+    return regal[0];
   });
 }
 async function deleteRegal(regalid) {

@@ -27,6 +27,7 @@ async function createArtikel(artikelData) {
       log.regal.set(regal);
       log.createdAt = Date.now();
     });
+    return artikel;
   });
 }
 async function getAllArtikel() {
@@ -104,6 +105,7 @@ async function updateArtikel(gwid, updatedData, changeValue) {
         art.regal.set(updatedData.regalId);
       }
     });
+    return artikel[0];
   });
 }
 

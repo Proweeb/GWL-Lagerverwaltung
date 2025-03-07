@@ -60,14 +60,15 @@ export default function IndexScreen() {
         } else if (existingRegal) {
           Alert.alert("Fehler", "Regal existiert bereits");
         } else {
-          console.log(existingRegal);
+          //console.log(existingRegal);
+          console.log("hier");
           await RegalService.createRegal({
             regalId,
             regalName: regalname,
             fachName: fachname,
           });
 
-          await ArtikelService.createArtikel({
+          const created = await ArtikelService.createArtikel({
             gwId,
             beschreibung,
             menge: Number(menge),
@@ -76,19 +77,6 @@ export default function IndexScreen() {
             regalId,
           });
 
-          await LogService.createLog(
-            {
-              beschreibung: "Einlagern",
-              menge: Number(menge),
-              gesamtMenge: Number(menge),
-            },
-            gwId,
-            regalId
-          );
-
-          await LogService.createLog({
-            beschreibung: "lagerplatz hinzugefügt",
-          });
           console.log("Artikel gespeichert, GWID: " + gwId);
           Alert.alert("Erfolg", "Regal und Artikel erfolgreich gespeichert!");
           navigation.navigate("Home");
