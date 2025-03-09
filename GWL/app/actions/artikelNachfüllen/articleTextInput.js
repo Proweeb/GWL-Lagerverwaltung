@@ -10,6 +10,7 @@ import Feather from "@expo/vector-icons/Feather";
 import { Alert } from "react-native";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper.js";
 import RegalService from "../../../database/datamapper/RegalHelper.js";
+import Toast from "react-native-toast-message";
 
 export default function ArticleTextInput({
   gwId,
@@ -26,7 +27,12 @@ export default function ArticleTextInput({
       return;
     }
     if (!dbArtikel) {
-      Alert.alert("Fehler", "Artikel existiert nicht");
+      Toast.show({
+        type: "error",
+        text1: "Artikel",
+        text2: "Existiert nicht",
+        position: "bottom",
+      });
       console.log("Artikel existiert nicht");
       setShowMengeOverview(false);
     } else {
@@ -42,7 +48,12 @@ export default function ArticleTextInput({
 
   const handleSearch = async () => {
     if (!gwId) {
-      Alert.alert("Fehler", "Bitte füllen Sie alle Felder aus.");
+      Toast.show({
+        type: "warning",
+        text1: "Artikel",
+        text2: "Bitte füllen Sie alle Felder aus",
+        position: "bottom",
+      });
       console.log(gwId);
     } else {
       console.log("Alle Felder sind befüllt:", gwId);
@@ -51,7 +62,12 @@ export default function ArticleTextInput({
         setDbArtikel(await ArtikelService.getArtikelById(gwId));
       } catch (error) {
         console.error("Fehler beim Finden:", error);
-        Alert.alert("Fehler", "Fehler bei Artikelsuche.");
+        Toast.show({
+          type: "error",
+          text1: "Artikel",
+          text2: "Fehler beim Finden",
+          position: "bottom",
+        });
       }
     }
   };

@@ -17,7 +17,12 @@ export default function TextInputField(props) {
     >
       <TextInput
         style={[
-          { width: "100%", textAlign: "left", paddingHorizontal: 5 },
+          {
+            width: "100%",
+            textAlign: "left",
+            paddingHorizontal: 5,
+            color: "black",
+          },
           styles.text,
         ]}
         {...props}

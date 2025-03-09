@@ -10,6 +10,7 @@ import ArtikelService from "../../../database/datamapper/ArtikelHelper.js";
 import RegalService from "../../../database/datamapper/RegalHelper.js";
 import { useNavigation } from "@react-navigation/native";
 import LogService from "../../../database/datamapper/LogHelper.js";
+import Toast from "react-native-toast-message";
 
 export default function IndexScreen() {
   const navigation = useNavigation();
@@ -34,7 +35,12 @@ export default function IndexScreen() {
       !mindestmenge ||
       !regalId
     ) {
-      Alert.alert("Fehler", "Bitte füllen Sie alle Felder aus.");
+      Toast.show({
+        type: "warning",
+        text1: "Artikel/Regal",
+        text2: "Bitte füllen Sie alle Felder aus",
+        position: "bottom",
+      });
       console.log(formData);
     } else {
       console.log("Alle Felder sind befüllt:", formData);
@@ -44,9 +50,19 @@ export default function IndexScreen() {
         const existingRegal = await RegalService.getRegalById(String(regalId));
         console.log(menge);
         if (existingArtikel) {
-          Alert.alert("Fehler", "GWID existiert bereits");
+          Toast.show({
+            type: "error",
+            text1: "Artikel",
+            text2: "GWID existiert bereits",
+            position: "bottom",
+          });
         } else if (!existingRegal) {
-          Alert.alert("Fehler", "Regal existiert nicht");
+          Toast.show({
+            type: "error",
+            text1: "Regal",
+            text2: "Existiert nicht",
+            position: "bottom",
+          });
         } else {
           console.log(existingRegal);
           await ArtikelService.createArtikel({
@@ -57,12 +73,22 @@ export default function IndexScreen() {
             mindestMenge: Number(mindestmenge),
             regalId,
           });
-          Alert.alert("Erfolg", "Artikel erfolgreich gespeichert!");
+          Toast.show({
+            type: "success",
+            text1: "Artikel: " + formData.beschreibung,
+            text2: "Erfolgreich gespeichert",
+            position: "bottom",
+          });
           navigation.navigate("Home");
         }
       } catch (error) {
         console.error("Fehler beim Speichern:", error);
-        Alert.alert("Fehler", "Artikel konnte nicht gespeichert werden.");
+        Toast.show({
+          type: "error",
+          text1: "Artikel",
+          text2: "Konnte nicht gespeichert werden.",
+          position: "bottom",
+        });
       }
     }
   };

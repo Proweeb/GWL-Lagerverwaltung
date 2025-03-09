@@ -6,8 +6,8 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 import Feather from "@expo/vector-icons/Feather";
 import { Pressable } from "react-native";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper";
-import { Alert } from "react-native";
 import LogService from "../../../database/datamapper/LogHelper";
+import Toast from "react-native-toast-message";
 
 export default function OverviewWithQuantity({
   menge,
@@ -22,7 +22,6 @@ export default function OverviewWithQuantity({
     if (nachfüllmenge == "") {
       setNachfüllmenge(0);
     }
-    const regal = await foundArticle.regal.fetch();
 
     await ArtikelService.updateArtikel(
       foundArticle.gwId,
@@ -32,7 +31,12 @@ export default function OverviewWithQuantity({
       1
     );
 
-    Alert.alert("Erfolg", "Menge erfolgreich geändert\nNeue Menge: " + menge);
+    Toast.show({
+      type: "success",
+      text1: "Artikel: " + foundArticle.beschreibung,
+      text2: "Neue Menge: " + foundArticle.menge,
+      position: "bottom",
+    });
   };
   return (
     <Pressable

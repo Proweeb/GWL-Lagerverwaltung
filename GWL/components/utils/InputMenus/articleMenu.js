@@ -7,9 +7,41 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 import { widthPercentageToDP } from "react-native-responsive-screen";
 import { useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
+import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 
 export default function ArticleMenu({ formData, setFormData }) {
   const navigation = useNavigation();
+
+  const [ablaufDatum, setAblaufDatum] = useState(new Date());
+
+  const showDatePicker = (currentDate, setDate, isStart) => {
+    DateTimePickerAndroid.open({
+      value: currentDate,
+      onChange: (event, selectedDate) => {
+        if (event.type === "set" && selectedDate) {
+          let adjustedDate = new Date(selectedDate);
+
+          if (isStart) {
+            // Set time to 00:00:00 for start date
+            adjustedDate.setHours(0, 0, 0, 0);
+          } else {
+            // Set time to 23:59:59 for end date
+            adjustedDate.setHours(23, 59, 59, 999);
+          }
+
+          setDate(adjustedDate);
+          setFormData((prevData) => ({
+            ...prevData,
+            ablaufdatum: adjustedDate.toISOString(), // ISO-Format speichern
+          }));
+          console.log("Selected Date:", formData.ablaufdatum.toISOString());
+        }
+      },
+      mode: "date",
+      display: "calendar",
+      backgroundColor: "black",
+    });
+  };
 
   return (
     <View
@@ -56,6 +88,7 @@ export default function ArticleMenu({ formData, setFormData }) {
           <Text style={{ color: "black", fontSize: 20 }}>[III]</Text>
         </TouchableOpacity>
       </View>
+
       <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>
         Beschreibung
       </Text>
@@ -65,6 +98,7 @@ export default function ArticleMenu({ formData, setFormData }) {
           setFormData((prevData) => ({ ...prevData, beschreibung: text }))
         }
       />
+
       <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>Menge</Text>
       <TextInputField
         inputMode={"numeric"}
@@ -73,15 +107,37 @@ export default function ArticleMenu({ formData, setFormData }) {
           setFormData((prevData) => ({ ...prevData, menge: text }))
         }
       />
+
       <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>
         Ablaufdatum
       </Text>
-      <TextInputField
-        value={formData.ablaufdatum}
-        onChangeText={(text) =>
-          setFormData((prevData) => ({ ...prevData, ablaufdatum: text }))
-        }
-      />
+
+      <TouchableOpacity
+        onPress={() => showDatePicker(ablaufDatum, setAblaufDatum, true)}
+        style={{ width: "100%" }}
+      >
+        <View pointerEvents="none">
+          <TextInputField
+            value={
+              formData.ablaufdatum
+                ? new Date(formData.ablaufdatum).toLocaleDateString("de-DE", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  })
+                : "" // Wenn kein Datum gesetzt ist, bleibt es leer
+            }
+            editable={false}
+            // onChangeText={(text) =>
+            //   setFormData((prevData) => ({
+            //     ...prevData,
+            //     ablaufdatum: text.toLocaleDateString, // ISO-Format speichern
+            //   }))
+            // }
+          />
+        </View>
+      </TouchableOpacity>
+
       <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>
         Mindestmenge
       </Text>
