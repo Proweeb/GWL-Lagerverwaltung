@@ -35,7 +35,7 @@ export default function OverviewWithQuantity({
       type: "success",
       text1: "Artikel: " + foundArticle.beschreibung,
       text2: "Neue Menge: " + foundArticle.menge,
-      position: "bottom",
+      position: "top",
     });
   };
   return (

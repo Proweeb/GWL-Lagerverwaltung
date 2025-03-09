@@ -53,7 +53,7 @@ export default function IndexScreen() {
           Toast.show({
             type: "error",
             text1: "Artikel",
-            text2: "GWID existiert bereits",
+            text2: "Existiert bereits",
             position: "bottom",
           });
         } else if (!existingRegal) {
@@ -77,7 +77,7 @@ export default function IndexScreen() {
             type: "success",
             text1: "Artikel: " + formData.beschreibung,
             text2: "Erfolgreich gespeichert",
-            position: "bottom",
+            position: "top",
           });
           navigation.navigate("Home");
         }

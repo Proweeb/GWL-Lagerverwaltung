@@ -11,6 +11,7 @@ import RegalService from "../../../database/datamapper/RegalHelper.js";
 import LogService from "../../../database/datamapper/LogHelper.js";
 import { useNavigation } from "@react-navigation/native";
 import Storagemenu from "./storageMenu.js";
+import Toast from "react-native-toast-message";
 
 export default function IndexScreen() {
   const navigation = useNavigation();
@@ -47,7 +48,12 @@ export default function IndexScreen() {
       !regalname ||
       !fachname
     ) {
-      Alert.alert("Fehler", "Bitte füllen Sie alle Felder aus.");
+      Toast.show({
+        type: "warning",
+        text1: "Artikel/Regal",
+        text2: "Bitte füllen Sie alle Felder aus",
+        position: "bottom",
+      });
       console.log(formData);
     } else {
       console.log("Alle Felder sind befüllt:", formData);
@@ -56,9 +62,19 @@ export default function IndexScreen() {
         const existingArtikel = await ArtikelService.getArtikelById(gwId);
         const existingRegal = await RegalService.getRegalById(regalId);
         if (existingArtikel) {
-          Alert.alert("Fehler", "GWID existiert bereits");
+          Toast.show({
+            type: "error",
+            text1: "Artikel",
+            text2: "Existiert bereits",
+            position: "bottom",
+          });
         } else if (existingRegal) {
-          Alert.alert("Fehler", "Regal existiert bereits");
+          Toast.show({
+            type: "error",
+            text1: "Regal",
+            text2: "Existiert bereits",
+            position: "bottom",
+          });
         } else {
           //console.log(existingRegal);
           console.log("hier");
@@ -78,7 +94,16 @@ export default function IndexScreen() {
           });
 
           console.log("Artikel gespeichert, GWID: " + gwId);
-          Alert.alert("Erfolg", "Regal und Artikel erfolgreich gespeichert!");
+          Toast.show({
+            type: "success",
+            text1:
+              "Artikel: " +
+              formData.beschreibung +
+              "   &   Regal: " +
+              formData.regalId,
+            text2: "Erfolgreich gespeichert",
+            position: "top",
+          });
           navigation.navigate("Home");
         }
       } catch (error) {
