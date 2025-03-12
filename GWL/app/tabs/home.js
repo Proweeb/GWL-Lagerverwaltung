@@ -6,6 +6,7 @@ import { styles } from "../../components/styles";
 import ActionGrid from "../../components/utils/ActionGrid";
 import InventoryWidget from "../../components/utils/InventoryWidget";
 import HomeWidget from "../../components/utils/HomeWidget/homeWidget";
+import NotificationsWidget from "../../components/oneTimeUse/NotifcationsWidget";
 
 const actions = [
   [
@@ -77,7 +78,9 @@ function HomeScreen() {
         containerFlex={0.7}
         title={"Benachrichtungen"}
         containerStyle={{ overflow: "hidden" }}
-      />
+      >
+        <NotificationsWidget />
+      </HomeWidget>
       <HomeWidget
         flexValue={0.95}
         containerFlex={1}
