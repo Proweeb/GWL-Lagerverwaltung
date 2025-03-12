@@ -42,11 +42,11 @@ export default function App() {
       });
     };
     //a();
-    Toast.show({
-      type: "success",
-      text1: "Artikel",
-      text2: "haha ",
-    });
+    // Toast.show({
+    //   type: "success",
+    //   text1: "Artikel",
+    //   text2: "haha ",
+    // });
   }, []);
 
   return (
