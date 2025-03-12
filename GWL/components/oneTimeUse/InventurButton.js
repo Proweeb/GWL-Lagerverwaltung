@@ -1,4 +1,3 @@
-import { on } from "@nozbe/watermelondb/QueryDescription";
 import React from "react";
 import { TouchableOpacity, Text } from "react-native";
 

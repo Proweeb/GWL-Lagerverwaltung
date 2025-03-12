@@ -310,7 +310,7 @@ export default function QrCodeScreen() {
 
   // QR code scanner logic
   const codeScanner = useCodeScanner({
-    codeTypes: [isBarcodeMode ? "ean-8" : "qr"], // Conditionally set QR or Barcode
+    codeTypes: [isBarcodeMode ? "code-128" : "qr"], // Conditionally set QR or Barcode
     onCodeScanned: (codes) => {
       for (const code of codes) {
         if (!scannedCodes.has(code.value)) {

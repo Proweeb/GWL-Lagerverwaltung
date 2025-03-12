@@ -1,32 +1,42 @@
 import React, { useState } from "react";
 import { View } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { useIsFocused } from "@react-navigation/native";
-import InventoryScreen from "./inventur";
-import InventurButton from "../../../components/oneTimeUse/InventurButton";
+import InventurStartScreen from "./InventurStartScreen";
+import InventurScreen from "./InventurScreen";
+import PreviewScreen from "./PreviewScreen";
 
 const Stack = createStackNavigator();
 
 export default function InventurNavigator() {
-  const [inventur, setInventur] = useState(false);
-  const isFocused = useIsFocused();
-
-  const startInventur = () => {
-    setInventur(true);
-  };
+  const [changedMenge, setChangedMenge] = useState({}); // Define state here
 
   return (
     <View style={{ flex: 1 }}>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="start" options={{ title: "hau" }}>
-          {(props) => (
-            <InventoryScreen
+      <Stack.Navigator
+        screenOptions={{ headerShown: false }}
+        initialRouteName="startinventur"
+      >
+        <Stack.Screen name="startinventur" component={InventurStartScreen} />
+        <Stack.Screen
+          name="inventurscreen"
+          children={(props) => (
+            <InventurScreen
               {...props}
-              inventur={inventur}
-              setInventur={setInventur}
+              changedMenge={changedMenge}
+              setChangedMenge={setChangedMenge}
             />
           )}
-        </Stack.Screen>
+        />
+        <Stack.Screen
+          name="preview"
+          children={(props) => (
+            <PreviewScreen
+              {...props}
+              changedMenge={changedMenge}
+              setChangedMenge={setChangedMenge}
+            />
+          )}
+        />
       </Stack.Navigator>
     </View>
   );
