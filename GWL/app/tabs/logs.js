@@ -153,7 +153,7 @@ const customStyles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 20,
     width: "80%",
-    backgroundColor: styles.white,
+    backgroundColor: styles.backgroundColor,
     borderRadius: 10,
     padding: 10,
     elevation: 5,
@@ -171,7 +171,7 @@ const customStyles = StyleSheet.create({
   },
   inputContainer: {
     width: "100%",
-    backgroundColor: styles.backgroundColor,
+    backgroundColor: styles.white,
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 15,
