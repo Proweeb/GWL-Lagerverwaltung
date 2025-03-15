@@ -7,6 +7,7 @@ import * as XLSX from "xlsx/xlsx.mjs";
 import RegalService from "../../../database/datamapper/RegalHelper";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper";
 import { styles } from "../../../components/styles";
+import Toast from "react-native-toast-message";
 
 XLSX.set_fs(FileSystem);
 
@@ -336,13 +337,19 @@ const ExportScreen = () => {
       // Share the file
       await Sharing.shareAsync(fileUri);
 
-      Alert.alert(
-        "Erfolg",
-        "Datei wurde erfolgreich exportiert und gespeichert!"
-      );
+      Toast.show({
+        type: "success",
+        text1: "Export",
+        text2: "Erfolgreich Exportiert ",
+      });
     } catch (error) {
       console.error("Fehler beim Export:", error);
-      Alert.alert("Fehler", "Export fehlgeschlagen.");
+
+      Toast.show({
+        type: "error",
+        text1: "Export",
+        text2: "Fehler beim Exportieren ",
+      });
     }
   };
 
