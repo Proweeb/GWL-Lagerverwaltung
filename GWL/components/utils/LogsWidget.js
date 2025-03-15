@@ -99,7 +99,7 @@ const customStyles = StyleSheet.create({
     padding: 10,
     backgroundColor: styles.backgroundColor,
     borderRadius: 10,
-    height: "100%",
+    flex: 1,
     elevation: 6,
   },
   logItem: {
@@ -108,6 +108,7 @@ const customStyles = StyleSheet.create({
     borderRadius: 10,
     elevation: 3,
     marginBottom: 8,
+    flex: 1,
   },
   time: { fontWeight: "bold", color: "#333" },
   beschreibung: { fontSize: 16, marginBottom: 5 },
