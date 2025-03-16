@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, FlatList } from "react-native";
 import { styles } from "../styles";
 import { FlashList } from "@shopify/flash-list";
+import ArtikelVorschauView from "./ArtikelVorschauViews";
 
 const ArtikelVorschau = ({ artikelList, changedMenge }) => {
   return (
@@ -139,66 +140,10 @@ const ArtikelVorschau = ({ artikelList, changedMenge }) => {
         <FlashList
           estimatedItemSize={37}
           data={artikelList}
-          keyExtractor={(item) => item.gwId.toString()}
+          keyExtractor={(item) => String(item.id)}
           contentContainerStyle={{ paddingBottom: 0 }}
           renderItem={({ item }) => (
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                width: "100%",
-                paddingHorizontal: 10,
-                marginBottom: 2,
-                height: 35,
-                borderBottomWidth: 2,
-                padding: 5,
-                borderBottomColor: "#ffffff",
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 12,
-                  color: "#333",
-                  textAlign: "left",
-                  width: "25%",
-                }}
-              >
-                {item.beschreibung}
-              </Text>
-              <Text
-                style={{
-                  fontSize: 12,
-                  color: "#AFAFAF",
-                  textAlign: "center",
-                  width: "25%",
-                }}
-              >
-                {item.gwId}
-              </Text>
-              <Text
-                style={{
-                  fontSize: 12,
-                  color: "#AFAFAF",
-                  textAlign: "center",
-                  width: "25%",
-                }}
-              >
-                {item.menge}
-              </Text>
-              <Text
-                style={{
-                  fontSize: 12,
-                  color: "#AFAFAF",
-                  textAlign: "center",
-                  width: "25%",
-                }}
-              >
-                {changedMenge[item.gwId] != null
-                  ? changedMenge[item.gwId]
-                  : item.menge}
-              </Text>
-            </View>
+            <ArtikelVorschauView item={item} changedMenge={changedMenge} />
           )}
         />
       </View>

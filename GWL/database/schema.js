@@ -1,7 +1,7 @@
 import { appSchema, tableSchema } from "@nozbe/watermelondb";
 
 export const lagerSchema = appSchema({
-  version: 3, // Incremented version due to schema changes
+  version: 5, // Incremented version due to schema changes
   tables: [
     tableSchema({
       name: "regale",
@@ -22,7 +22,6 @@ export const lagerSchema = appSchema({
         { name: "menge", type: "number" },
         { name: "mindestmenge", type: "number" },
         { name: "kunde", type: "string" },
-        { name: "regal_id", type: "string", isIndexed: true }, // Foreign key to regale
         { name: "ablaufdatum", type: "number", isOptional: true },
         { name: "created_at", type: "number" },
         { name: "updated_at", type: "number" },
@@ -37,6 +36,16 @@ export const lagerSchema = appSchema({
         { name: "menge", type: "number", isOptional: true },
         { name: "gesamt_menge", type: "number", isOptional: true },
         { name: "is_backup", type: "boolean" },
+        { name: "created_at", type: "number" },
+        { name: "updated_at", type: "number" },
+      ],
+    }),
+    tableSchema({
+      name: "artikel_besitzer",
+      columns: [
+        { name: "menge", type: "number" },
+        { name: "regal_id", type: "string", isOptional: true }, // Foreign key to regale
+        { name: "gw_id", type: "string", isOptional: true }, // Foreign key to artikel
         { name: "created_at", type: "number" },
         { name: "updated_at", type: "number" },
       ],

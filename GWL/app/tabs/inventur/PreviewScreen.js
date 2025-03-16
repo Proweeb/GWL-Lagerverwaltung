@@ -11,6 +11,7 @@ import ZurückButton from "../../../components/oneTimeUse/ZurückButton.js";
 import FertigButton from "../../../components/utils/FertigButton.js";
 import * as FileSystem from "expo-file-system";
 import * as MailComposer from "expo-mail-composer";
+import ArtikelOwnerService from "../../../database/datamapper/ArtikelBesitzerHelper.js";
 
 const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
   const navigation = useNavigation();
@@ -19,9 +20,10 @@ const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
   const [isScanning, setIsScanning] = useState(false);
 
   console.log(changedMenge);
+
   const fetchArtikel = async () => {
     try {
-      const artikelData = await ArtikelService.getAllArtikel();
+      const artikelData = await ArtikelOwnerService.getAllArtikelOwners();
       setArtikelList(artikelData);
     } catch (error) {
       console.error("Fehler beim Laden der Artikel:", error);

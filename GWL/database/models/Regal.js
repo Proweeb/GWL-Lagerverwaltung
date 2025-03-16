@@ -6,7 +6,7 @@ class Regal extends Model {
   static table = "regale";
 
   static associations = {
-    artikel: { type: "has_many", foreignKey: "regal_id" },
+    artikel_besitzer: { type: "has_many", foreignKey: "regal_id" },
     logs: { type: "has_many", foreignKey: "regal_id" },
   };
   @field("regal_id") regalId;
@@ -16,7 +16,7 @@ class Regal extends Model {
   @date("created_at") createdAt;
   @date("updated_at") updatedAt;
 
-  @children("artikel") artikel;
+  @children("artikel_besitzer") artikelBesitzer;
   @children("logs") logs;
 }
 

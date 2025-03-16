@@ -1,9 +1,10 @@
 import { database } from "../database";
 import { Q } from "@nozbe/watermelondb";
 import RegalService from "./RegalHelper";
+import ArtikelBesitzer from "../models/ArtikelBesitzer";
 
-async function createArtikel(artikelData) {
-  const regal = await RegalService.getRegalById(artikelData.regalId);
+async function createArtikel(artikelData, regalId) {
+  const regal = await RegalService.getRegalById(regalId);
   return database.write(async () => {
     const artikel = await database.get("artikel").create((artikel) => {
       artikel.gwId = artikelData.gwId;
@@ -13,11 +14,6 @@ async function createArtikel(artikelData) {
       artikel.mindestMenge = artikelData.mindestMenge;
       artikel.kunde = artikelData.kunde;
       artikel.ablaufdatum = artikelData.ablaufdatum;
-
-      // NEU 19.02
-      if (regal) {
-        artikel.regal.set(regal);
-      }
     });
     await database.get("logs").create((log) => {
       log.beschreibung = "Einlagern";
@@ -26,6 +22,12 @@ async function createArtikel(artikelData) {
       log.artikel.set(artikel);
       log.regal.set(regal);
       log.createdAt = Date.now();
+    });
+    await database.get("artikel_besitzer").create((artikelBesitzer) => {
+      artikelBesitzer.menge = Number(artikelData.menge);
+      artikelBesitzer.regal.set(regal);
+      artikelBesitzer.artikel.set(artikel);
+      artikelBesitzer.createdAt = Date.now();
     });
     return artikel;
   });
@@ -44,7 +46,7 @@ async function getArtikelById(gwid) {
 
   return artikel.length > 0 ? artikel[0] : null; // Return first item or null if not found
 }
-async function updateArtikel(gwid, updatedData, changeValue) {
+async function updateArtikel(gwid, updatedData) {
   return await database.write(async () => {
     const artikel = await database
       .get("artikel")
@@ -55,7 +57,7 @@ async function updateArtikel(gwid, updatedData, changeValue) {
       return;
     }
     let text;
-    if (changeValue === -1) {
+    if (updatedData.menge < 0) {
       text = "Entnehmen";
     } else {
       text = "Nachfüllen";
@@ -63,7 +65,7 @@ async function updateArtikel(gwid, updatedData, changeValue) {
     await database.get("logs").create((log) => {
       log.beschreibung = text;
       log.menge = Number(updatedData.menge);
-      log.gesamtMenge = Number(updatedData.menge);
+      log.gesamtMenge = Number(artikel[0].menge) + Number(updatedData.menge);
       log.artikel.set(artikel[0]);
       log.createdAt = Date.now();
     });
@@ -82,7 +84,7 @@ async function updateArtikel(gwid, updatedData, changeValue) {
         art.beschreibung = updatedData.beschreibung;
       }
       if (updatedData.menge !== null && updatedData.menge !== undefined) {
-        art.menge = updatedData.menge;
+        art.menge += updatedData.menge;
       }
       if (
         updatedData.mindestMenge !== null &&
@@ -98,11 +100,6 @@ async function updateArtikel(gwid, updatedData, changeValue) {
         updatedData.ablaufdatum !== undefined
       ) {
         art.ablaufdatum = updatedData.ablaufdatum;
-      }
-
-      // Ensure regalId is only updated if it is valid
-      if (updatedData.regalId !== null && updatedData.regalId !== undefined) {
-        art.regal.set(updatedData.regalId);
       }
     });
     return artikel[0];
@@ -122,10 +119,6 @@ async function deleteArtikel(gwid) {
   });
 }
 
-async function getArtikelByRegalId(regal_id) {
-  const regal = await RegalService.getRegalById(regal_id);
-  return await regal.artikel.fetch();
-}
 async function deleteAllData() {
   return await database.write(async () => {
     const batchOperations = [];
@@ -158,7 +151,6 @@ const ArtikelService = {
   updateArtikel,
   deleteArtikel,
   deleteAllData,
-  getArtikelByRegalId,
 };
 
 export default ArtikelService;

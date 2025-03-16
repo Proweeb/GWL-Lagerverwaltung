@@ -7,6 +7,7 @@ import { lagerSchema } from "./schema";
 import Regal from "./models/Regal";
 import Artikel from "./models/Artikel";
 import Log from "./models/Log";
+import ArtikelBesitzer from "./models/ArtikelBesitzer.js";
 
 // First, create the adapter to the underlying database:
 const adapter = new SQLiteAdapter({
@@ -25,5 +26,6 @@ export const database = new Database({
     Artikel, // Your model classes here
     Regal,
     Log,
+    ArtikelBesitzer,
   ],
 });

@@ -1,20 +1,36 @@
 import { database } from "../database/database";
+import ArtikelBesitzerHelper from "../database/datamapper/ArtikelBesitzerHelper";
+import ArtikelService from "../database/datamapper/ArtikelHelper";
 
 export async function testInsertAndFetch() {
   await database.write(async () => {
     // Delete all existing records from "artikel" and "logs"
     const allArtikel = await database.get("artikel").query().fetch();
     const allLogs = await database.get("logs").query().fetch();
+    const allRegale = await database.get("regale").query().fetch();
+    const allArtikelBesitzer = await database
+      .get("artikel_besitzer")
+      .query()
+      .fetch();
 
     await database.batch(
       ...allArtikel.map((artikel) => artikel.prepareDestroyPermanently()),
-      ...allLogs.map((log) => log.prepareDestroyPermanently())
+      ...allLogs.map((log) => log.prepareDestroyPermanently()),
+      ...allRegale.map((regal) => regal.prepareDestroyPermanently()),
+      ...allArtikelBesitzer.map((artikelbesitzer) =>
+        artikelbesitzer.prepareDestroyPermanently()
+      )
     );
 
     const regal = await database.get("regale").create((regal) => {
       regal.fachName = "10";
       regal.regalName = "A5";
       regal.regalId = "134";
+    });
+    const regal2 = await database.get("regale").create((regal) => {
+      regal.fachName = "10";
+      regal.regalName = "A5";
+      regal.regalId = "135";
     });
     // Create 3 artikel records
     const artikelPromises = [];
@@ -28,7 +44,6 @@ export async function testInsertAndFetch() {
           artikel.mindestMenge = 10;
           artikel.kunde = "Test Kunde";
           artikel.ablaufdatum = Date.now() + 0 * 24 * 60 * 60 * 1000;
-          artikel.regal.set(regal);
         })
       );
     }
@@ -82,4 +97,18 @@ export async function testInsertAndFetch() {
       );
     }
   });
+  for (let i = 30; i < 60; i++) {
+    await ArtikelService.createArtikel(
+      {
+        gwId: `${i + 1}`,
+        firmenId: `firmen456_${i + 1}`,
+        beschreibung: `Kiwi ${i + 1}`,
+        menge: 5,
+        mindestMenge: 10,
+        kunde: "Test Kunde",
+        ablaufdatum: Date.now() + 0 * 24 * 60 * 60 * 1000,
+      },
+      "134"
+    );
+  }
 }

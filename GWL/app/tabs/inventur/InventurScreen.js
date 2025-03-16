@@ -7,6 +7,7 @@ import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import SearchBar from "../../../components/utils/SearchBar.js";
 import WeiterButton from "../../../components/oneTimeUse/WeiterButton.js";
+import ArtikelOwnerService from "../../../database/datamapper/ArtikelBesitzerHelper.js";
 const InventurScreen = ({ setChangedMenge, changedMenge }) => {
   const navigation = useNavigation();
   const [gwId, setGwId] = useState("");
@@ -15,7 +16,7 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
 
   const fetchArtikel = async () => {
     try {
-      const artikelData = await ArtikelService.getAllArtikel();
+      const artikelData = await ArtikelOwnerService.getAllArtikelOwners();
       setArtikelList(artikelData);
     } catch (error) {
       console.error("Fehler beim Laden der Artikel:", error);

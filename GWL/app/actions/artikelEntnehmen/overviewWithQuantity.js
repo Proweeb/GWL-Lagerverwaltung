@@ -8,6 +8,7 @@ import { Pressable } from "react-native";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper";
 import LogService from "../../../database/datamapper/LogHelper";
 import Toast from "react-native-toast-message";
+import ArtikelOwnerService from "../../../database/datamapper/ArtikelBesitzerHelper";
 
 export default function OverviewWithQuantity({
   menge,
@@ -67,13 +68,12 @@ export default function OverviewWithQuantity({
     }
 
     console.log(foundArticle);
-
-    await ArtikelService.updateArtikel(
-      foundArticle.gwId,
+    //Regal Id muss hier noch rein gehören also beim nachfüllen und entnehmen braucht man die RegalID
+    await ArtikelOwnerService.updateArtikelBesitzerByGwIdAndRegalId(
       {
-        menge: menge,
-      },
-      -1
+        menge: nachfüllmenge,
+      }, //hier noch regalID
+      foundArticle.gwId
     );
 
     Toast.show({

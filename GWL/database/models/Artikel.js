@@ -10,7 +10,7 @@ class Artikel extends Model {
   static table = "artikel";
 
   static associations = {
-    regale: { type: "belongs_to", key: "regal_id" },
+    artikel_besitzer: { type: "has_many", foreignKey: "gw_id" },
     logs: { type: "has_many", foreignKey: "gw_id" },
   };
 
@@ -25,7 +25,7 @@ class Artikel extends Model {
   @date("created_at") createdAt;
   @date("updated_at") updatedAt;
 
-  @relation("regale", "regal_id") regal;
+  @children("artikel_besitzer") artikelBesitzer;
   @children("logs") logs;
 
   get status() {

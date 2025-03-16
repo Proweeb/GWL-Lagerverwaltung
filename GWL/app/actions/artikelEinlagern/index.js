@@ -65,14 +65,16 @@ export default function IndexScreen() {
           });
         } else {
           console.log(existingRegal);
-          await ArtikelService.createArtikel({
-            gwId,
-            beschreibung,
-            menge: Number(menge),
-            ablaufdatum,
-            mindestMenge: Number(mindestmenge),
-            regalId,
-          });
+          await ArtikelService.createArtikel(
+            {
+              gwId,
+              beschreibung,
+              menge: Number(menge),
+              ablaufdatum,
+              mindestMenge: Number(mindestmenge),
+            },
+            String(regalId)
+          );
           Toast.show({
             type: "success",
             text1: "Artikel: " + formData.beschreibung,

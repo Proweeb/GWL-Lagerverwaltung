@@ -1,9 +1,51 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TextInput } from "react-native";
-
+import { database } from "../../database/database";
 import { styles } from "../../components/styles";
+import { Q } from "@nozbe/watermelondb";
 
 const InventoryItem = ({ item, changedMenge, setChangedMenge }) => {
+  const [gwId, setGwId] = useState("");
+  const [beschreibung, setBeschreibung] = useState("");
+
+  useEffect(() => {
+    const fetchArtikel = async () => {
+      try {
+        const artikel = await database
+          .get("artikel")
+          .query(Q.where("id", item._raw.gw_id))
+          .fetch();
+
+        if (artikel.length > 0) {
+          setGwId(String(artikel[0].gwId));
+        }
+      } catch (error) {
+        console.error("Error fetching artikel:", error);
+      }
+    };
+
+    fetchArtikel();
+  }, [item]);
+
+  useEffect(() => {
+    const fetchArtikel = async () => {
+      try {
+        const artikel = await database
+          .get("artikel")
+          .query(Q.where("id", item._raw.gw_id))
+          .fetch();
+
+        if (artikel.length > 0) {
+          setBeschreibung(String(artikel[0].beschreibung));
+        }
+      } catch (error) {
+        console.error("Error fetching artikel:", error);
+      }
+    };
+
+    fetchArtikel();
+  }, [item]);
+
   return (
     <View style={{ alignItems: "center" }}>
       <View
@@ -16,13 +58,15 @@ const InventoryItem = ({ item, changedMenge, setChangedMenge }) => {
           margin: 20,
         }}
       >
-        <Text style={styles.subHeader}>{item.beschreibung}</Text>
-        <Text style={styles.subHeader}>ID: {item.gwId}</Text>
+        <Text style={styles.subHeader}>{beschreibung || "Laden..."}</Text>
+        <Text style={styles.subHeader}>ID: {gwId || "Laden..."}</Text>
         <Text style={styles.subHeader}>Soll: {item.menge}</Text>
+
         <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
           <View style={{ width: "20%" }}>
             <Text style={styles.subHeader}>Haben:</Text>
           </View>
+
           <View
             style={{
               alignItems: "flex-start",
@@ -37,11 +81,11 @@ const InventoryItem = ({ item, changedMenge, setChangedMenge }) => {
             <TextInput
               style={[styles.subHeader, { marginBottom: 0, width: "100%" }]}
               keyboardType="numeric"
-              defaultValue={changedMenge[item.gwId] || ""}
+              value={changedMenge[item._raw.gw_id] || ""}
               onChangeText={(text) => {
                 setChangedMenge((prev) => ({
                   ...prev,
-                  [item.gwId]: text,
+                  [item._raw.gw_id]: text, // Use `_raw.gw_id` for correct key
                 }));
               }}
             />
