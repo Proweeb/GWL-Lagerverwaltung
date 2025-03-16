@@ -7,6 +7,7 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 import { widthPercentageToDP } from "react-native-responsive-screen";
 import { useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function MiniStorageMenu({ formData, setFormData }) {
   const navigation = useNavigation();
@@ -37,7 +38,7 @@ export default function MiniStorageMenu({ formData, setFormData }) {
 
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate("Scan", {
+            navigation.navigate("Scan\\Barcode", {
               onScan: (code) => {
                 setFormData((prevData) => ({ ...prevData, regalId: code }));
               },
@@ -54,7 +55,11 @@ export default function MiniStorageMenu({ formData, setFormData }) {
             elevation: 5,
           }}
         >
-          <Text style={{ color: "black", fontSize: 20 }}>[III]</Text>
+          <MaterialCommunityIcons
+            name={"barcode-scan"}
+            size={25}
+            color={"black"}
+          />
         </TouchableOpacity>
       </View>
     </View>

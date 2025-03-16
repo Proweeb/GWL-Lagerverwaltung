@@ -16,6 +16,8 @@ import BottomTabNavigator from "./tabs/_layout";
 import AktionenNavigator from "./actions/_layout";
 
 import { toastConfig } from "../components/toastConfig";
+import BarcodeScreen from "./scan/barcode";
+import QrCodeScreen from "./scan/qrcode";
 
 // Create Stack & Tab Navigators
 const Stack = createStackNavigator();
@@ -73,7 +75,28 @@ function MainStack() {
       }}
     >
       <Stack.Screen name="Tabs" component={BottomTabNavigator} />
-      <Stack.Screen name="Scan" component={ScanScreen} />
+      <Stack.Screen
+        name="Scan\Barcode"
+        component={BarcodeScreen}
+        options={{
+          title: "Barcode",
+          headerShown: true,
+          statusBarBackgroundColor: styles.backgroundColor,
+          statusBarStyle: "dark",
+          headerTitleStyle: styles.header,
+        }}
+      />
+      <Stack.Screen
+        name="Scan\Qrcode"
+        component={QrCodeScreen}
+        options={{
+          title: "Qrcode",
+          headerShown: true,
+          statusBarBackgroundColor: styles.backgroundColor,
+          statusBarStyle: "dark",
+          headerTitleStyle: styles.header,
+        }}
+      />
       <Stack.Screen name="Actions" component={AktionenNavigator} />
     </Stack.Navigator>
   );

@@ -8,6 +8,7 @@ import { widthPercentageToDP } from "react-native-responsive-screen";
 import { useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function ArticleMenu({ formData, setFormData }) {
   const navigation = useNavigation();
@@ -68,7 +69,7 @@ export default function ArticleMenu({ formData, setFormData }) {
 
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate("Scan", {
+            navigation.navigate("Scan\\Qrcode", {
               onScan: (code) => {
                 setFormData((prevData) => ({ ...prevData, gwId: code }));
               },
@@ -85,7 +86,12 @@ export default function ArticleMenu({ formData, setFormData }) {
             elevation: 5,
           }}
         >
-          <Text style={{ color: "black", fontSize: 20 }}>[III]</Text>
+          {/* <Text style={{ color: "black", fontSize: 20 }}>[III]</Text> */}
+          <MaterialCommunityIcons
+            name={"qrcode-scan"}
+            size={25}
+            color={"black"}
+          />
         </TouchableOpacity>
       </View>
 

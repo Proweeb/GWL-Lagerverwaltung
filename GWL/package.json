@@ -49,7 +49,8 @@
     "react-native-toast-message": "^2.2.1",
     "react-native-vision-camera": "^4.6.3",
     "xlsx": "^0.18.5",
-    "@shopify/flash-list": "1.6.4"
+    "@shopify/flash-list": "1.6.4",
+    "expo-sharing": "~12.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

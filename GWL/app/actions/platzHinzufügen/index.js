@@ -9,7 +9,7 @@ import {
 import React, { Component, useState } from "react";
 import RegalService from "../../../database/datamapper/RegalHelper";
 import { useNavigation } from "@react-navigation/native";
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { styles } from "../../../components/styles";
 import TextInputField from "../../../components/utils/TextInputs/textInputField";
 import { column } from "@nozbe/watermelondb/QueryDescription";
@@ -110,7 +110,7 @@ export default function IndexScreen() {
 
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate("Scan", {
+            navigation.navigate("Scan\\Barcode", {
               onScan: (code) => {
                 setCode(code);
               },
@@ -131,7 +131,11 @@ export default function IndexScreen() {
             shadowRadius: 3,
           }}
         >
-          <Text style={{ color: "black", fontSize: 20 }}>[III]</Text>
+          <MaterialCommunityIcons
+            name={"barcode-scan"}
+            size={25}
+            color={"black"}
+          />
         </TouchableOpacity>
       </View>
       <View style={{ marginTop: 50, alignItems: "center" }}>

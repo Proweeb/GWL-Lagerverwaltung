@@ -9,6 +9,7 @@ import { useNavigation } from "@react-navigation/native";
 import Feather from "@expo/vector-icons/Feather";
 import ArticleTextInput from "../artikelNachfüllen/articleTextInput.js";
 import { Alert } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function Storagemenu({ formData, setFormData }) {
   const navigation = useNavigation();
@@ -57,7 +58,7 @@ export default function Storagemenu({ formData, setFormData }) {
 
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate("Scan", {
+            navigation.navigate("Scan\\Barcode", {
               onScan: (code) => {
                 setFormData((prevData) => ({ ...prevData, regalId: code }));
               },
@@ -74,7 +75,11 @@ export default function Storagemenu({ formData, setFormData }) {
             elevation: 5,
           }}
         >
-          <Text style={{ color: "black", fontSize: 20 }}>[III]</Text>
+          <MaterialCommunityIcons
+            name={"barcode-scan"}
+            size={25}
+            color={"black"}
+          />
         </TouchableOpacity>
       </View>
     </View>

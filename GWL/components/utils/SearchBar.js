@@ -55,7 +55,7 @@ const SearchBar = ({ gwId, setGwId, handleSearch, setIsScanning }) => {
             onPress={() => {
               setIsScanning(true);
               setTimeout(() => {
-                navigation.navigate("Scan", {
+                navigation.navigate("Scan\\Qrcode", {
                   onScan: (code) => {
                     setGwId(code);
                   },
@@ -73,7 +73,11 @@ const SearchBar = ({ gwId, setGwId, handleSearch, setIsScanning }) => {
               elevation: 3,
             }}
           >
-            <Text style={{ color: "black", fontSize: 20 }}>[III]</Text>
+            <MaterialCommunityIcons
+              name={"qrcode-scan"}
+              size={25}
+              color={"black"}
+            />
           </TouchableOpacity>
         )}
 

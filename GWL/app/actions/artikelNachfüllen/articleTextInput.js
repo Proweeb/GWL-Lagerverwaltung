@@ -11,6 +11,7 @@ import { Alert } from "react-native";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper.js";
 import RegalService from "../../../database/datamapper/RegalHelper.js";
 import Toast from "react-native-toast-message";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function ArticleTextInput({
   gwId,
@@ -88,7 +89,7 @@ export default function ArticleTextInput({
 
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate("Scan", {
+            navigation.navigate("Scan\\Qrcode", {
               onScan: (code) => {
                 setGwId(code);
               },
@@ -105,7 +106,11 @@ export default function ArticleTextInput({
             elevation: 5,
           }}
         >
-          <Text style={{ color: "black", fontSize: 20 }}>[III]</Text>
+          <MaterialCommunityIcons
+            name={"qrcode-scan"}
+            size={25}
+            color={"black"}
+          />
         </TouchableOpacity>
 
         <TouchableOpacity
