@@ -1,67 +1,98 @@
-import { View, Text } from "react-native";
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { FlashList } from "@shopify/flash-list";
+import { styles } from "../styles";
+import ArtikelService from "../../database/datamapper/ArtikelHelper";
 
 export default function NotificationsWidget() {
+  const [expiredArticles, setExpiredArticles] = React.useState([]);
+
+  React.useEffect(() => {
+    const fetchExpiredArticles = async () => {
+      const allArticles = await ArtikelService.getAllArtikel();
+      const filteredArticles = allArticles.filter((article) =>
+        ["Kritisch", "Abgelaufen", "Warnung"].includes(article.isExpired)
+      );
+      setExpiredArticles(filteredArticles);
+    };
+
+    fetchExpiredArticles();
+  }, []);
+
+  // Function to determine background color based on the status
+  const getBackgroundColor = (status) => {
+    const colors = {
+      Warnung: styles.lightYellow,
+      Abgelaufen: "black",
+      Kritisch: styles.lightRed,
+    };
+    const borderColors = {
+      Warnung: "orange",
+      Abgelaufen: "violet",
+      Kritisch: styles.red,
+    };
+    return {
+      backgroundColor: colors[status],
+      borderColor: borderColors[status],
+    };
+  };
+
+  const getTextColor = (status) => {
+    const colors = {
+      Warnung: "orange",
+      Abgelaufen: "violet",
+      Kritisch: styles.darkRed,
+    };
+    return { color: colors[status] };
+  };
+
+  const getArticleTextColor = (status) => {
+    const colors = {
+      Warnung: styles.textColor,
+      Abgelaufen: "white",
+      Kritisch: styles.textColor,
+    };
+    return { color: colors[status] };
+  };
+
   return (
-<<<<<<< Updated upstream
-    <View
-      style={{ backgroundColor: "red", width: "100%", height: "100%" }}
-    ></View>
-  );
-}
-=======
     <View style={notificationstyle.container}>
       {expiredArticles.length === 0 ? (
         <Text style={notificationstyle.noNotifications}>
           Keine Benachrichtigungen
         </Text>
       ) : (
-        <View
-          style={{
-            flex: 1,
-            width: "100%",
-            //elevation: 5,
-            //backgroundColor: styles.backgroundColor,
-            borderRadius: 10,
-          }}
-        >
-          <FlashList
-            data={expiredArticles}
-            estimatedItemSize={120}
-            // showsHorizontalScrollIndicator={true}
-            showsVerticalScrollIndicator={false}
-            keyExtractor={(item) => item.id}
-            ItemSeparatorComponent={() => <View style={{}}></View>}
-            renderItem={({ item }) => (
-              <View
+        <FlashList
+          data={expiredArticles}
+          estimatedItemSize={120}
+          showsVerticalScrollIndicator={false}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View
+              style={[
+                notificationstyle.notificationItem,
+                getBackgroundColor(item.isExpired),
+              ]}
+            >
+              <Text
                 style={[
-                  notificationstyle.notificationItem,
-                  getBackgroundColor(item.isExpired),
+                  notificationstyle.articleText,
+                  getArticleTextColor(item.isExpired),
                 ]}
               >
-                <Text
-                  style={[
-                    notificationstyle.articleText,
-                    getArticleTextColor(item.isExpired),
-                  ]}
-                >
-                  {item.beschreibung}
-                </Text>
-                <Text
-                  style={[
-                    notificationstyle.statusText,
-                    getTextColor(item.isExpired),
-                  ]}
-                >
-                  {item.ablaufdatum.toLocaleString("de-DE", {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                  })}
-                </Text>
-              </View>
-            )}
-          />
-        </View>
+                {item.beschreibung}
+              </Text>
+              <Text
+                style={[
+                  notificationstyle.statusText,
+                  getTextColor(item.isExpired),
+                ]}
+              >
+                {item.isExpired}
+              </Text>
+            </View>
+          )}
+        />
       )}
     </View>
   );
@@ -108,4 +139,3 @@ const notificationstyle = StyleSheet.create({
     flex: 1,
   },
 });
->>>>>>> Stashed changes
