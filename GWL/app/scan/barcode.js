@@ -68,7 +68,7 @@ export default function BarcodeScreen() {
 
   // QR Code Scanner Logic
   const codeScanner = useCodeScanner({
-    codeTypes: ["code-128"],
+    codeTypes: ["qr"],
     onCodeScanned: (codes) => {
       if (!showClearButton) {
         // Prevent scanning when a code is displayed
