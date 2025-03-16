@@ -20,8 +20,8 @@ class Artikel extends Model {
   @field("menge") menge;
   @field("mindestmenge") mindestMenge;
   @field("kunde") kunde;
-  @field("ablaufdatum") ablaufdatum;
 
+  @date("ablaufdatum") ablaufdatum;
   @date("created_at") createdAt;
   @date("updated_at") updatedAt;
 
@@ -39,6 +39,20 @@ class Artikel extends Model {
     if (menge === 0) return "out"; // Explicit check for zero
     if (menge <= mindestMenge) return "low"; // Check if menge is less than or equal to mindestMenge
     return "ok"; // Default case
+  }
+
+  get isExpired() {
+    if (!this.ablaufdatum) return "Valid";
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Normalize today's date to start of the day
+    const expiryDate = new Date(this.ablaufdatum);
+    const timeDiff = expiryDate.getTime() - today.getTime(); // Difference in milliseconds
+    const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24)); // Convert to days
+    if (daysRemaining <= 0) return "Abgelaufen"; // Past expiration date
+    if (daysRemaining <= 7) return "Kritisch"; // Less than or equal to 7 days
+    if (daysRemaining <= 14) return "Warnung"; // Less than or equal to 14 days
+
+    return "Valid"; // More than 14 days remaining
   }
 }
 

@@ -27,7 +27,7 @@ export async function testInsertAndFetch() {
           artikel.menge = 5;
           artikel.mindestMenge = 10;
           artikel.kunde = "Test Kunde";
-          artikel.ablaufdatum = Date.now();
+          artikel.ablaufdatum = Date.now() + 0 * 24 * 60 * 60 * 1000;
           artikel.regal.set(regal);
         })
       );

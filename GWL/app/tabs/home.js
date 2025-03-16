@@ -77,7 +77,7 @@ function HomeScreen() {
         flexValue={0.9}
         containerFlex={0.7}
         title={"Benachrichtungen"}
-        containerStyle={{ overflow: "hidden" }}
+        containerStyle={[{ alignItems: "center" }]}
       >
         <NotificationsWidget />
       </HomeWidget>
