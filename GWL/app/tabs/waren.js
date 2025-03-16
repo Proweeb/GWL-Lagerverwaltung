@@ -24,6 +24,7 @@ const WarenScreen = () => {
 
   useEffect(() => {
     LoadArtikel();
+    OrderArtikel();
   }, []);
 
   const showDatePicker = (currentDate, setDate) => {
@@ -39,7 +40,7 @@ const WarenScreen = () => {
     });
   };
 
-  async function orderArtikel() {
+  async function OrderArtikel() {
     try {
       const regaleundso = await RegalService.getAllRegal();
       console.log("Regale:", regaleundso);
@@ -141,51 +142,9 @@ const WarenScreen = () => {
 
   return (
     <View style={{ flex: 1, padding: 10 }}>
-      {/* Date Picker */}
-      <TouchableOpacity onPress={() => showDatePicker(fromDate, setFromDate)}>
-        <TextInput
-          style={{
-            marginTop: 10,
-            height: 40,
-            borderWidth: 1,
-            borderRadius: 10,
-            paddingHorizontal: 10,
-            textAlign: "center",
-            backgroundColor: "white",
-          }}
-          value={fromDate.toDateString()}
-          editable={false}
-        />
-      </TouchableOpacity>
+      
 
-      <TouchableOpacity onPress={() => showDatePicker(toDate, setToDate)}>
-        <TextInput
-          style={{
-            marginTop: 10,
-            height: 40,
-            borderWidth: 1,
-            borderRadius: 10,
-            paddingHorizontal: 10,
-            textAlign: "center",
-            backgroundColor: "white",
-          }}
-          value={toDate.toDateString()}
-          editable={false}
-        />
-      </TouchableOpacity>
-
-      {/* Buttons */}
-      <TouchableOpacity style={styles.buttonWhite} onPress={LoadArtikel}>
-        <Text numberOfLines={1} style={styles.buttonText}>
-          LoadArtikel
-        </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.buttonWhite} onPress={orderArtikel}>
-        <Text numberOfLines={1} style={styles.buttonText}>
-          orderArtikel
-        </Text>
-      </TouchableOpacity>
+      
 
       {/* Table */}
       <View style={localStyles.table}>
