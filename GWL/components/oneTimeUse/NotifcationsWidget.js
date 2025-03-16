@@ -64,9 +64,8 @@ export default function NotificationsWidget() {
       ) : (
         <FlashList
           data={expiredArticles}
-          horizontal
           estimatedItemSize={120}
-          showsHorizontalScrollIndicator={true}
+          showsVerticalScrollIndicator={false}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <View
@@ -77,7 +76,7 @@ export default function NotificationsWidget() {
             >
               <Text
                 style={[
-                  notificationstyle.statusText,
+                  notificationstyle.articleText,
                   getArticleTextColor(item.isExpired),
                 ]}
               >
@@ -116,26 +115,27 @@ const notificationstyle = StyleSheet.create({
   },
   notificationItem: {
     padding: 10,
-    marginRight: 10,
     borderRadius: 8,
+    marginVertical: 10,
     alignItems: "center",
     flexDirection: "row",
-    justifyContent: "space-evenly",
-    width: 200,
+    justifyContent: "space-around",
+    flex: 1,
     borderColor: styles.red,
     borderWidth: 1,
   },
   articleText: {
-    fontSize: 14,
-    flex: 0.5,
-    textAlign: "right",
-    marginRight: 5,
+    fontSize: 18,
+    flex: 1,
+    textAlign: "center",
+
     color: styles.textColor,
   },
   statusText: {
-    fontSize: 14,
+    fontSize: 18,
     color: styles.darkRed,
-    flex: 0.5,
-    marginLeft: 5,
+    textAlign: "center",
+
+    flex: 1,
   },
 });
