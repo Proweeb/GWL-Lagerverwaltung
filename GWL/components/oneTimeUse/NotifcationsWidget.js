@@ -62,37 +62,43 @@ export default function NotificationsWidget() {
           Keine Benachrichtigungen
         </Text>
       ) : (
-        <FlashList
-          data={expiredArticles}
-          estimatedItemSize={120}
-          showsVerticalScrollIndicator={false}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View
-              style={[
-                notificationstyle.notificationItem,
-                getBackgroundColor(item.isExpired),
-              ]}
-            >
-              <Text
+        <View style={{ width: "100%", height: "100%" }}>
+          <FlashList
+            data={expiredArticles}
+            estimatedItemSize={120}
+            showsVerticalScrollIndicator={true}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <View
                 style={[
-                  notificationstyle.articleText,
-                  getArticleTextColor(item.isExpired),
+                  notificationstyle.notificationItem,
+                  getBackgroundColor(item.isExpired),
                 ]}
               >
-                {item.beschreibung}
-              </Text>
-              <Text
-                style={[
-                  notificationstyle.statusText,
-                  getTextColor(item.isExpired),
-                ]}
-              >
-                {item.isExpired}
-              </Text>
-            </View>
-          )}
-        />
+                <Text
+                  style={[
+                    notificationstyle.articleText,
+                    getArticleTextColor(item.isExpired),
+                  ]}
+                >
+                  {item.beschreibung}
+                </Text>
+                <Text
+                  style={[
+                    notificationstyle.statusText,
+                    getTextColor(item.isExpired),
+                  ]}
+                >
+                  {new Date(item.ablaufdatum).toLocaleString("de-DE", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  })}
+                </Text>
+              </View>
+            )}
+          />
+        </View>
       )}
     </View>
   );
@@ -116,7 +122,7 @@ const notificationstyle = StyleSheet.create({
   notificationItem: {
     padding: 10,
     borderRadius: 8,
-    marginVertical: 10,
+    marginVertical: 5,
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-around",

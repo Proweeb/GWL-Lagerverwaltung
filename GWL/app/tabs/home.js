@@ -77,9 +77,12 @@ function HomeScreen() {
         flexValue={0.9}
         containerFlex={0.7}
         title={"Benachrichtungen"}
-        containerStyle={[{ alignItems: "center" }]}
+        containerStyle={[{ alignItems: "center", flex: 1 }]}
       >
-        <NotificationsWidget />
+        {/* <NotificationsWidget /> */}
+        <View style={{ flex: 1, width: "100%" }}>
+          <NotificationsWidget />
+        </View>
       </HomeWidget>
       <HomeWidget
         flexValue={0.95}

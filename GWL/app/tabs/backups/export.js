@@ -297,7 +297,7 @@ const ExportScreen = () => {
       // Fetch Regal data for each Artikel (this is the async part)
       const artikelSheetData = await Promise.all(
         artikel.map(async (a) => {
-          const regal = await a.regal.fetch(); // Fetch Regal for each Artikel
+          // const regal = await a.regal.fetch(); // Fetch Regal for each Artikel
           return {
             GWID: a.gwId,
             "Firmen ID": a.firmenId,
@@ -305,7 +305,7 @@ const ExportScreen = () => {
             Menge: a.menge,
             Mindestmenge: a.mindestMenge,
             Kunde: a.kunde,
-            "Regal ID": regal.regalId, // Link to Regal (use `id` from Regal)
+            "Regal ID": "5", // Link to Regal (use `id` from Regal)
             Ablaufdatum: a.ablaufdatum
               ? new Date(a.ablaufdatum).toLocaleDateString()
               : "",
