@@ -13,6 +13,13 @@ import { database } from "../../database/database";
 import { Q } from "@nozbe/watermelondb";
 import { useIsFocused } from "@react-navigation/native";
 import HomeWidget from "../../components/utils/HomeWidget/homeWidget";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+
+import * as XLSX from "xlsx";
+import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
+import LogService from "../../database/datamapper/LogHelper";
+import Toast from "react-native-toast-message";
 
 export default function LogsScreen() {
   const [startDate, setStartDate] = useState(new Date());
@@ -90,6 +97,85 @@ export default function LogsScreen() {
     });
   };
 
+  const exportLogs = async () => {
+    try {
+      // Fetch logs from the database
+      const logsQuery = await LogService.getAllLogs();
+
+      if (!logsQuery.length) {
+        Alert.alert("Fehler", "Keine Logs zum Exportieren vorhanden.");
+        return;
+      }
+
+      // Format logs data with async fetching of related Artikel and Regal
+      const logsData = await Promise.all(
+        logsQuery.map(async (log) => {
+          let artikel, regal;
+
+          if (!log.isBackup) {
+            artikel = await log.artikel.fetch();
+            regal = await log.regal.fetch();
+          }
+
+          return {
+            Beschreibung: log.beschreibung,
+            Menge: log.menge,
+            "Gesamt Menge": log.gesamtMenge,
+            "Regal Name": log.isBackup
+              ? log.regal_id
+              : regal
+              ? regal.regalId
+              : "",
+            "Artikel Name": log.isBackup
+              ? log.gwId
+              : artikel
+              ? artikel.gwId
+              : "", // Artikel Name
+            "Erstellt am": new Date(log.createdAt).toLocaleDateString(),
+          };
+        })
+      );
+
+      // Create worksheet
+      const logsSheet = XLSX.utils.json_to_sheet(logsData);
+
+      // Create workbook and append sheet
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, logsSheet, "Trackingliste");
+
+      // Define export file name
+      const exportFileName = `trackingliste_${new Date()
+        .toISOString()
+        .slice(0, 10)}.xlsx`;
+      const fileUri = FileSystem.documentDirectory + exportFileName;
+
+      // Convert workbook to base64 and save
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "base64",
+      });
+      await FileSystem.writeAsStringAsync(fileUri, excelBuffer, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      // Share the file
+      await Sharing.shareAsync(fileUri);
+
+      Toast.show({
+        type: "success",
+        text1: "Export",
+        text2: "Logs erfolgreich exportiert",
+      });
+    } catch (error) {
+      console.error("Fehler beim Export der Logs:", error);
+      Toast.show({
+        type: "error",
+        text1: "Export",
+        text2: "Fehler beim Exportieren der Logs",
+      });
+    }
+  };
+
   return (
     <View
       style={{
@@ -142,7 +228,16 @@ export default function LogsScreen() {
           </View>
         </View>
       </View>
+
       <LogsWidget startDate={startDate} endDate={endDate} />
+      <View style={{ justifyContent: "center", alignItems: "flex-end" }}>
+        <TouchableOpacity
+          style={{ paddingHorizontal: 5, paddingTop: 5 }}
+          onPress={exportLogs}
+        >
+          <MaterialCommunityIcons name={"dots-horizontal"} size={25} />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }

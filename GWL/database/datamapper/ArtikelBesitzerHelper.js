@@ -122,7 +122,7 @@ async function getArtikelOwnersByGwIdAndRegalId(artikelId, regalId) {
     .fetch();
 }
 
-const ArtikelOwnerService = {
+const ArtikelBesitzerService = {
   createArtikelOwner,
   getAllArtikelOwners,
   getArtikelOwnerByGwId,
@@ -132,4 +132,4 @@ const ArtikelOwnerService = {
   updateArtikelBesitzerByGwIdAndRegalId,
 };
 
-export default ArtikelOwnerService;
+export default ArtikelBesitzerService;

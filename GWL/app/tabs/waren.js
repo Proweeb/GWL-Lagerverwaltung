@@ -15,6 +15,7 @@ import ArtikelService from "../../database/datamapper/ArtikelHelper";
 import RegalService from "../../database/datamapper/RegalHelper";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { FlashList } from "@shopify/flash-list";
+import ArtikelBesitzerService from "../../database/datamapper/ArtikelBesitzerHelper";
 
 const WarenScreen = () => {
   const navigation = useNavigation();
@@ -49,7 +50,10 @@ const WarenScreen = () => {
 
       for (let i = 0; i < regaleundso.length; i++) {
         const regalId = regaleundso[i].regalId;
-        const artikel = await ArtikelService.getArtikelByRegalId(regalId);
+        //const artikel = await ArtikelService.getArtikelByRegalId(regalId);
+        const artikel = await ArtikelBesitzerService.getArtikelOwnersByRegalId(
+          regalId
+        );
 
         console.log("Regal ID:", regalId);
         if (artikel[0]) {
@@ -141,11 +145,9 @@ const WarenScreen = () => {
   };
 
   return (
-    <View style={{ flex: 1, padding: 10 }}>
-      
-
-      
-
+    <View
+      style={{ flex: 1, padding: 10, backgroundColor: styles.backgroundColor }}
+    >
       {/* Table */}
       <View style={localStyles.table}>
         {/* Table Header */}
