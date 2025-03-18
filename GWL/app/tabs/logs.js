@@ -119,18 +119,15 @@ export default function LogsScreen() {
 
           return {
             Beschreibung: log.beschreibung,
-            Menge: log.menge,
+
             "Gesamt Menge": log.gesamtMenge,
-            "Regal Name": log.isBackup
+            "Regal ID": log.isBackup
               ? log.regal_id
               : regal
               ? regal.regalId
               : "",
-            "Artikel Name": log.isBackup
-              ? log.gwId
-              : artikel
-              ? artikel.gwId
-              : "", // Artikel Name
+            GWID: log.isBackup ? log.gwId : artikel ? artikel.gwId : "", // Artikel Name
+            Menge: log.menge,
             "Erstellt am": new Date(log.createdAt).toLocaleDateString(),
           };
         })
