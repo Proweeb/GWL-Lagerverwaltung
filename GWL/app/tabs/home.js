@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Text, Dimensions } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, Dimensions, Keyboard } from "react-native";
 
 import { styles } from "../../components/styles";
 
@@ -59,6 +59,30 @@ const actions = [
 ];
 
 function HomeScreen() {
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => {
+        setKeyboardVisible(true); // Keyboard is visible
+      }
+    );
+
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        setKeyboardVisible(false); // Keyboard is hidden
+      }
+    );
+
+    // Cleanup listeners when component unmounts
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
+
   return (
     <View
       style={[
@@ -77,12 +101,9 @@ function HomeScreen() {
         flexValue={0.9}
         containerFlex={0.7}
         title={"Benachrichtungen"}
-        containerStyle={[{ alignItems: "center", flex: 1 }]}
+        containerStyle={[{ alignItems: "center", flex: 1, width: "100%" }]}
       >
-        {/* <NotificationsWidget /> */}
-        <View style={{ flex: 1, width: "100%" }}>
-          <NotificationsWidget />
-        </View>
+        {!keyboardVisible && <NotificationsWidget />}
       </HomeWidget>
       <HomeWidget
         flexValue={0.95}

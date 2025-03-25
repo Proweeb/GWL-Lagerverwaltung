@@ -110,6 +110,7 @@ const notificationstyle = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
+    flex: 1,
     height: "100%",
     borderRadius: 10,
     paddingTop: 5,
