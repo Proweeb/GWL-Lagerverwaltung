@@ -1,4 +1,4 @@
-import { Text, View, ScrollView } from "react-native";
+import { Text, View, ScrollView, Modal } from "react-native";
 import { styles } from "../../../components/styles";
 import TextInputField from "../../../components/utils/TextInputs/textInputField";
 import ArticleMenu from "../../../components/utils/InputMenus/articleMenu";
@@ -19,21 +19,7 @@ export default function IndexScreen() {
 
   const navigation = useNavigation();
 
-  const handleCancel = () => navigation.navigate("Home");
-
-  const showOverview = () => {
-    if (showMengeOverview) {
-      return (
-        <OverviewWithQuantity
-          menge={menge}
-          setMenge={setMenge}
-          setShowMengeOverview={setShowMengeOverview}
-          foundArticle={foundArticle}
-        />
-      );
-    }
-    return null;
-  };
+  const handleCancel = () => navigation.navigate("Tabs");
 
   return (
     <View
@@ -70,7 +56,22 @@ export default function IndexScreen() {
         </TouchableOpacity>
       </View>
 
-      {showOverview()}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showMengeOverview}
+        statusBarTranslucent={true}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <OverviewWithQuantity
+          menge={menge}
+          setMenge={setMenge}
+          setShowMengeOverview={setShowMengeOverview}
+          foundArticle={foundArticle}
+        />
+      </Modal>
     </View>
   );
 }
