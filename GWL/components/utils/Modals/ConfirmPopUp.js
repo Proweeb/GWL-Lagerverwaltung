@@ -35,11 +35,12 @@ const ConfirmPopup = ({
 
         {/* Buttons */}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.cancelButton}>
+          <TouchableOpacity style={styles.cancelButton} onPress={greyCallback}>
             <Text style={styles.cancelText}>Abbrechen</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.confirmButton, { backgroundColor: bgColor }]}
+            onPress={colorCallback}
           >
             <Text style={[styles.confirmText, { color: accentColor }]}>
               {greenMode ? "Bestätigen" : "Löschen"}

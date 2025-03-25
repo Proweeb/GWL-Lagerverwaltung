@@ -5,9 +5,11 @@ const CustomPopup = ({
   yellowButtonText,
   greenButtonText,
   redButtonText,
+  cancelButtonText, // New prop for cancel button text
   yellowCallback,
   greenCallBack,
   redCallback,
+  cancelCallback, // New prop for cancel button callback
 }) => {
   return (
     <View style={styles.container}>
@@ -29,12 +31,22 @@ const CustomPopup = ({
             <Text style={styles.addText}>{greenButtonText}</Text>
           </TouchableOpacity>
         )}
+
         {redButtonText && (
           <TouchableOpacity
             style={[styles.button, styles.deleteButton]}
             onPress={redCallback}
           >
             <Text style={styles.deleteText}>{redButtonText}</Text>
+          </TouchableOpacity>
+        )}
+
+        {cancelButtonText && (
+          <TouchableOpacity
+            style={[styles.button, styles.cancelButton]}
+            onPress={cancelCallback}
+          >
+            <Text style={styles.cancelText}>{cancelButtonText}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -77,6 +89,9 @@ const styles = StyleSheet.create({
   deleteButton: {
     backgroundColor: "#F8C8C8",
   },
+  cancelButton: {
+    backgroundColor: "#D3D3D3",
+  },
   editText: {
     color: "#D8A157",
     fontSize: 16,
@@ -89,6 +104,11 @@ const styles = StyleSheet.create({
   },
   deleteText: {
     color: "#D14242",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  cancelText: {
+    color: "#555", // Grey color
     fontSize: 16,
     fontWeight: "bold",
   },

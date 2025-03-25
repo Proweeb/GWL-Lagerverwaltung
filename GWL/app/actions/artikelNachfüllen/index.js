@@ -5,7 +5,7 @@ import ArticleMenu from "../../../components/utils/InputMenus/articleMenu";
 import { useState, useEffect } from "react";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { RFPercentage } from "react-native-responsive-fontsize";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import Feather from "@expo/vector-icons/Feather";
 import ArticleTextInput from "./articleTextInput";
 import { Alert } from "react-native";
@@ -18,9 +18,14 @@ export default function IndexScreen() {
   const [foundArticle, setFoundArticle] = useState(null);
 
   const navigation = useNavigation();
-
+  const route = useRoute();
+  const passedGwId = route.params?.gwId;
   const handleCancel = () => navigation.navigate("Tabs");
-
+  useEffect(() => {
+    if (passedGwId) {
+      setGwId(passedGwId);
+    }
+  });
   return (
     <View
       style={{
@@ -57,7 +62,7 @@ export default function IndexScreen() {
       </View>
 
       <Modal
-        animationType="fade"
+        animationType={"fade"}
         transparent={true}
         visible={showMengeOverview}
         statusBarTranslucent={true}
