@@ -4,6 +4,7 @@ import {
   TouchableOpacity,
   TextInput,
   StyleSheet,
+  Modal,
 } from "react-native";
 import { styles } from "../../components/styles";
 import React, { useState, useEffect } from "react";
@@ -20,12 +21,15 @@ import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import LogService from "../../database/datamapper/LogHelper";
 import Toast from "react-native-toast-message";
+import CustomPopup from "../../components/utils/Modals/CustomPopUp";
+import ConfirmPopup from "../../components/utils/Modals/ConfirmPopUp";
 
 export default function LogsScreen() {
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [minDate, setMinDate] = useState(new Date());
   const [maxDate, setMaxDate] = useState(new Date());
+  const [modalVisible, setModalVisible] = useState(false);
   const isFocused = useIsFocused();
 
   useEffect(() => {
@@ -156,13 +160,15 @@ export default function LogsScreen() {
       });
 
       // Share the file
-      await Sharing.shareAsync(fileUri);
+      const result = await Sharing.shareAsync(fileUri);
 
-      Toast.show({
-        type: "success",
-        text1: "Export",
-        text2: "Logs erfolgreich exportiert",
-      });
+      if (result) {
+        Toast.show({
+          type: "success",
+          text1: "Export",
+          text2: "Logs erfolgreich exportiert",
+        });
+      }
     } catch (error) {
       console.error("Fehler beim Export der Logs:", error);
       Toast.show({
@@ -230,11 +236,28 @@ export default function LogsScreen() {
       <View style={{ justifyContent: "center", alignItems: "flex-end" }}>
         <TouchableOpacity
           style={{ paddingHorizontal: 5, paddingTop: 5 }}
-          onPress={exportLogs}
+          onPress={() => setModalVisible(true)}
         >
           <MaterialCommunityIcons name={"dots-horizontal"} size={25} />
         </TouchableOpacity>
       </View>
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        statusBarTranslucent={true}
+        onRequestClose={() => {
+          console.log("im out");
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <CustomPopup
+          redButtonText={"Abbrechen"}
+          redCallback={() => setModalVisible(false)}
+          greenButtonText={"Exportieren"}
+          greenCallBack={exportLogs}
+        ></CustomPopup>
+      </Modal>
     </View>
   );
 }
