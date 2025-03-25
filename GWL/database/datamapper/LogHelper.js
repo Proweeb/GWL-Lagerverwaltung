@@ -153,8 +153,6 @@ async function BackupLogByArtikelId(artikelId) {
       console.log(
         `Backed up ${validUpdates.length} logs for artikel ${artikelId}`
       );
-    } else {
-      console.warn(`No valid logs to update for artikel ${artikelId}`);
     }
   });
 }

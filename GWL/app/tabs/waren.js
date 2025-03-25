@@ -400,6 +400,7 @@ const WarenScreen = () => {
             {menge}
           </Text>
         </View>
+
         <View style={localStyles.cell}>
           <Text
             numberOfLines={1}
@@ -427,12 +428,12 @@ const WarenScreen = () => {
         <View style={[localStyles.row, localStyles.rowBorder]}>
           <View style={localStyles.cell}>
             <Text numberOfLines={1} style={localStyles.tableContent}>
-              Produkt Name
+              Name
             </Text>
           </View>
           <View style={localStyles.cell}>
             <Text numberOfLines={1} style={localStyles.tableContent}>
-              Produkt ID
+              GWID
             </Text>
           </View>
           <View style={localStyles.cell}>
@@ -521,6 +522,7 @@ const WarenScreen = () => {
             setAction(value);
           }}
           colorCallback={async () => {
+            await ArtikelBesitzerService.deleteArtikelOwnerByArtikelId(confirm);
             await LogService.BackupLogByArtikelId(confirm);
             await ArtikelService.deleteArtikel(confirm);
 

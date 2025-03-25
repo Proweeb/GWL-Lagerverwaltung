@@ -52,6 +52,21 @@ async function deleteArtikelOwner(gwId, regalId) {
   });
 }
 
+async function deleteArtikelOwnerByArtikelId(gwId) {
+  return database.write(async () => {
+    const artikel = await ArtikelService.getArtikelById(gwId);
+
+    const artikelOwner = await database
+      .get("artikel_besitzer")
+      .query(Q.where("gw_id", artikel.id))
+      .fetch();
+
+    if (artikelOwner.length) {
+      await artikelOwner[0].destroyPermanently();
+    }
+  });
+}
+
 async function getArtikelOwnersByRegalId(regalId) {
   const regal = await RegalService.getRegalById(regalId);
   return await regal.artikelBesitzer.fetch();
@@ -126,6 +141,7 @@ const ArtikelBesitzerService = {
   createArtikelOwner,
   getAllArtikelOwners,
   getArtikelOwnerByGwId,
+  deleteArtikelOwnerByArtikelId,
   deleteArtikelOwner,
   getArtikelOwnersByRegalId,
   getArtikelOwnersByGwIdAndRegalId,
