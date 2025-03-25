@@ -107,15 +107,20 @@ async function updateArtikel(gwid, updatedData) {
 }
 
 async function deleteArtikel(gwid) {
-  return await database.write(async () => {
+  return database.write(async () => {
     const artikel = await database
       .get("artikel")
-      .query(
-        Q.where("gw_id", gwid) // Ensure "gwId" matches your schema
-      )
+      .query(Q.where("gw_id", gwid))
       .fetch();
 
+    if (artikel.length === 0) {
+      console.warn(`Artikel with gw_id ${gwid} not found`);
+      return false;
+    }
+
     await artikel[0].destroyPermanently();
+    console.log(`Artikel with gw_id ${gwid} deleted`);
+    return true;
   });
 }
 

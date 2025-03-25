@@ -523,6 +523,7 @@ const WarenScreen = () => {
           colorCallback={async () => {
             await LogService.BackupLogByArtikelId(confirm);
             await ArtikelService.deleteArtikel(confirm);
+
             console.log("Artikel deleted " + confirm);
 
             Toast.show({
@@ -530,7 +531,7 @@ const WarenScreen = () => {
               text1: "Erfolgreich",
               text2: "Artikel mit der GWID " + confirm + " gelöscht",
             });
-            setConfirm(false);
+            setConfirm(null);
           }}
         />
       </Modal>

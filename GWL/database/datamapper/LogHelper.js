@@ -62,37 +62,100 @@ async function deleteLogByArtikelId(artikel_id) {
   });
 }
 
+// async function BackupLogByArtikelId(artikelId) {
+//   const artikel = await ArtikelService.getArtikelById(artikelId);
+
+//   await database.write(async () => {
+//     //Fetch logs that are associated with the given artikelId
+//     const logs = await database.get("logs").query().fetch();
+//     //console.log(logs);
+
+//     // Use Promise.all to resolve asynchronous operations for each log
+//     const updates = await Promise.all(
+//       logs.map(async (log) => {
+//         const regal = await log.regal.fetch();
+//         const artikel = await log.artikel.fetch();
+
+//         if (artikel.gwId != artikelId) {
+//           return;
+//         }
+//         console.log(
+//           `Backing up log for artikel ${artikelId}:`,
+//           log.beschreibung
+//         );
+//         return log.prepareUpdate((logRecord) => {
+//           logRecord.isBackup = true;
+//           // Optionally, update regalId and gwId if required (for every log linked to the artikel)
+//           logRecord.regalId = regal.regalId;
+//           logRecord.gwId = artikel.gwId;
+//         });
+//       })
+//     );
+//     // Apply all updates in a batch
+//     await database.batch(...updates);
+//   });
+// }
 async function BackupLogByArtikelId(artikelId) {
   const artikel = await ArtikelService.getArtikelById(artikelId);
 
+  if (!artikel) {
+    console.warn(`Artikel with ID ${artikelId} not found`);
+    return;
+  }
+
   await database.write(async () => {
-    //Fetch logs that are associated with the given artikelId
+    // Fetch logs that are associated with the given artikelId (keeping your original query)
     const logs = await database.get("logs").query().fetch();
-    //console.log(logs);
+
+    if (logs.length === 0) {
+      console.warn(`No logs found for artikel ${artikelId}`);
+      return;
+    }
 
     // Use Promise.all to resolve asynchronous operations for each log
     const updates = await Promise.all(
       logs.map(async (log) => {
-        const regal = await log.regal.fetch();
-        const artikel = await log.artikel.fetch();
+        try {
+          if (log.isBackup) {
+            return null;
+          }
+          // Fetch regal and artikel for the log
+          const regal = log.regal ? await log.regal.fetch() : null;
+          const artikel = log.artikel ? await log.artikel.fetch() : null;
 
-        if (artikel.gwId != artikelId) {
-          return;
+          // Skip if the artikel does not match
+          if (!artikel || artikel.gwId !== artikelId) {
+            return null;
+          }
+
+          console.log(
+            `Backing up log for artikel ${artikelId}:`,
+            log.beschreibung
+          );
+
+          return log.prepareUpdate((logRecord) => {
+            logRecord.isBackup = true;
+            logRecord.regalId = regal ? regal.regalId : null; // Handle possible null values
+            logRecord.gwId = artikel.gwId;
+          });
+        } catch (error) {
+          console.error(`Error processing log ${log.id}:`, error);
+          return null;
         }
-        console.log(
-          `Backing up log for artikel ${artikelId}:`,
-          log.beschreibung
-        );
-        return log.prepareUpdate((logRecord) => {
-          logRecord.isBackup = true;
-          // Optionally, update regalId and gwId if required (for every log linked to the artikel)
-          logRecord.regalId = regal.regalId;
-          logRecord.gwId = artikel.gwId;
-        });
       })
     );
-    // Apply all updates in a batch
-    await database.batch(...updates);
+
+    // Filter out any null/undefined updates before batching
+    const validUpdates = updates.filter(Boolean);
+
+    if (validUpdates.length > 0) {
+      await database.batch(...validUpdates);
+      console.log(
+        `Backed up ${validUpdates.length} logs for artikel ${artikelId}`
+      );
+    } else {
+      console.warn(`No valid logs to update for artikel ${artikelId}`);
+    }
   });
 }
 
@@ -107,7 +170,6 @@ async function deleteLogByRegalId(regal_id) {
 }
 
 async function deleteLogByRegalIdAndArtikelId(regal_id, artikel_id) {
-  console.log("hier");
   const regal = await RegalService.getRegalById(regal_id);
   const artikel = await ArtikelService.getArtikelById(artikel_id);
   return await database.write(async () => {
