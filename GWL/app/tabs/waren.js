@@ -332,6 +332,7 @@ import CustomPopup from "../../components/utils/Modals/CustomPopUp";
 import Toast from "react-native-toast-message";
 import { database } from "../../database/database"; // Import your WatermelonDB database instance
 import ConfirmPopup from "../../components/utils/Modals/ConfirmPopUp";
+import LogService from "../../database/datamapper/LogHelper";
 
 const WarenScreen = () => {
   const navigation = useNavigation();
@@ -520,7 +521,7 @@ const WarenScreen = () => {
             setAction(value);
           }}
           colorCallback={async () => {
-            console.log(await ArtikelService.getArtikelById(confirm));
+            await LogService.BackupLogByArtikelId(confirm);
             await ArtikelService.deleteArtikel(confirm);
             console.log("Artikel deleted " + confirm);
 
@@ -530,7 +531,6 @@ const WarenScreen = () => {
               text2: "Artikel mit der GWID " + confirm + " gelöscht",
             });
             setConfirm(false);
-            console.log(await ArtikelService.getArtikelById(confirm));
           }}
         />
       </Modal>
