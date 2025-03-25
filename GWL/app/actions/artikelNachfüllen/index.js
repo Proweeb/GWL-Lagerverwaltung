@@ -62,7 +62,7 @@ export default function IndexScreen() {
         visible={showMengeOverview}
         statusBarTranslucent={true}
         onRequestClose={() => {
-          setModalVisible(!modalVisible);
+          setShowMengeOverview(false);
         }}
       >
         <OverviewWithQuantity
