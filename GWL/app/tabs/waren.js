@@ -404,7 +404,7 @@ const WarenScreen = () => {
         <View style={localStyles.cell}>
           <Text
             numberOfLines={1}
-            style={[localStyles.cellText, localStyles["low"]]}
+            style={[localStyles.cellText, localStyles[item.status]]}
           >
             {item.status || "Unbekannt"}
           </Text>
@@ -532,6 +532,7 @@ const WarenScreen = () => {
               type: "success",
               text1: "Erfolgreich",
               text2: "Artikel mit der GWID " + confirm + " gelöscht",
+              visibilityTime: 1000,
             });
             setConfirm(null);
           }}

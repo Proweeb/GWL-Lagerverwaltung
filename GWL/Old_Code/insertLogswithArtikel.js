@@ -41,7 +41,7 @@ export async function testInsertAndFetch() {
           artikel.gwId = `${i + 1}`;
           artikel.firmenId = `firmen456_${i + 1}`;
           artikel.beschreibung = `Kiwi ${i + 1}`;
-          artikel.menge = 5;
+          artikel.menge = 0;
           artikel.mindestMenge = 10;
           artikel.kunde = "Test Kunde";
           artikel.ablaufdatum = Date.now() + 0 * 24 * 60 * 60 * 1000;
