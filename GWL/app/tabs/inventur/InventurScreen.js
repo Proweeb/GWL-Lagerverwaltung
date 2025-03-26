@@ -3,7 +3,7 @@ import { View, Text, Alert } from "react-native";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper.js";
 import { styles } from "../../../components/styles.js";
 import InventoryItem from "../../../components/oneTimeUse/InventoryItem.js";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import SearchBar from "../../../components/utils/SearchBar.js";
 import WeiterButton from "../../../components/oneTimeUse/WeiterButton.js";
@@ -13,6 +13,12 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
   const [gwId, setGwId] = useState("");
   const [artikelList, setArtikelList] = useState([]);
   const [isScanning, setIsScanning] = useState(false);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchArtikel();
+    }, [])
+  );
 
   const fetchArtikel = async () => {
     try {

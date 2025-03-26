@@ -11,6 +11,7 @@ import ArtikelService from "../../../database/datamapper/ArtikelHelper.js";
 import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper.js";
 import XLSX from "xlsx";
 import LogService from "../../../database/datamapper/LogHelper.js";
+import ConfirmPopup from "../../../components/utils/Modals/ConfirmPopUp.js";
 
 const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
   const navigation = useNavigation();
@@ -159,72 +160,17 @@ const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
         ></ZurückButton>
         <FertigButton onPress={() => setModalVisible(true)} />
       </View>
-      <Modal transparent={true} animationType="slide" visible={modalVisible}>
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "rgba(0,0,0,0.5)",
-          }}
-        >
-          <View
-            style={{
-              width: 300,
-              padding: 20,
-              backgroundColor: "white",
-              borderRadius: 10,
-              alignItems: "center",
-            }}
-          >
-            <Text
-              style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10 }}
-            >
-              Inventur abschließen?
-            </Text>
-            <Text style={{ marginBottom: 20 }}>
-              Sind Sie sicher, dass Sie die Inventur abschließen möchten?
-            </Text>
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                width: "100%",
-              }}
-            >
-              <TouchableOpacity
-                onPress={() => setModalVisible(false)}
-                style={{
-                  padding: 10,
-                  backgroundColor: "gray",
-                  borderRadius: 5,
-                  flex: 1,
-                  marginRight: 5,
-                  alignItems: "center",
-                }}
-              >
-                <Text style={{ color: "white", fontWeight: "bold" }}>
-                  Abbrechen
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleConfirm}
-                style={{
-                  padding: 10,
-                  backgroundColor: "green",
-                  borderRadius: 5,
-                  flex: 1,
-                  marginLeft: 5,
-                  alignItems: "center",
-                }}
-              >
-                <Text style={{ color: "white", fontWeight: "bold" }}>
-                  Ja, fortfahren
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
+      <Modal
+        transparent={true}
+        animationType="slide"
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <ConfirmPopup
+          colorCallback={handleConfirm}
+          greyCallback={() => setModalVisible(false)}
+          text={"Sind Sie sicher, dass Sie die Inventur abschließen möchten?"}
+        ></ConfirmPopup>
       </Modal>
     </View>
   );
