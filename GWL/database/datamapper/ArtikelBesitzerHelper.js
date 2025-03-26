@@ -67,7 +67,9 @@ async function deleteArtikelOwnerByArtikelId(gwId) {
       .fetch();
 
     if (artikelOwner.length) {
-      await artikelOwner[0].destroyPermanently();
+      await database.batch(
+        ...artikelOwner.map((artikel) => artikel.prepareDestroyPermanently())
+      );
     }
   });
 }
@@ -82,18 +84,25 @@ async function updateArtikelBesitzerByGwIdAndRegalId(
   regalId,
   gwId
 ) {
+  const artikelId = await ArtikelService.getArtikelById(gwId);
+  const newRegalId = await RegalService.getRegalById(regalId);
+  const artikelBesitzer = await database
+    .get("artikel_besitzer")
+    .query(Q.where("gw_id", artikelId.id), Q.where("regal_id", newRegalId.id)) // Ensure "gwId" matches your schema
+    .fetch();
+  if (!artikelBesitzer.length) {
+    console.error("ArtikelBesitzer not found for gwId:", gwId);
+    return;
+  }
+  if (
+    updatedArtikelBesitzer.menge !== null &&
+    updatedArtikelBesitzer.menge !== undefined
+  ) {
+    await ArtikelService.updateInventurArtikel(artikelId.gwId, {
+      menge: Number(updatedArtikelBesitzer.menge),
+    });
+  }
   return await database.write(async () => {
-    const artikelId = await ArtikelService.getArtikelById(gwId);
-    const newRegalId = await RegalService.getRegalById(regalId);
-    const artikelBesitzer = await database
-      .get("artikel_besitzer")
-      .query(Q.where("gw_id", gwId), Q.where("regal_id", regalId)) // Ensure "gwId" matches your schema
-      .fetch();
-    if (!artikelBesitzer.length) {
-      console.error("ArtikelBesitzer not found for gwId:", gwId);
-      return;
-    }
-
     let text;
     if (updatedArtikelBesitzer.menge < 0) {
       text = "Entnehmen";
@@ -133,6 +142,73 @@ async function updateArtikelBesitzerByGwIdAndRegalId(
   });
 }
 
+async function updateArtikelBesitzerMengeByGwIdAndRegalId(
+  updatedArtikelBesitzer,
+  regalId,
+  gwId
+) {
+  return await database.write(async () => {
+    const artikelId = await ArtikelService.getArtikelById(gwId);
+    console.log("_*_*___*_*__*_*");
+    console.log(artikelId);
+    const newRegalId = await RegalService.getRegalById(regalId);
+    const artikelBesitzer = await database
+      .get("artikel_besitzer")
+      .query(Q.where("gw_id", artikelId.id), Q.where("regal_id", newRegalId.id)) // Ensure "gwId" matches your schema
+      .fetch();
+    if (!artikelBesitzer.length) {
+      console.error("ArtikelBesitzer not found for gwId:", gwId);
+      return;
+    }
+
+    let text;
+    if (updatedArtikelBesitzer.menge < 0) {
+      text = "Entnehmen";
+    } else {
+      text = "Nachfüllen";
+    }
+    await database.get("logs").create((log) => {
+      log.beschreibung = text;
+      log.menge = Number(updatedArtikelBesitzer.menge);
+      log.gesamtMenge =
+        Number(artikelBesitzer[0].menge) + Number(updatedArtikelBesitzer.menge);
+      log.artikel.set(artikelId);
+      log.createdAt = Date.now();
+    });
+
+    if (
+      updatedArtikelBesitzer.menge !== null &&
+      updatedArtikelBesitzer.menge !== undefined
+    ) {
+      await ArtikelService.updateArtikel(artikelId.gwId, {
+        menge: Number(artikelId.menge + updatedArtikelBesitzer.menge),
+      });
+    }
+
+    await artikelBesitzer[0].update((art) => {
+      if (
+        updatedArtikelBesitzer.gwId !== null &&
+        updatedArtikelBesitzer.gwId !== undefined
+      ) {
+        art.artikel.set(gwId);
+      }
+      if (
+        updatedArtikelBesitzer.menge !== null &&
+        updatedArtikelBesitzer.menge !== undefined
+      ) {
+        art.menge += updatedArtikelBesitzer.menge;
+      }
+      if (
+        updatedArtikelBesitzer.regalId !== null &&
+        updatedArtikelBesitzer.regalId !== undefined
+      ) {
+        art.regal.set(regalId);
+      }
+    });
+    return artikelBesitzer[0];
+  });
+}
+
 async function getArtikelOwnersByGwIdAndRegalId(artikelId, regalId) {
   const artikel = await ArtikelService.getArtikelById(artikelId);
   const regal = await RegalService.getRegalById(regalId);
@@ -151,6 +227,7 @@ const ArtikelBesitzerService = {
   getArtikelOwnersByRegalId,
   getArtikelOwnersByGwIdAndRegalId,
   updateArtikelBesitzerByGwIdAndRegalId,
+  updateArtikelBesitzerMengeByGwIdAndRegalId,
 };
 
 export default ArtikelBesitzerService;
