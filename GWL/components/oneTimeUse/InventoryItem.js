@@ -16,10 +16,7 @@ const InventoryItem = ({ item, changedMenge, setChangedMenge }) => {
         if (item) {
           const regal = await item.regal.fetch();
           setRegalId(regal.regalId);
-          //console.log(item.artikel);
           const artikel = await item.artikel.fetch();
-          console.log("+++++++++++++++++++");
-          console.log(artikel);
           if (artikel.gwId) {
             setGwId(String(artikel.gwId));
             setBeschreibung(String(artikel.beschreibung));
@@ -54,7 +51,7 @@ const InventoryItem = ({ item, changedMenge, setChangedMenge }) => {
 
         <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
           <View style={{ width: "20%" }}>
-            <Text style={styles.subHeader}>Haben:</Text>
+            <Text style={styles.subHeader}>Ist:</Text>
           </View>
 
           <View

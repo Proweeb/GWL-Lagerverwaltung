@@ -1,7 +1,6 @@
 import { database } from "../database";
 import { Q } from "@nozbe/watermelondb";
 import RegalService from "./RegalHelper";
-import ArtikelBesitzer from "../models/ArtikelBesitzer";
 
 async function createArtikel(artikelData, regalId) {
   const regal = await RegalService.getRegalById(regalId);
@@ -96,6 +95,66 @@ async function updateArtikel(gwid, updatedData) {
       }
       if (updatedData.menge !== null && updatedData.menge !== undefined) {
         art.menge += updatedData.menge;
+      }
+      if (
+        updatedData.mindestMenge !== null &&
+        updatedData.mindestMenge !== undefined
+      ) {
+        art.mindestMenge = updatedData.mindestMenge;
+      }
+      if (updatedData.kunde !== null && updatedData.kunde !== undefined) {
+        art.kunde = updatedData.kunde;
+      }
+      if (
+        updatedData.ablaufdatum !== null &&
+        updatedData.ablaufdatum !== undefined
+      ) {
+        art.ablaufdatum = updatedData.ablaufdatum;
+      }
+    });
+    return artikel[0];
+  });
+}
+
+async function updateInventurArtikel(gwid, updatedData) {
+  return await database.write(async () => {
+    const artikel = await database
+      .get("artikel")
+      .query(Q.where("gw_id", gwid)) // Ensure "gwId" matches your schema
+      .fetch();
+    if (!artikel.length) {
+      console.error("Artikel not found for gwId:", gwid);
+      return;
+    }
+    let text;
+    if (updatedData.menge < 0) {
+      text = "Entnehmen";
+    } else {
+      text = "Nachfüllen";
+    }
+    await database.get("logs").create((log) => {
+      log.beschreibung = text;
+      log.menge = Number(updatedData.menge);
+      log.gesamtMenge = Number(artikel[0].menge) + Number(updatedData.menge);
+      log.artikel.set(artikel[0]);
+      log.createdAt = Date.now();
+    });
+
+    await artikel[0].update((art) => {
+      if (updatedData.gwId !== null && updatedData.gwId !== undefined) {
+        art.gwId = updatedData.gwId;
+      }
+      if (updatedData.firmenId !== null && updatedData.firmenId !== undefined) {
+        art.firmenId = updatedData.firmenId;
+      }
+      if (
+        updatedData.beschreibung !== null &&
+        updatedData.beschreibung !== undefined
+      ) {
+        art.beschreibung = updatedData.beschreibung;
+      }
+      if (updatedData.menge !== null && updatedData.menge !== undefined) {
+        art.menge = updatedData.menge;
       }
       if (
         updatedData.mindestMenge !== null &&
@@ -223,6 +282,7 @@ const ArtikelService = {
   deleteAllData,
   updateArtikelById,
   getArtikelsById,
+  updateInventurArtikel,
 };
 
 export default ArtikelService;

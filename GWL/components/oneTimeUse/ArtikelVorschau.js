@@ -32,7 +32,7 @@ const ArtikelVorschau = ({ artikelList, changedMenge }) => {
           </View>
           <View style={styles.column}>
             <Text style={styles.headerColumnText} numberOfLines={1}>
-              Haben
+              Ist
             </Text>
           </View>
         </View>
