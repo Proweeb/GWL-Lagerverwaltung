@@ -1,4 +1,5 @@
 import { database } from "../database/database";
+import ArtikelBesitzerService from "../database/datamapper/ArtikelBesitzerHelper";
 import ArtikelBesitzerHelper from "../database/datamapper/ArtikelBesitzerHelper";
 import ArtikelService from "../database/datamapper/ArtikelHelper";
 
@@ -97,7 +98,7 @@ export async function testInsertAndFetch() {
       );
     }
   });
-  for (let i = 30; i < 60; i++) {
+  for (let i = 30; i < 35; i++) {
     await ArtikelService.createArtikel(
       {
         gwId: `${i + 1}`,
@@ -109,6 +110,13 @@ export async function testInsertAndFetch() {
         ablaufdatum: Date.now() + 0 * 24 * 60 * 60 * 1000,
       },
       "134"
+    );
+    await ArtikelBesitzerService.createArtikelOwner(
+      {
+        menge: 5,
+      },
+      String(i + 1),
+      "135"
     );
   }
 }

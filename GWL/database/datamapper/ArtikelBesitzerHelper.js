@@ -34,7 +34,12 @@ async function getAllArtikelOwners() {
 
 async function getArtikelOwnerByGwId(gwId) {
   const artikel = await ArtikelService.getArtikelById(gwId);
-  return await artikel.artikelBesitzer.fetch();
+  const artikelOwners = await database
+    .get("artikel_besitzer")
+    .query(Q.where("gw_id", artikel.id))
+    .fetch();
+  console.log(artikelOwners);
+  return artikelOwners;
 }
 
 async function deleteArtikelOwner(gwId, regalId) {
@@ -82,7 +87,7 @@ async function updateArtikelBesitzerByGwIdAndRegalId(
     const newRegalId = await RegalService.getRegalById(regalId);
     const artikelBesitzer = await database
       .get("artikel_besitzer")
-      .query(Q.where("gw_id", artikelId.id), Q.where("regal_id", newRegalId.id)) // Ensure "gwId" matches your schema
+      .query(Q.where("gw_id", gwId), Q.where("regal_id", regalId)) // Ensure "gwId" matches your schema
       .fetch();
     if (!artikelBesitzer.length) {
       console.error("ArtikelBesitzer not found for gwId:", gwId);
@@ -90,14 +95,14 @@ async function updateArtikelBesitzerByGwIdAndRegalId(
     }
 
     let text;
-    if (updatedData.menge < 0) {
+    if (updatedArtikelBesitzer.menge < 0) {
       text = "Entnehmen";
     } else {
       text = "Nachfüllen";
     }
     await database.get("logs").create((log) => {
       log.beschreibung = text;
-      log.menge = Number(updatedData.menge);
+      log.menge = Number(updatedArtikelBesitzer.menge);
       log.gesamtMenge =
         Number(artikelBesitzer[0].menge) + Number(updatedArtikelBesitzer.menge);
       log.artikel.set(artikelId);
@@ -115,7 +120,7 @@ async function updateArtikelBesitzerByGwIdAndRegalId(
         updatedArtikelBesitzer.menge !== null &&
         updatedArtikelBesitzer.menge !== undefined
       ) {
-        art.menge += updatedArtikelBesitzer.menge;
+        art.menge = updatedArtikelBesitzer.menge;
       }
       if (
         updatedArtikelBesitzer.regalId !== null &&

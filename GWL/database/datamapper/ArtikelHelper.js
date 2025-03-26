@@ -46,6 +46,17 @@ async function getArtikelById(gwid) {
 
   return artikel.length > 0 ? artikel[0] : null; // Return first item or null if not found
 }
+
+async function getArtikelsById(gwid) {
+  const artikel = await database
+    .get("artikel")
+    .query(
+      Q.where("gw_id", gwid) // Ensure "gwId" matches your schema
+    )
+    .fetch();
+  return artikel.length > 0 ? artikel : null; // Return first item or null if not found
+}
+
 async function updateArtikel(gwid, updatedData) {
   return await database.write(async () => {
     const artikel = await database
@@ -107,20 +118,15 @@ async function updateArtikel(gwid, updatedData) {
 }
 
 async function deleteArtikel(gwid) {
-  return database.write(async () => {
+  return await database.write(async () => {
     const artikel = await database
       .get("artikel")
-      .query(Q.where("gw_id", gwid))
+      .query(
+        Q.where("gw_id", gwid) // Ensure "gwId" matches your schema
+      )
       .fetch();
 
-    if (artikel.length === 0) {
-      console.warn(`Artikel with gw_id ${gwid} not found`);
-      return false;
-    }
-
     await artikel[0].destroyPermanently();
-    console.log(`Artikel with gw_id ${gwid} deleted`);
-    return true;
   });
 }
 
@@ -149,6 +155,65 @@ async function deleteAllData() {
   });
 }
 
+async function updateArtikelById(id, updatedData) {
+  return await database.write(async () => {
+    const artikel = await database
+      .get("artikel")
+      .query(Q.where("id", id)) // Ensure "gwId" matches your schema
+      .fetch();
+    if (!artikel.length) {
+      console.error("Artikel not found for id:", id);
+      return;
+    }
+    let text;
+    if (updatedData.menge < 0) {
+      text = "Entnehmen";
+    } else {
+      text = "Nachfüllen";
+    }
+    await database.get("logs").create((log) => {
+      log.beschreibung = text;
+      log.menge = Number(updatedData.menge);
+      log.gesamtMenge = Number(artikel[0].menge) + Number(updatedData.menge);
+      log.artikel.set(artikel[0]);
+      log.createdAt = Date.now();
+    });
+
+    await artikel[0].update((art) => {
+      if (updatedData.gwId !== null && updatedData.gwId !== undefined) {
+        art.gwId = updatedData.gwId;
+      }
+      if (updatedData.firmenId !== null && updatedData.firmenId !== undefined) {
+        art.firmenId = updatedData.firmenId;
+      }
+      if (
+        updatedData.beschreibung !== null &&
+        updatedData.beschreibung !== undefined
+      ) {
+        art.beschreibung = updatedData.beschreibung;
+      }
+      if (updatedData.menge !== null && updatedData.menge !== undefined) {
+        art.menge += updatedData.menge;
+      }
+      if (
+        updatedData.mindestMenge !== null &&
+        updatedData.mindestMenge !== undefined
+      ) {
+        art.mindestMenge = updatedData.mindestMenge;
+      }
+      if (updatedData.kunde !== null && updatedData.kunde !== undefined) {
+        art.kunde = updatedData.kunde;
+      }
+      if (
+        updatedData.ablaufdatum !== null &&
+        updatedData.ablaufdatum !== undefined
+      ) {
+        art.ablaufdatum = updatedData.ablaufdatum;
+      }
+    });
+    return artikel[0];
+  });
+}
 const ArtikelService = {
   createArtikel,
   getAllArtikel,
@@ -156,6 +221,8 @@ const ArtikelService = {
   updateArtikel,
   deleteArtikel,
   deleteAllData,
+  updateArtikelById,
+  getArtikelsById,
 };
 
 export default ArtikelService;

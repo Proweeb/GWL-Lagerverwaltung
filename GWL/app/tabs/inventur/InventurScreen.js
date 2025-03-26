@@ -16,7 +16,8 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
 
   const fetchArtikel = async () => {
     try {
-      const artikelData = await ArtikelBesitzerService.getAllArtikelOwners();
+      const artikelData = await ArtikelBesitzerService.getAllArtikelOwners(); //#endregio
+      console.log(await artikelData[0].artikel.fetch());
       setArtikelList(artikelData);
     } catch (error) {
       console.error("Fehler beim Laden der Artikel:", error);
@@ -36,7 +37,7 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
   const handleSearch = async () => {
     if (!gwId) {
       try {
-        const artikelData = await ArtikelService.getAllArtikel();
+        const artikelData = await ArtikelBesitzerService.getAllArtikelOwners();
         setArtikelList(artikelData);
       } catch (error) {
         console.error("Fehler beim Laden der Artikel:", error);
@@ -45,11 +46,11 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
     }
 
     try {
-      const artikel = await ArtikelService.getArtikelById(gwId);
+      const artikel = await ArtikelBesitzerService.getArtikelOwnerByGwId(gwId);
       if (!artikel) {
         Alert.alert("Fehler", "Artikel nicht gefunden.");
       } else {
-        setArtikelList([artikel]);
+        setArtikelList(artikel);
       }
     } catch (error) {
       console.error("Fehler beim Finden des Artikels:", error);
