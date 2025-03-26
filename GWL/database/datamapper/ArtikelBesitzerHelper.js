@@ -66,7 +66,7 @@ async function deleteArtikelOwnerByArtikelId(gwId) {
       .query(Q.where("gw_id", artikel.id))
       .fetch();
 
-    if (artikelOwner.length) {
+    if (artikelOwner.length > 0) {
       await database.batch(
         ...artikelOwner.map((artikel) => artikel.prepareDestroyPermanently())
       );
@@ -74,6 +74,26 @@ async function deleteArtikelOwnerByArtikelId(gwId) {
   });
 }
 
+async function deleteArtikelOwnerByArtikelIdAndRegalId(gwId, regalId) {
+  const artikel = await ArtikelService.getArtikelById(gwId);
+  const regal = await RegalService.getRegalById(regalId);
+
+  return database.write(async () => {
+    const artikelOwner = await database
+      .get("artikel_besitzer")
+      .query(
+        Q.where("gw_id", artikel.id), // First condition: gw_id
+        Q.where("regal_id", regal.id)
+      )
+      .fetch();
+
+    if (artikelOwner.length > 0) {
+      await database.batch(
+        ...artikelOwner.map((artikel) => artikel.prepareDestroyPermanently())
+      );
+    }
+  });
+}
 async function getArtikelOwnersByRegalId(regalId) {
   const regal = await RegalService.getRegalById(regalId);
   return await regal.artikelBesitzer.fetch();
@@ -223,6 +243,7 @@ const ArtikelBesitzerService = {
   getAllArtikelOwners,
   getArtikelOwnerByGwId,
   deleteArtikelOwnerByArtikelId,
+  deleteArtikelOwnerByArtikelIdAndRegalId,
   deleteArtikelOwner,
   getArtikelOwnersByRegalId,
   getArtikelOwnersByGwIdAndRegalId,

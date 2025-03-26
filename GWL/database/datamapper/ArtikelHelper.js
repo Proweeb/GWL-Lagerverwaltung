@@ -185,7 +185,11 @@ async function deleteArtikel(gwid) {
       )
       .fetch();
 
-    await artikel[0].destroyPermanently();
+    if (artikel.length > 0) {
+      await database.batch(
+        ...artikel.map((artikel) => artikel.prepareDestroyPermanently())
+      );
+    }
   });
 }
 

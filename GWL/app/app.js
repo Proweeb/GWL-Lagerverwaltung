@@ -11,7 +11,6 @@ import * as Notifications from "expo-notifications";
 import { LogBox } from "react-native";
 import Toast from "react-native-toast-message";
 
-import ScanScreen from "./scan/scan";
 import BottomTabNavigator from "./tabs/_layout";
 import AktionenNavigator from "./actions/_layout";
 

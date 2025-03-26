@@ -1,235 +1,253 @@
+import React, { useEffect, useState } from "react";
 import {
-  Text,
   View,
+  Text,
+  ActivityIndicator,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
+  Modal,
 } from "react-native";
+import { FlashList } from "@shopify/flash-list";
+import RegalService from "../../../database/datamapper/RegalHelper";
+import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper";
 import { styles } from "../../../components/styles";
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons"; // for icon buttons
+import CustomPopup from "../../../components/utils/Modals/CustomPopUp";
+import ConfirmPopup from "../../../components/utils/Modals/ConfirmPopUp";
 
-export default function IndexScreen() {
+import { useNavigation } from "@react-navigation/native";
 
+const LagerScreen = () => {
+  const navigation = useNavigation();
+  const [regale, setRegale] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [Action, setAction] = useState(null);
+  const [confirm, setConfirm] = useState(null);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch all regale data
+        const regaleData = await RegalService.getAllRegal();
 
-  
-  const data = [
-    { name: "Baby Oil", id: "#3451F", menge: "x3", status: "out" },
-    { name: "Kiwi", id: "#6341E", menge: "x265", status: "high" },
-    { name: "Keyboard", id: "#8253A", menge: "x60", status: "low" },
-    { name: "Mouse", id: "#5434R", menge: "x1", status: "out" },
-    { name: "Cup", id: "#1244T", menge: "x4", status: "out" },
-  ];
+        // Fetch and attach the articles to each regal
+        const regaleWithArtikel = await Promise.all(
+          regaleData.map(async (regal) => {
+            // Fetch articles by regalId
+            const artikelList =
+              await ArtikelBesitzerService.getArtikelOwnersByRegalId(
+                regal.regalId
+              );
 
-  
-  async function OrderArtikel() {
-    try {
-      const regaleundso = await RegalService.getAllRegal();
-      console.log("Regale:", regaleundso);
+            // For each artikel in the list, fetch detailed artikel data
+            const artikelWithDetails = await Promise.all(
+              artikelList.map(async (artikelOwner) => {
+                const artikel = await artikelOwner.artikel.fetch(); // Fetch the article details
+                return {
+                  gwId: artikel.gwId,
+                  name: artikel.beschreibung,
+                  status: artikel.status,
+                  artikelOwnerId: artikelOwner.id, // Include the owner ID
+                  menge: artikelOwner.menge,
+                };
+              })
+            );
 
-      const orderedData = {}; // This object will store our results
+            return {
+              regalId: regal.regalId,
+              id: regal.id,
+              artikel: artikelWithDetails, // Attach the detailed artikel list
+            };
+          })
+        );
 
-      for (let i = 0; i < regaleundso.length; i++) {
-        const regalId = regaleundso[i].regalId;
-        const artikel = await ArtikelService.getArtikelByRegalId(regalId);
-
-        console.log("Regal ID:", regalId);
-        if (artikel[0]) {
-          console.log("Artikel:", artikel[0].gwId);
-        } else {
-          console.log("keine Artikel");
-        }
-
-        // If there are no articles, skip to the next regal
-        if (artikel.length === 0) {
-          continue;
-        }
-
-        // Save the artikel data into the object with regalId as the key
-        orderedData[regalId] = artikel.map((item) => ({
-          gwId: item.gwId,
-          beschreibung: item.beschreibung,
-          menge: item.menge,
-          mindestmenge: item.mindestmenge,
-        }));
-
-        // Logging the orderedData object for verification
-        console.log("Ordered Data:", orderedData);
+        setRegale(regaleWithArtikel); // Set regale with articles
+      } catch (error) {
+        console.error("Error loading data:", error);
+      } finally {
+        setTimeout(() => setLoading(false), 1000);
       }
+    };
 
-      // Do something with the orderedData, for example, you can save it to a state if you need to display it
-      // setOrderedData(orderedData);
-    } catch (error) {
-      console.error("Fehler beim Abrufen der Artikel:", error);
-    }
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <View
+        style={{
+          backgroundColor: styles.backgroundColor,
+          justifyContent: "center",
+          alignContent: "center",
+          flex: 1,
+        }}
+      >
+        <ActivityIndicator size="large" color="#007AFF" style={styles.loader} />
+      </View>
+    );
   }
 
-  async function LoadArtikel() {
-    try {
-      const artikel = await ArtikelService.getAllArtikel();
-      console.log("Alle Artikel:", artikel);
-      setJsonData(artikel);
-    } catch (error) {
-      console.error("Fehler beim Abrufen der Artikel1:", error);
-    }
-  }
+  const RenderArtikel = ({ item, regalId }) => {
+    return (
+      <View style={localStyles.row}>
+        <View style={localStyles.cell}>
+          <Text style={localStyles.name}>{item.name}</Text>
+        </View>
+        <View style={localStyles.cell}>
+          <Text style={localStyles.cellText}>{item.gwId}</Text>
+        </View>
+        <View style={localStyles.cell}>
+          <Text style={localStyles.cellText}>{item.menge}</Text>
+        </View>
+        <View style={localStyles.cell}>
+          <Text
+            numberOfLines={1}
+            style={[localStyles.cellText, localStyles[item.status]]}
+          >
+            {item.status || "Unbekannt"}
+          </Text>
+        </View>
+        <TouchableOpacity
+          style={localStyles.cell}
+          onPress={() => {
+            setAction(item.gwId);
+          }}
+        >
+          <MaterialIcons name="more-horiz" size={24} color="#D3D3D3" />
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
+  const RenderRegal = ({ item }) => {
+    const regalId = item.regalId;
+    return (
+      <View style={localStyles.regalContainer}>
+        <Text style={localStyles.regalBez}>{regalId}</Text>
+        <View style={localStyles.table}>
+          <View style={[localStyles.row, localStyles.rowBorder]}>
+            <View style={localStyles.cell}>
+              <Text style={localStyles.tableContent}>Produkt Name</Text>
+            </View>
 
-  const handlePress = () => {
-    console.log("Action was pressed!");
+            <View style={localStyles.cell}>
+              <Text style={localStyles.tableContent}>Produkt ID</Text>
+            </View>
+
+            <View style={localStyles.cell}>
+              <Text style={localStyles.tableContent}>Menge</Text>
+            </View>
+
+            <View style={localStyles.cell}>
+              <Text style={localStyles.tableContent}>Status</Text>
+            </View>
+
+            <View style={localStyles.cell}>
+              <Text style={localStyles.tableContent}>Aktion</Text>
+            </View>
+          </View>
+          <FlashList
+            data={item.artikel}
+            keyExtractor={(artikel) => artikel.artikelOwnerId.toString()}
+            renderItem={({ item }) => (
+              <RenderArtikel item={item} regalId={regalId} />
+            )}
+            estimatedItemSize={50}
+            ListFooterComponent={<View style={{ height: 10 }} />}
+          />
+        </View>
+      </View>
+    );
   };
 
   return (
-    <ScrollView contentContainerStyle={localStyles.scrollContainer}>
-      <Text style={localStyles.regalBez}>Regal Bezeichnung</Text>
-      <View style={localStyles.table}>
-        {/* Table Header */}
-        <View style={[localStyles.row, localStyles.rowBorder]}>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Produkt Name</Text>
-          </View>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Produkt ID</Text>
-          </View>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Menge</Text>
-          </View>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Status</Text>
-          </View>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Aktion</Text>
-          </View>
-        </View>
+    <View style={localStyles.container}>
+      <FlashList
+        data={regale}
+        keyExtractor={(regal) => regal.id.toString()}
+        renderItem={({ item }) => <RenderRegal item={item} />}
+        estimatedItemSize={100}
+      />
+      <Modal
+        visible={Action ? true : false}
+        transparent={true}
+        statusBarTranslucent={true}
+        onRequestClose={() => {
+          setAction(null);
+          console.log("closed");
+        }}
+      >
+        <CustomPopup
+          cancelButtonText={"Abbrechen"}
+          greenButtonText={"Nachfüllen"}
+          redButtonText={"Löschen"}
+          yellowButtonText={"Bearbeiten"}
+          cancelCallback={() => setAction(null)}
+          greenCallBack={() => {
+            navigation.navigate("Actions", {
+              screen: "ArtikelNachfüllenNavigator",
+              params: { screen: "ArtikelNachfüllen", params: { gwId: Action } },
+            });
+            setAction(null);
+          }}
+          redCallback={async () => {
+            const value = Action;
+            setAction(null);
+            setConfirm(value);
+          }}
+        />
+      </Modal>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        statusBarTranslucent={true}
+        visible={confirm ? true : false}
+        onRequestClose={() => {
+          setAction(null);
+          setConfirm(false);
+          console.log("closed");
+        }}
+      >
+        <ConfirmPopup
+          greenMode={false}
+          greyCallback={() => {
+            const value = confirm;
+            setConfirm(null);
+            setAction(value);
+          }}
+          colorCallback={async () => {
+            await ArtikelBesitzerService.deleteArtikelOwnerByArtikelId(confirm);
+            await LogService.BackupLogByArtikelId(confirm);
+            await ArtikelService.deleteArtikel(confirm);
 
-        {/* Table Rows */}
-        {data.map((item, index) => (
-          <View key={index} style={[localStyles.row, localStyles.rowBorder]}>
-            <View style={localStyles.cell}>
-              <Text style={localStyles.name}>{item.name}</Text>
-            </View>
-            <View style={localStyles.cell}>
-              <Text style={localStyles.cellText}>{item.id}</Text>
-            </View>
-            <View style={localStyles.cell}>
-              <Text style={localStyles.cell}>{item.menge}</Text>
-            </View>
-            <View style={localStyles.cell}>
-              <Text style={[localStyles.cell, localStyles[item.status]]}>
-                {item.status}
-              </Text>
-            </View>
-            <View style={localStyles.cell}>
-              <TouchableOpacity onPress={handlePress}>
-                <MaterialIcons name="more-horiz" size={24} color="#D3D3D3" />
-              </TouchableOpacity>
-            </View>
-          </View>
-        ))}
-      </View>
-      <Text style={localStyles.regalBez}>Regal Bezeichnung</Text>
-      <View style={localStyles.table}>
-        {/* Table Header */}
-        <View style={[localStyles.row, localStyles.rowBorder]}>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Produkt Name</Text>
-          </View>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Produkt ID</Text>
-          </View>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Menge</Text>
-          </View>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Status</Text>
-          </View>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Aktion</Text>
-          </View>
-        </View>
+            console.log("Artikel deleted " + confirm);
 
-        {/* Table Rows */}
-        {data.map((item, index) => (
-          <View key={index} style={[localStyles.row, localStyles.rowBorder]}>
-            <View style={localStyles.cell}>
-              <Text style={localStyles.name}>{item.name}</Text>
-            </View>
-            <View style={localStyles.cell}>
-              <Text style={localStyles.cellText}>{item.id}</Text>
-            </View>
-            <View style={localStyles.cell}>
-              <Text style={localStyles.cell}>{item.menge}</Text>
-            </View>
-            <View style={localStyles.cell}>
-              <Text style={[localStyles.cell, localStyles[item.status]]}>
-                {item.status}
-              </Text>
-            </View>
-            <View style={localStyles.cell}>
-              <TouchableOpacity onPress={handlePress}>
-                <MaterialIcons name="more-horiz" size={24} color="#D3D3D3" />
-              </TouchableOpacity>
-            </View>
-          </View>
-        ))}
-      </View>
-      <Text style={localStyles.regalBez}>Regal Bezeichnung</Text>
-      <View style={localStyles.table}>
-        {/* Table Header */}
-        <View style={[localStyles.row, localStyles.rowBorder]}>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Produkt Name</Text>
-          </View>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Produkt ID</Text>
-          </View>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Menge</Text>
-          </View>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Status</Text>
-          </View>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Aktion</Text>
-          </View>
-        </View>
-
-        {/* Table Rows */}
-        {data.map((item, index) => (
-          <View key={index} style={[localStyles.row, localStyles.rowBorder]}>
-            <View style={localStyles.cell}>
-              <Text style={localStyles.name}>{item.name}</Text>
-            </View>
-            <View style={localStyles.cell}>
-              <Text style={localStyles.cellText}>{item.id}</Text>
-            </View>
-            <View style={localStyles.cell}>
-              <Text style={localStyles.cell}>{item.menge}</Text>
-            </View>
-            <View style={localStyles.cell}>
-              <Text style={[localStyles.cell, localStyles[item.status]]}>
-                {item.status}
-              </Text>
-            </View>
-            <View style={localStyles.cell}>
-              <TouchableOpacity onPress={handlePress}>
-                <MaterialIcons name="more-horiz" size={24} color="#D3D3D3" />
-              </TouchableOpacity>
-            </View>
-          </View>
-        ))}
-      </View>
-    </ScrollView>
+            Toast.show({
+              type: "success",
+              text1: "Erfolgreich",
+              text2: "Artikel mit der GWID " + confirm + " gelöscht",
+              visibilityTime: 1000,
+            });
+            setConfirm(null);
+          }}
+        />
+      </Modal>
+    </View>
   );
-}
-
+};
 const localStyles = StyleSheet.create({
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: "center",
-    alignItems: "center",
+  container: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
     backgroundColor: styles.backgroundColor,
     paddingVertical: 20,
+  },
+  regalContainer: {
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
   },
   table: {
     borderRadius: 20,
@@ -239,17 +257,17 @@ const localStyles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 4,
-    width: 349,
-    marginBottom: 20,
+    flex: 1,
+    margin: 20,
     padding: 5,
   },
   regalBez: {
     color: "#292D32", // Text color
     fontFamily: "Inter", // Font family
-    fontSize: 12, // Font size in points
+    fontSize: 18, // Font size in points
     fontStyle: "normal", // Normal font style
     fontWeight: "400", // Font weight
-    lineHeight: 16, // lineHeight, you can adjust it based on your design preference
+
     marginBottom: 10,
   },
   tableContent: {
@@ -279,7 +297,7 @@ const localStyles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     textAlign: "center",
-    width: 60,
+    flex: 1,
   },
   rowBorder: {
     borderBottomWidth: 2,
@@ -321,3 +339,4 @@ const localStyles = StyleSheet.create({
     textAlign: "left",
   },
 });
+export default LagerScreen;
