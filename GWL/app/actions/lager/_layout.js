@@ -10,11 +10,10 @@ export default function LagerNavigator() {
       <Stack.Screen
         name="Lager"
         options={{
-          title: "Lager verwalten",
+          title: "Lagerplätze",
           headerShown: true,
-          statusBarBackgroundColor: styles.backgroundColor,
-          statusBarStyle: "dark",
-          headerTitleStyle: styles.header,
+          headerStyle: {},
+          headerTitleStyle: [styles.header],
         }}
         component={IndexScreen} // Using the same IndexScreen for all
       />
