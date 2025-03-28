@@ -115,12 +115,15 @@ export async function testInsertAndFetch() {
       },
       "B00.000"
     );
-    await ArtikelBesitzerService.createArtikelOwner(
-      {
-        menge: 5,
-      },
-      String(i + 1),
-      "B00.000"
-    );
+
+    for (let i = 1; i < 9; i++) {
+      await ArtikelBesitzerService.createArtikelOwner(
+        {
+          menge: 5,
+        },
+        String(i + 1),
+        "B00.00" + i
+      );
+    }
   }
 }
