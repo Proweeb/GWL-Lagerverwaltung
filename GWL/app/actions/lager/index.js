@@ -1,4 +1,3 @@
-// import { heightPercentageToDP } from "react-native-responsive-screen";
 import React, { useEffect, useState } from "react";
 import {
   View,
