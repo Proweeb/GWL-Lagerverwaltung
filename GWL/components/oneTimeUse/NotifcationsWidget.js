@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, SafeAreaView, Dimensions } from "react-native";
 import Carousel from "react-native-reanimated-carousel"; // Carousel import
 import { styles } from "../styles";
 import ArtikelService from "../../database/datamapper/ArtikelHelper";
+import { widthPercentageToDP } from "react-native-responsive-screen";
 
 export default function NotificationsWidget() {
   const [expiredArticles, setExpiredArticles] = React.useState([]);
@@ -73,7 +74,8 @@ export default function NotificationsWidget() {
           <Carousel
             loop
             autoPlay
-            width={300} // Dynamic width for the carousel
+            width={widthPercentageToDP(80)} // Dynamic width for the carousel
+            //height={widthPercentageToDP(80) * 0.25}
             data={expiredArticles}
             scrollAnimationDuration={1000}
             //onSnapToItem={(index) => console.log("Active Index: ", index)} // Optional: Log active index
@@ -137,8 +139,7 @@ const notificationstyle = StyleSheet.create({
     justifyContent: "center",
     flex: 1,
     borderWidth: 1,
-    width: "80%",
-    marginHorizontal: 25, // Margin for spacing between carousel items
+    marginHorizontal: 10, // Margin for spacing between carousel items
   },
   articleText: {
     fontSize: 18,
