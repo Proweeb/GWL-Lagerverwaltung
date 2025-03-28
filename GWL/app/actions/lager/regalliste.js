@@ -1,68 +1,119 @@
 import { Button, Text, View, TouchableOpacity, Modal } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { styles } from "../../components/styles";
+import { styles } from "../../../components/styles";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { useState, useEffect } from "react";
 import { StyleSheet } from "react-native";
-import ArtikelService from "../../database/datamapper/ArtikelHelper";
-import RegalService from "../../database/datamapper/RegalHelper";
-import ArtikelBesitzerService from "../../database/datamapper/ArtikelBesitzerHelper";
+import ArtikelService from "../../../database/datamapper/ArtikelHelper";
+import RegalService from "../../../database/datamapper/RegalHelper";
+import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper";
 import { FlashList } from "@shopify/flash-list";
-import CustomPopup from "../../components/utils/Modals/CustomPopUp";
+import CustomPopup from "../../../components/utils/Modals/CustomPopUp";
 import Toast from "react-native-toast-message";
-import { database } from "../../database/database"; // Import your WatermelonDB database instance
-import ConfirmPopup from "../../components/utils/Modals/ConfirmPopUp";
-import LogService from "../../database/datamapper/LogHelper";
+import { database } from "../../../database/database"; // Import your WatermelonDB database instance
+import ConfirmPopup from "../../../components/utils/Modals/ConfirmPopUp";
+import LogService from "../../../database/datamapper/LogHelper";
+import { useRoute } from "@react-navigation/native";
 
-const WarenScreen = () => {
+const RegallisteScreen = () => {
   const navigation = useNavigation();
   const [jsonData, setJsonData] = useState([]);
   const [Action, setAction] = useState(null);
   const [confirm, setConfirm] = useState(null);
   const isFocused = useIsFocused();
 
+  const route = useRoute();
+  const passedRegalId = route.params?.regalId;
+
+  //   useEffect(() => {
+  //     navigation.setOptions({
+  //       headerShown: true,
+  //       title: passedRegalId,
+  //     });
+  //     const fetchData = async () => {
+  //       try {
+  //         // Fetch initial data from the database
+  //         const artikel = await ArtikelService.getAllArtikel();
+  //         setJsonData(artikel);
+  //       } catch (error) {
+  //         console.error("Fehler beim Abrufen der Artikel:", error);
+  //       }
+  //     };
+
+  //     fetchData();
+
+  //     // Set up a real-time listener for changes in the `artikel` table
+  //     const subscriber = database.collections
+  //       .get("artikel")
+  //       .query()
+  //       .observe()
+  //       .subscribe((artikelSnapshot) => {
+  //         const artikelData = artikelSnapshot.map((artikel) => ({
+  //           gwId: artikel.gwId,
+  //           beschreibung: artikel.beschreibung,
+  //           menge: artikel.menge,
+  //           status: artikel.status,
+  //         }));
+
+  //         // Update the state with the new data to trigger re-render
+  //         setJsonData(artikelData);
+  //       });
+
+  //     // Cleanup subscription on component unmount
+  //     return () => subscriber.unsubscribe();
+  //   }, [isFocused]); // The effect will re-run when the screen gains focus
   useEffect(() => {
+    navigation.setOptions({
+      headerShown: true,
+      title: passedRegalId,
+    });
+
     const fetchData = async () => {
       try {
-        // Fetch initial data from the database
-        const artikel = await ArtikelService.getAllArtikel();
-        setJsonData(artikel);
+        // Fetch the specific regal based on passedRegalId
+        const regal = await RegalService.getRegalById(passedRegalId);
+        if (!regal) {
+          console.error("Regal not found");
+          return;
+        }
+
+        // Fetch articles by regalId
+        const artikelList =
+          await ArtikelBesitzerService.getArtikelOwnersByRegalId(passedRegalId);
+
+        // Fetch detailed artikel data for each artikel in the regal
+        const artikelWithDetails = await Promise.all(
+          artikelList.map(async (artikelOwner) => {
+            const artikel = await artikelOwner.artikel.fetch();
+            return {
+              regalId: passedRegalId,
+              gwId: artikel.gwId,
+              beschreibung: artikel.beschreibung,
+              status: artikel.status,
+              artikelOwnerId: artikelOwner.id,
+              menge: artikelOwner.menge,
+            };
+          })
+        );
+
+        // Set the state with the filtered artikel data
+        setJsonData(artikelWithDetails);
       } catch (error) {
         console.error("Fehler beim Abrufen der Artikel:", error);
       }
     };
 
     fetchData();
-
-    // Set up a real-time listener for changes in the `artikel` table
-    const subscriber = database.collections
-      .get("artikel")
-      .query()
-      .observe()
-      .subscribe((artikelSnapshot) => {
-        const artikelData = artikelSnapshot.map((artikel) => ({
-          gwId: artikel.gwId,
-          beschreibung: artikel.beschreibung,
-          menge: artikel.menge,
-          status: artikel.status,
-        }));
-
-        // Update the state with the new data to trigger re-render
-        setJsonData(artikelData);
-      });
-
-    // Cleanup subscription on component unmount
-    return () => subscriber.unsubscribe();
-  }, [isFocused]); // The effect will re-run when the screen gains focus
+  }, [isFocused]);
 
   const renderItem = ({ item }) => {
-    const { menge, beschreibung, gwId } = item;
+    const { menge, beschreibung, gwId, regalId } = item;
 
     return (
       <TouchableOpacity
         style={[localStyles.row, localStyles.rowBorder]}
         onPress={() => {
-          setAction(gwId);
+          setAction({ gwId: gwId, regalId: regalId });
         }}
       >
         <View style={localStyles.cell}>
@@ -161,7 +212,10 @@ const WarenScreen = () => {
           greenCallBack={() => {
             navigation.navigate("Actions", {
               screen: "ArtikelNachfüllenNavigator",
-              params: { screen: "ArtikelNachfüllen", params: { gwId: Action } },
+              params: {
+                screen: "ArtikelNachfüllen",
+                params: { gwId: Action.gwId, regalId: Action.regalId },
+              },
             });
             setAction(null);
           }}
@@ -202,11 +256,13 @@ const WarenScreen = () => {
             setAction(value);
           }}
           colorCallback={async () => {
-            await ArtikelBesitzerService.deleteArtikelOwnerByArtikelId(confirm);
-            await LogService.BackupLogByArtikelId(confirm);
-            await ArtikelService.deleteArtikel(confirm);
+            await ArtikelBesitzerService.deleteArtikelOwnerByArtikelIdAndRegalId(
+              confirm.gwId,
+              confirm.regalId
+            );
+            await LogService.BackupLogByArtikelId(confirm.gwId);
 
-            console.log("Artikel deleted " + confirm);
+            console.log("Artikel deleted " + confirm.gwId);
 
             Toast.show({
               type: "success",
@@ -222,7 +278,7 @@ const WarenScreen = () => {
   );
 };
 
-export default WarenScreen;
+export default RegallisteScreen;
 
 const localStyles = StyleSheet.create({
   listContainer: {

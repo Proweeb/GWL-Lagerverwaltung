@@ -9,6 +9,9 @@ async function createArtikelOwner(artikelOwnerData, artikelId, regalId) {
 
   if (artikelId !== null) {
     artikel = await ArtikelService.getArtikelById(artikelId);
+    await ArtikelService.updateArtikel(artikelId, {
+      menge: Number(artikelOwnerData.menge),
+    });
   }
 
   if (regalId !== null) {

@@ -102,7 +102,7 @@ export async function testInsertAndFetch() {
     //   );
     // }
   });
-  for (let i = 30; i < 100; i++) {
+  for (let i = 30; i < 50; i++) {
     await ArtikelService.createArtikel(
       {
         gwId: `${i + 1}`,
@@ -113,17 +113,27 @@ export async function testInsertAndFetch() {
         kunde: "Test Kunde",
         ablaufdatum: Date.now() + 0 * 24 * 60 * 60 * 1000,
       },
-      "B00.000"
+      "A00.000"
     );
 
-    for (let i = 1; i < 9; i++) {
+    for (let j = 1; j < 9; j++) {
+      // if (j % 2 == 0) {
       await ArtikelBesitzerService.createArtikelOwner(
         {
           menge: 5,
         },
         String(i + 1),
-        "B00.00" + i
+        "B00.00" + j
       );
+      // } else {
+      //   await ArtikelBesitzerService.createArtikelOwner(
+      //     {
+      //       menge: 5,
+      //     },
+      //     String(i + 1),
+      //     "A00.00" + j
+      //   );
+      // }
     }
   }
 }

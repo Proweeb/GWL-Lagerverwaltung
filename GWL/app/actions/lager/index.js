@@ -85,11 +85,14 @@ const LagerScreen = () => {
     );
   }
   const RenderFach = ({ item }) => {
-    useEffect(() => {});
+    useEffect(() => {}, [item]);
     return (
       <TouchableOpacity
         onPress={() => {
-          console.log(item.regalId);
+          navigation.navigate("Actions", {
+            screen: "LagerNavigator",
+            params: { screen: "Regalliste", params: { regalId: item.regalId } },
+          });
         }}
         style={[
           {
