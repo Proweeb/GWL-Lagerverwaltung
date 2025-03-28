@@ -26,7 +26,8 @@ const LogsWidget = ({ startDate, endDate }) => {
           Q.where(
             "created_at",
             Q.between(startDate.getTime(), endDate.getTime())
-          )
+          ),
+          Q.sortBy("created_at", Q.desc)
         )
         .fetch(); // Fetch instead of observe
 
