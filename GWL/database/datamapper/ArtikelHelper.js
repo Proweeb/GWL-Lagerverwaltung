@@ -66,19 +66,6 @@ async function updateArtikel(gwid, updatedData) {
       console.error("Artikel not found for gwId:", gwid);
       return;
     }
-    let text;
-    if (updatedData.menge < 0) {
-      text = "Entnehmen";
-    } else {
-      text = "Nachfüllen";
-    }
-    await database.get("logs").create((log) => {
-      log.beschreibung = text;
-      log.menge = Number(updatedData.menge);
-      log.gesamtMenge = Number(artikel[0].menge) + Number(updatedData.menge);
-      log.artikel.set(artikel[0]);
-      log.createdAt = Date.now();
-    });
 
     await artikel[0].update((art) => {
       if (updatedData.gwId !== null && updatedData.gwId !== undefined) {

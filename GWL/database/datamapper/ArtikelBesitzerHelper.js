@@ -18,8 +18,15 @@ async function createArtikelOwner(artikelOwnerData, artikelId, regalId) {
     regal = await RegalService.getRegalById(regalId);
   }
 
+  let text;
+  if (artikelOwnerData.menge < 0) {
+    text = "Entnehmen";
+  } else {
+    text = "Nachfüllen";
+  }
+
   return await database.write(async () => {
-    return database.get("artikel_besitzer").create((artikelOwner) => {
+    const owner = database.get("artikel_besitzer").create((artikelOwner) => {
       artikelOwner.menge = artikelOwnerData.menge;
       artikelOwner.artikel.set(artikel);
       artikelOwner.regal.set(regal);
@@ -28,6 +35,15 @@ async function createArtikelOwner(artikelOwnerData, artikelId, regalId) {
         artikelOwner.createdAt = artikelOwnerData.createdAt;
       }
     });
+    await database.get("logs").create((log) => {
+      log.beschreibung = text;
+      log.menge = Number(artikelOwnerData.menge);
+      log.gesamtMenge = Number(artikel.menge);
+      log.artikel.set(artikel);
+      log.regal.set(regal);
+      log.createdAt = Date.now();
+    });
+    return owner;
   });
 }
 
