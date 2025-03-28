@@ -18,7 +18,8 @@ const InventoryWidget = () => {
             Q.sortBy("created_at", "desc"),
             Q.or(
               Q.where("beschreibung", "Entnehmen"),
-              Q.where("beschreibung", "Einlagern")
+              Q.where("beschreibung", "Einlagern"),
+              Q.where("beschreibung", "Nachfüllen")
             ),
             Q.where("is_backup", false),
             Q.take(3) // Limit to the latest 3 logs
