@@ -17,13 +17,6 @@ const actions = [
       label: "Art.-Nachfüllen ",
       route: "ArtikelNachfüllenNavigator",
     },
-    {
-      screen: "PlatzHinzufügenNavigator",
-      iconName: "package-variant-closed", // Represents adding a storage location
-      iconType: "MaterialCommunityIcons",
-      label: "LP-Hinzufügen",
-      route: "PlatzHinzufügenNavigator",
-    },
 
     {
       screen: "ArtikelEinlagernNavigator",
@@ -31,6 +24,13 @@ const actions = [
       iconType: "MaterialCommunityIcons",
       label: "Art.-Einlagern",
       route: "ArtikelEinlagernNavigator",
+    },
+    {
+      screen: "ArtikelEntnehmenNavigator",
+      iconName: "cart-minus", // Represents taking an item out
+      iconType: "MaterialCommunityIcons",
+      label: "Art.-Entnehmen",
+      route: "ArtikelEntnehmenNavigator",
     },
   ],
   [
@@ -42,18 +42,18 @@ const actions = [
       route: "LagerNavigator",
     },
     {
+      screen: "PlatzHinzufügenNavigator",
+      iconName: "package-variant-closed", // Represents adding a storage location
+      iconType: "MaterialCommunityIcons",
+      label: "LP-Hinzufügen",
+      route: "PlatzHinzufügenNavigator",
+    },
+    {
       screen: "ArtikelPlatzHinzufügenNavigator",
       iconName: "package-variant", // Represents assigning an item to a place
       iconType: "MaterialCommunityIcons",
       label: "Art. & LP-Ergänzen",
       route: "ArtikelPlatzHinzufügenNavigator",
-    },
-    {
-      screen: "ArtikelEntnehmenNavigator",
-      iconName: "cart-minus", // Represents taking an item out
-      iconType: "MaterialCommunityIcons",
-      label: "Art.-Entnehmen",
-      route: "ArtikelEntnehmenNavigator",
     },
   ],
 ];
