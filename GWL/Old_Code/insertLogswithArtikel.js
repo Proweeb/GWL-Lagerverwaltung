@@ -10,9 +10,9 @@ export async function testInsertAndFetch() {
       tables.map((table) => database.get(table).query().fetch())
     );
 
-    await database.batch(
-      ...allRecords.flat().map((record) => record.prepareDestroyPermanently())
-    );
+    await database.batch([
+      ...allRecords.flat().map((record) => record.prepareDestroyPermanently()),
+    ]);
 
     // Create Regale (shelves)
     const regaleNames = ["A00", "B00", "C00"];
