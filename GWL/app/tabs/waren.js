@@ -219,6 +219,7 @@ const WarenScreen = () => {
             setConfirm(null);
           }}
           colorCallback={async () => {
+            await ArtikelBesitzerService.deleteArtikelOwnerByArtikelId(confirm);
             await LogService.BackupLogByArtikelId(confirm);
             await ArtikelService.deleteArtikel(confirm);
 
