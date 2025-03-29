@@ -104,7 +104,7 @@ const WarenScreen = () => {
     return (
       <TouchableOpacity
         style={[localStyles.row, localStyles.rowBorder]}
-        onPress={() => setAction({ gwId: item.gwId, regalId: item.regalId })}
+        onPress={() => setAction(item.gwId)}
         activeOpacity={0.6}
       >
         <View style={localStyles.cell}>
@@ -219,16 +219,13 @@ const WarenScreen = () => {
             setConfirm(null);
           }}
           colorCallback={async () => {
-            await ArtikelBesitzerService.deleteArtikelOwnerByArtikelIdAndRegalId(
-              confirm.gwId,
-              confirm.regalId
-            );
-            await LogService.BackupLogByArtikelId(confirm.gwId);
+            await LogService.BackupLogByArtikelId(confirm);
+            await ArtikelService.deleteArtikel(confirm);
 
             Toast.show({
               type: "success",
               text1: "Erfolgreich",
-              text2: `Artikel mit GWID ${confirm.gwId} gelöscht`,
+              text2: `Artikel mit GWID ${confirm} gelöscht`,
               visibilityTime: 1000,
             });
 
