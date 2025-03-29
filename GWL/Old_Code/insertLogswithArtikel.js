@@ -27,7 +27,7 @@ export async function testInsertAndFetch() {
     }
   });
 
-  // Sample item names for diversity
+  // List of 50 unique item names
   const artikelNamen = [
     "Kiwi",
     "Apfel",
@@ -39,16 +39,52 @@ export async function testInsertAndFetch() {
     "Paprika",
     "Möhre",
     "Zitrone",
+    "Ananas",
+    "Birne",
+    "Mango",
+    "Pfirsich",
+    "Melone",
+    "Traube",
+    "Erdbeere",
+    "Himbeere",
+    "Brombeere",
+    "Johannisbeere",
+    "Kirsche",
+    "Pflaume",
+    "Aprikose",
+    "Granatapfel",
+    "Feige",
+    "Dattel",
+    "Zuckermelone",
+    "Honigmelone",
+    "Avocado",
+    "Litschi",
+    "Mandarine",
+    "Nektarine",
+    "Passionsfrucht",
+    "Kokosnuss",
+    "Kohlrabi",
+    "Spargel",
+    "Rettich",
+    "Radieschen",
+    "Rosenkohl",
+    "Blumenkohl",
+    "Brokkoli",
+    "Spinat",
+    "Mangold",
+    "Lauch",
+    "Sellerie",
+    "Zucchini",
+    "Aubergine",
+    "Bohnen",
+    "Erbsen",
+    "Linsen",
   ];
 
   const regale = ["A00", "B00", "C00"];
 
-  for (let i = 1; i <= 50; i++) {
-    const artikelName = artikelNamen[i % artikelNamen.length]; // Rotate names
-    const uniqueName = `${artikelName}-${Date.now()}-${Math.floor(
-      Math.random() * 1000
-    )}`; // Unique name by adding a timestamp and random number
-
+  for (let i = 0; i < 50; i++) {
+    const artikelName = artikelNamen[i];
     const menge = Math.floor(Math.random() * 20) + 1; // Menge between 1 and 20
     const mindestMenge = Math.floor(Math.random() * 5) + 5; // MindestMenge 5-10
 
@@ -59,9 +95,9 @@ export async function testInsertAndFetch() {
 
     const artikel = await ArtikelService.createArtikel(
       {
-        gwId: `${i}`,
-        firmenId: `firmen456_${i}`,
-        beschreibung: uniqueName, // Use unique name for each artikel
+        gwId: `${i + 1}`,
+        firmenId: `firmen456_${i + 1}`,
+        beschreibung: artikelName,
         menge,
         mindestMenge,
         kunde: "Test Kunde",
@@ -81,7 +117,7 @@ export async function testInsertAndFetch() {
         {
           menge: Math.floor(menge / numShelves),
         },
-        String(i),
+        String(i + 1),
         regalBesitzer
       );
     }
