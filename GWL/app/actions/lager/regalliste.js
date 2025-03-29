@@ -262,7 +262,7 @@ const RegallisteScreen = () => {
             Toast.show({
               type: "success",
               text1: "Erfolgreich",
-              text2: `Artikel mit GWID ${confirm.gwId} gelöscht`,
+              text2: `Artikel ${confirm.gwId} aus dem Regal ${confirm.regalId} gelöscht`,
               visibilityTime: 1000,
             });
 
