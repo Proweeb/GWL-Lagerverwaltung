@@ -17,8 +17,10 @@ import LogService from "../../database/datamapper/LogHelper";
 const WarenScreen = () => {
   const navigation = useNavigation();
   const [jsonData, setJsonData] = useState([]);
-  const [Action, setAction] = useState(null);
+  const [action, setAction] = useState(null);
   const [confirm, setConfirm] = useState(null);
+  const [sortColumn, setSortColumn] = useState("gwId");
+  const [sortDirection, setSortDirection] = useState("asc");
   const isFocused = useIsFocused();
 
   useEffect(() => {
@@ -55,56 +57,81 @@ const WarenScreen = () => {
     return () => subscriber.unsubscribe();
   }, [isFocused]); // The effect will re-run when the screen gains focus
 
-  const renderItem = ({ item }) => {
-    const { menge, beschreibung, gwId } = item;
+  const handleSort = (column) => {
+    let newDirection = "asc";
+    if (sortColumn === column && sortDirection === "asc") {
+      newDirection = "desc"; // Toggle direction
+    }
 
+    const statusOrder = { ok: 1, low: 2, out: 3 };
+
+    const sortedData = [...jsonData].sort((a, b) => {
+      if (column === "status") {
+        // Custom order for status
+        return newDirection === "asc"
+          ? statusOrder[a.status] - statusOrder[b.status]
+          : statusOrder[b.status] - statusOrder[a.status];
+      } else if (column === "beschreibung") {
+        // String comparison
+        return newDirection === "asc"
+          ? a.beschreibung.localeCompare(b.beschreibung)
+          : b.beschreibung.localeCompare(a.beschreibung);
+      } else if (column === "gwId") {
+        // Number comparison
+        return newDirection === "asc" ? a.gwId - b.gwId : b.gwId - a.gwId;
+      } else if (column === "menge") {
+        // Numeric comparison
+        return newDirection === "asc" ? a.menge - b.menge : b.menge - a.menge;
+      }
+      return 0;
+    });
+
+    setJsonData(sortedData);
+    setSortColumn(column);
+    setSortDirection(newDirection);
+  };
+
+  // Table Headers Map
+  const tableHeaders = [
+    { key: "beschreibung", label: "Name" },
+    { key: "gwId", label: "GWID" },
+    { key: "menge", label: "Menge" },
+    { key: "status", label: "Status" },
+    { key: "action", label: "Aktion" },
+  ];
+
+  const renderItem = ({ item }) => {
     return (
       <TouchableOpacity
         style={[localStyles.row, localStyles.rowBorder]}
-        onPress={() => {
-          setAction(gwId);
-        }}
+        onPress={() => setAction({ gwId: item.gwId, regalId: item.regalId })}
         activeOpacity={0.6}
       >
         <View style={localStyles.cell}>
           <Text numberOfLines={1} style={localStyles.name}>
-            {beschreibung}
+            {item.beschreibung}
           </Text>
         </View>
         <View style={localStyles.cell}>
           <Text numberOfLines={1} style={localStyles.cellText}>
-            {gwId}
+            {item.gwId}
           </Text>
         </View>
         <View style={localStyles.cell}>
           <Text numberOfLines={1} style={localStyles.cellText}>
-            {menge}
+            {item.menge}
           </Text>
         </View>
-
         <View style={localStyles.cell}>
-          <View
-            style={[
-              item.status && {
-                borderRadius: 30,
-                elevation: 1,
-                overflow: "hidden",
-              },
-              styles[item.status],
-            ]}
+          <Text
+            numberOfLines={1}
+            style={[localStyles.cellText, localStyles[item.status]]}
           >
-            <Text
-              numberOfLines={1}
-              style={[localStyles.cellText, localStyles[item.status]]}
-            >
-              {item.status || "Unbekannt"}
-            </Text>
-          </View>
+            {item.status || "Unbekannt"}
+          </Text>
         </View>
         <View style={localStyles.cell}>
-          <View>
-            <MaterialIcons name="more-horiz" size={24} color="#D3D3D3" />
-          </View>
+          <MaterialIcons name="more-horiz" size={24} color="#D3D3D3" />
         </View>
       </TouchableOpacity>
     );
@@ -118,31 +145,30 @@ const WarenScreen = () => {
       <View style={localStyles.table}>
         {/* Table Header */}
         <View style={[localStyles.row, localStyles.rowBorder]}>
-          <View style={localStyles.cell}>
-            <Text numberOfLines={1} style={localStyles.tableContent}>
-              Name
-            </Text>
-          </View>
-          <View style={localStyles.cell}>
-            <Text numberOfLines={1} style={localStyles.tableContent}>
-              GWID
-            </Text>
-          </View>
-          <View style={localStyles.cell}>
-            <Text numberOfLines={1} style={localStyles.tableContent}>
-              Menge
-            </Text>
-          </View>
-          <View style={localStyles.cell}>
-            <Text numberOfLines={1} style={localStyles.tableContent}>
-              Status
-            </Text>
-          </View>
-          <View style={localStyles.cell}>
-            <Text numberOfLines={1} style={localStyles.tableContent}>
-              Aktion
-            </Text>
-          </View>
+          {tableHeaders.map((header) =>
+            header.label != "Aktion" ? (
+              <TouchableOpacity
+                key={header.key}
+                style={localStyles.cell}
+                onPress={() => handleSort(header.key)}
+              >
+                <Text style={localStyles.tableContent}>
+                  {header.label}{" "}
+                  {sortColumn === header.key
+                    ? sortDirection === "asc"
+                      ? "▲"
+                      : "▼"
+                    : ""}
+                </Text>
+              </TouchableOpacity>
+            ) : (
+              <View style={localStyles.cell} key={header}>
+                <Text numberOfLines={1} style={localStyles.tableContent}>
+                  {header.label}
+                </Text>
+              </View>
+            )
+          )}
         </View>
 
         {/* FlashList */}
@@ -154,78 +180,58 @@ const WarenScreen = () => {
           estimatedItemSize={37}
         />
       </View>
-
       <Modal
-        visible={Action ? true : false}
-        transparent={true}
-        statusBarTranslucent={true}
-        onRequestClose={() => {
-          setAction(null);
-          console.log("closed");
-        }}
+        visible={!!action}
+        transparent
+        statusBarTranslucent
+        onRequestClose={() => setAction(null)}
       >
         <CustomPopup
-          cancelButtonText={"Abbrechen"}
-          greenButtonText={"Nachfüllen"}
-          redButtonText={"Löschen"}
-          yellowButtonText={"Bearbeiten"}
+          cancelButtonText="Abbrechen"
+          greenButtonText="Nachfüllen"
+          redButtonText="Löschen"
+          yellowButtonText="Bearbeiten"
           cancelCallback={() => setAction(null)}
           greenCallBack={() => {
             navigation.navigate("Actions", {
               screen: "ArtikelNachfüllenNavigator",
-              params: { screen: "ArtikelNachfüllen", params: { gwId: Action } },
+              params: { screen: "ArtikelNachfüllen", params: action },
             });
             setAction(null);
           }}
-          redCallback={async () => {
-            // console.log(await ArtikelService.getArtikelById(Action));
-            // await ArtikelService.deleteArtikel(Action);
-            // console.log("Artikel deleted " + Action);
-            // Toast.show({
-            //   type: "success",
-            //   text1: "Erfolgreich",
-            //   text2: "Artikel mit der GWID " + Action + " gelöscht",
-            // });
-            // setAction(null);
-            // console.log(await ArtikelService.getArtikelById(Action));
-            const value = Action;
+          redCallback={() => {
+            setConfirm(action);
             setAction(null);
-            setConfirm(value);
           }}
         />
       </Modal>
 
       <Modal
-        animationType="slide"
-        transparent={true}
-        statusBarTranslucent={true}
-        visible={confirm ? true : false}
-        onRequestClose={() => {
-          setAction(null);
-          setConfirm(false);
-          console.log("closed");
-        }}
+        visible={!!confirm}
+        transparent
+        statusBarTranslucent
+        onRequestClose={() => setConfirm(null)}
       >
         <ConfirmPopup
           greenMode={false}
           greyCallback={() => {
-            const value = confirm;
+            setAction(confirm);
             setConfirm(null);
-            setAction(value);
           }}
           colorCallback={async () => {
-            await ArtikelBesitzerService.deleteArtikelOwnerByArtikelId(confirm);
-            await LogService.BackupLogByArtikelId(confirm);
-            await ArtikelService.deleteArtikel(confirm);
-
-            console.log("Artikel deleted " + confirm);
+            await ArtikelBesitzerService.deleteArtikelOwnerByArtikelIdAndRegalId(
+              confirm.gwId,
+              confirm.regalId
+            );
+            await LogService.BackupLogByArtikelId(confirm.gwId);
 
             Toast.show({
               type: "success",
               text1: "Erfolgreich",
-              text2: "Artikel mit der GWID " + confirm + " gelöscht",
+              text2: `Artikel mit GWID ${confirm.gwId} gelöscht`,
               visibilityTime: 1000,
             });
+
             setConfirm(null);
           }}
         />

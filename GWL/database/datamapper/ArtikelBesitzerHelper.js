@@ -2,6 +2,8 @@ import { database } from "../database";
 import { Q } from "@nozbe/watermelondb";
 import ArtikelService from "./ArtikelHelper";
 import RegalService from "./RegalHelper";
+import LogService from "./LogHelper";
+import { logTypes } from "../../components/enum";
 
 async function createArtikelOwner(artikelOwnerData, artikelId, regalId) {
   let artikel = null;
@@ -65,6 +67,7 @@ async function deleteArtikelOwner(gwId, regalId) {
   return database.write(async () => {
     const artikel = await ArtikelService.getArtikelById(gwId);
     const regal = await RegalService.getRegalById(regalId);
+
     const artikelOwner = await database
       .get("artikel_besitzer")
       .query(Q.where("gw_id", artikel.id), Q.where("regal_id", regal.id))
@@ -97,7 +100,7 @@ async function deleteArtikelOwnerByArtikelIdAndRegalId(gwId, regalId) {
   const artikel = await ArtikelService.getArtikelById(gwId);
   const regal = await RegalService.getRegalById(regalId);
 
-  return database.write(async () => {
+  await database.write(async () => {
     const artikelOwner = await database
       .get("artikel_besitzer")
       .query(
@@ -106,6 +109,19 @@ async function deleteArtikelOwnerByArtikelIdAndRegalId(gwId, regalId) {
       )
       .fetch();
 
+    if (artikelOwner[0].menge > 0) {
+      await database.get("logs").create((log) => {
+        log.beschreibung = logTypes.artikelEntnehmen;
+        log.menge = Number(artikelOwner[0].menge) * -1;
+        log.gesamtMenge = Number(artikel.menge);
+        log.artikel.set(artikel);
+        log.regal.set(regal);
+        log.createdAt = Date.now();
+      });
+    }
+    await artikel.update((artikel) => {
+      artikel.menge -= artikelOwner.menge;
+    });
     if (artikelOwner.length > 0) {
       await database.batch(
         ...artikelOwner.map((artikel) => artikel.prepareDestroyPermanently())

@@ -82,6 +82,9 @@ const InventoryWidget = () => {
   };
 
   const getMengeColor = (menge) => {
+    if (menge == 0) {
+      return "grey";
+    }
     if (menge < 0) {
       return "red";
     } else {
@@ -116,7 +119,11 @@ const InventoryWidget = () => {
             ]}
             numberOfLines={1}
           >
-            {item.menge < 0 ? item.menge : `+${item.menge}`}
+            {item.menge == 0
+              ? item.menge
+              : item.menge < 0
+              ? item.menge
+              : `+${item.menge}`}
           </Text>
 
           <View style={styles.statusContainer}>

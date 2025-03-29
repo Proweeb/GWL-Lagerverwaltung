@@ -10,7 +10,7 @@ import { FlashList } from "@shopify/flash-list";
 import RegalService from "../../../database/datamapper/RegalHelper";
 import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper";
 import { styles } from "../../../components/styles";
-import { useNavigation } from "@react-navigation/native";
+import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { heightPercentageToDP } from "react-native-responsive-screen";
 import { Q } from "@nozbe/watermelondb";
 
@@ -85,7 +85,8 @@ const LagerScreen = () => {
     );
   }
   const RenderFach = ({ item }) => {
-    useEffect(() => {}, [item]);
+    const artikelMenge = item.artikelMenge;
+    useEffect(() => {}, [artikelMenge]);
     return (
       <TouchableOpacity
         onPress={() => {

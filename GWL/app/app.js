@@ -43,12 +43,7 @@ export default function App() {
         }),
       });
     };
-    //a();
-    // Toast.show({
-    //   type: "success",
-    //   text1: "Artikel",
-    //   text2: "haha ",
-    // });
+
     testInsertAndFetch();
   }, []);
 
