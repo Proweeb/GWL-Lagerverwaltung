@@ -17,6 +17,7 @@ import AktionenNavigator from "./actions/_layout";
 import { toastConfig } from "../components/toastConfig";
 import BarcodeScreen from "./scan/barcode";
 import QrCodeScreen from "./scan/qrcode";
+import { testInsertAndFetch } from "../Old_Code/insertLogswithArtikel";
 
 // Create Stack & Tab Navigators
 const Stack = createStackNavigator();
@@ -48,6 +49,7 @@ export default function App() {
     //   text1: "Artikel",
     //   text2: "haha ",
     // });
+    testInsertAndFetch();
   }, []);
 
   return (

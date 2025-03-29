@@ -11,7 +11,7 @@ import ArtikelService from "../../../database/datamapper/ArtikelHelper.js";
 import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper.js";
 import XLSX from "xlsx";
 import LogService from "../../../database/datamapper/LogHelper.js";
-import ConfirmPopup from "../../../components/utils/Modals/ConfirmPopUp.js";
+import ConfirmPopup from "../../../components/Modals/ConfirmPopUp.js";
 import { database } from "../../../database/database.js";
 import { Q } from "@nozbe/watermelondb/index.js";
 

@@ -8,10 +8,10 @@ import ArtikelService from "../../../database/datamapper/ArtikelHelper";
 import RegalService from "../../../database/datamapper/RegalHelper";
 import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper";
 import { FlashList } from "@shopify/flash-list";
-import CustomPopup from "../../../components/utils/Modals/CustomPopUp";
+import CustomPopup from "../../../components/Modals/CustomPopUp";
 import Toast from "react-native-toast-message";
 import { database } from "../../../database/database"; // Import your WatermelonDB database instance
-import ConfirmPopup from "../../../components/utils/Modals/ConfirmPopUp";
+import ConfirmPopup from "../../../components/Modals/ConfirmPopUp";
 import LogService from "../../../database/datamapper/LogHelper";
 import { useRoute } from "@react-navigation/native";
 
@@ -115,6 +115,7 @@ const RegallisteScreen = () => {
         onPress={() => {
           setAction({ gwId: gwId, regalId: regalId });
         }}
+        activeOpacity={0.6}
       >
         <View style={localStyles.cell}>
           <Text numberOfLines={1} style={localStyles.name}>
@@ -133,13 +134,25 @@ const RegallisteScreen = () => {
         </View>
 
         <View style={localStyles.cell}>
-          <Text
-            numberOfLines={1}
-            style={[localStyles.cellText, localStyles[item.status]]}
+          <View
+            style={[
+              item.status && {
+                borderRadius: 30,
+                elevation: 1,
+                overflow: "hidden",
+              },
+              styles[item.status],
+            ]}
           >
-            {item.status || "Unbekannt"}
-          </Text>
+            <Text
+              numberOfLines={1}
+              style={[localStyles.cellText, localStyles[item.status]]}
+            >
+              {item.status || "Unbekannt"}
+            </Text>
+          </View>
         </View>
+
         <View style={localStyles.cell}>
           <View>
             <MaterialIcons name="more-horiz" size={24} color="#D3D3D3" />
@@ -335,15 +348,17 @@ const localStyles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 10,
     color: "red",
+    fontWeight: "bold",
     fontSize: 10,
     textAlign: "center",
     width: 40,
   },
   ok: {
-    backgroundColor: "#DFFFD8",
+    backgroundColor: styles.lightGreen,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 10,
+    fontWeight: "bold",
     color: "green",
     fontSize: 10,
     textAlign: "center",
@@ -355,6 +370,7 @@ const localStyles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 10,
     color: "orange",
+    fontWeight: "bold",
     fontSize: 10,
     textAlign: "center",
     width: 40,

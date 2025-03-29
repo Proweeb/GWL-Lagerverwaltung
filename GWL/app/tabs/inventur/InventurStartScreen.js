@@ -4,7 +4,7 @@ import InventurButton from "../../../components/oneTimeUse/InventurButton";
 import { styles } from "../../../components/styles";
 import { useNavigation } from "@react-navigation/native";
 import LogService from "../../../database/datamapper/LogHelper";
-import ConfirmPopup from "../../../components/utils/Modals/ConfirmPopUp";
+import ConfirmPopup from "../../../components/Modals/ConfirmPopUp";
 
 const InventurStartScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
