@@ -15,6 +15,7 @@ export default function OverviewWithQuantity({
   setMenge,
   setShowMengeOverview,
   foundArticle,
+  regalId,
 }) {
   const [nachfüllmenge, setNachfüllmenge] = useState(0);
 

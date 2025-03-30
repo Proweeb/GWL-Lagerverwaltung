@@ -2,7 +2,7 @@ import { Text, View } from "react-native";
 import { styles } from "../../styles";
 import { TextInput } from "react-native-gesture-handler";
 
-export default function TextInputField(props) {
+export default function TextInputField({ textColor, ...props }) {
   return (
     <View
       style={{
@@ -21,7 +21,7 @@ export default function TextInputField(props) {
             width: "100%",
             textAlign: "left",
             paddingHorizontal: 5,
-            color: "black",
+            color: textColor || "black",
           },
           styles.text,
         ]}

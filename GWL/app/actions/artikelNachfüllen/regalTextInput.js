@@ -13,12 +13,17 @@ import RegalService from "../../../database/datamapper/RegalHelper.js";
 import Toast from "react-native-toast-message";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-export default function ArticleTextInput({ gwId, setGwId }) {
+export default function RegalTextInput({
+  regalId,
+  setRegalId,
+  setRegalIdValid,
+  regalIdValid,
+}) {
   const navigation = useNavigation();
 
   return (
     <View>
-      <Text style={{ fontSize: RFPercentage(1.8) }}>GWID*</Text>
+      <Text style={{ fontSize: RFPercentage(1.8) }}>Regal-ID*</Text>
       <View
         style={{
           flexDirection: "row",
@@ -28,19 +33,34 @@ export default function ArticleTextInput({ gwId, setGwId }) {
       >
         <View style={{ flex: 1 }}>
           <TextInputField
-            value={gwId}
+            value={regalId}
             onChangeText={(text) => {
-              const onlyNumbers = text.replace(/[^0-9]/g, "");
-              setGwId(onlyNumbers);
+              const regex = /^[a-zA-Z0-9]+\.[a-zA-Z0-9]+$/;
+
+              // Überprüfen, ob das Format gültig ist
+              if (regex.test(text)) {
+                setRegalIdValid(true); // Gültig
+              } else {
+                setRegalIdValid(false); // Ungültig
+                Toast.show({
+                  type: "warning",
+                  text1: "Regal",
+                  text2: "RegalID hat das falsche Format",
+                  position: "bottom",
+                });
+              }
+
+              setRegalId(text); // Text setzen
             }}
+            textColor={regalIdValid ? "black" : "red"} // Textfarbe ändern, wenn ungültig
           />
         </View>
 
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate("Scan\\Qrcode", {
+            navigation.navigate("Scan\\Barcode", {
               onScan: (code) => {
-                setGwId(code);
+                setRegalId(code);
               },
             });
           }}
@@ -56,7 +76,7 @@ export default function ArticleTextInput({ gwId, setGwId }) {
           }}
         >
           <MaterialCommunityIcons
-            name={"qrcode-scan"}
+            name={"barcode-scan"}
             size={25}
             color={"black"}
           />
