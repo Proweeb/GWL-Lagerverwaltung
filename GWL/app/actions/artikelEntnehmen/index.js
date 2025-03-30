@@ -57,7 +57,7 @@ export default function IndexScreen() {
       </View>
 
       <Modal
-        animationType="fade"
+        animationType="slide"
         transparent={true}
         visible={showMengeOverview}
         statusBarTranslucent={true}

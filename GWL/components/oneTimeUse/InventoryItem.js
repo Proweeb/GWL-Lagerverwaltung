@@ -7,17 +7,20 @@ import { Q } from "@nozbe/watermelondb";
 const InventoryItem = ({ item, changedMenge, setChangedMenge }) => {
   const [gwId, setGwId] = useState("");
   const [beschreibung, setBeschreibung] = useState("");
+  const [localmenge, setMenge] = useState("");
+  const [regalId, setRegalId] = useState("");
 
   useEffect(() => {
     const fetchArtikel = async () => {
       try {
-        const artikel = await database
-          .get("artikel")
-          .query(Q.where("id", item._raw.gw_id))
-          .fetch();
-
-        if (artikel.length > 0) {
-          setGwId(String(artikel[0].gwId));
+        if (item) {
+          const regal = await item.regal.fetch();
+          setRegalId(regal.regalId);
+          const artikel = await item.artikel.fetch();
+          if (artikel.gwId) {
+            setGwId(String(artikel.gwId));
+            setBeschreibung(String(artikel.beschreibung));
+          }
         }
       } catch (error) {
         console.error("Error fetching artikel:", error);
@@ -27,27 +30,10 @@ const InventoryItem = ({ item, changedMenge, setChangedMenge }) => {
     fetchArtikel();
   }, [item]);
 
-  useEffect(() => {
-    const fetchArtikel = async () => {
-      try {
-        const artikel = await database
-          .get("artikel")
-          .query(Q.where("id", item._raw.gw_id))
-          .fetch();
-
-        if (artikel.length > 0) {
-          setBeschreibung(String(artikel[0].beschreibung));
-        }
-      } catch (error) {
-        console.error("Error fetching artikel:", error);
-      }
-    };
-
-    fetchArtikel();
-  }, [item]);
+  useEffect(() => {}, [changedMenge]);
 
   return (
-    <View style={{ alignItems: "center" }}>
+    <View style={{ alignItems: "center", width: "100%", height: "100%" }}>
       <View
         style={{
           backgroundColor: styles.backgroundColor,
@@ -58,13 +44,14 @@ const InventoryItem = ({ item, changedMenge, setChangedMenge }) => {
           margin: 20,
         }}
       >
+        <Text style={styles.subHeader}>Regal: {regalId || "Laden..."}</Text>
         <Text style={styles.subHeader}>{beschreibung || "Laden..."}</Text>
         <Text style={styles.subHeader}>ID: {gwId || "Laden..."}</Text>
         <Text style={styles.subHeader}>Soll: {item.menge}</Text>
 
         <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
           <View style={{ width: "20%" }}>
-            <Text style={styles.subHeader}>Haben:</Text>
+            <Text style={styles.subHeader}>Ist:</Text>
           </View>
 
           <View
@@ -79,13 +66,15 @@ const InventoryItem = ({ item, changedMenge, setChangedMenge }) => {
             }}
           >
             <TextInput
-              style={[styles.subHeader, { marginBottom: 0, width: "100%" }]}
+              style={[styles.subHeader, { marginBottom: 0, width: "80%" }]}
               keyboardType="numeric"
-              value={changedMenge[item._raw.gw_id] || ""}
+              value={localmenge}
               onChangeText={(text) => {
+                const numericText = text.replace(/[^0-9]/g, "");
+                setMenge(numericText);
                 setChangedMenge((prev) => ({
                   ...prev,
-                  [item._raw.gw_id]: text, // Use `_raw.gw_id` for correct key
+                  [item._raw.gw_id + "" + item._raw.regal_id]: numericText, // Use `_raw.gw_id` for correct key
                 }));
               }}
             />

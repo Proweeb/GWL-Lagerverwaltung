@@ -8,16 +8,16 @@ import { DatabaseProvider } from "@nozbe/watermelondb/react";
 import { database } from "../database/database";
 import { styles } from "../components/styles";
 import * as Notifications from "expo-notifications";
-import { LogBox } from "react-native";
+import { LogBox, StatusBar } from "react-native";
 import Toast from "react-native-toast-message";
 
-import ScanScreen from "./scan/scan";
 import BottomTabNavigator from "./tabs/_layout";
 import AktionenNavigator from "./actions/_layout";
 
 import { toastConfig } from "../components/toastConfig";
 import BarcodeScreen from "./scan/barcode";
 import QrCodeScreen from "./scan/qrcode";
+import { testInsertAndFetch } from "../Old_Code/insertLogswithArtikel";
 
 // Create Stack & Tab Navigators
 const Stack = createStackNavigator();
@@ -29,7 +29,7 @@ export default function App() {
   useEffect(() => {
     SystemUI.setBackgroundColorAsync(styles.backgroundColor);
     NavigationBar.setBackgroundColorAsync(styles.backgroundColor);
-
+    StatusBar.setBarStyle("dark-content");
     NavigationBar.setButtonStyleAsync("dark");
     requestNotifications(["alert", "sound"]).then(({ status, settings }) => {
       // …
@@ -43,12 +43,8 @@ export default function App() {
         }),
       });
     };
-    //a();
-    // Toast.show({
-    //   type: "success",
-    //   text1: "Artikel",
-    //   text2: "haha ",
-    // });
+
+    testInsertAndFetch();
   }, []);
 
   return (

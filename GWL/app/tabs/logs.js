@@ -21,8 +21,8 @@ import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import LogService from "../../database/datamapper/LogHelper";
 import Toast from "react-native-toast-message";
-import CustomPopup from "../../components/utils/Modals/CustomPopUp";
-import ConfirmPopup from "../../components/utils/Modals/ConfirmPopUp";
+import CustomPopup from "../../components/Modals/CustomPopUp";
+import ConfirmPopup from "../../components/Modals/ConfirmPopUp";
 
 export default function LogsScreen() {
   const [startDate, setStartDate] = useState(new Date());

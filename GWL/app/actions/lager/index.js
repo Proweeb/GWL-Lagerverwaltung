@@ -1,235 +1,171 @@
+import React, { useEffect, useState } from "react";
 import {
-  Text,
   View,
+  Text,
+  ActivityIndicator,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
 } from "react-native";
+import { FlashList } from "@shopify/flash-list";
+import RegalService from "../../../database/datamapper/RegalHelper";
+import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper";
 import { styles } from "../../../components/styles";
-import { MaterialIcons } from "@expo/vector-icons";
+import { useIsFocused, useNavigation } from "@react-navigation/native";
+import { heightPercentageToDP } from "react-native-responsive-screen";
+import { Q } from "@nozbe/watermelondb";
 
-export default function IndexScreen() {
+import { database } from "../../../database/database";
+const LagerScreen = () => {
+  const navigation = useNavigation();
+  const [groupedRegale, setGroupedRegale] = useState([]);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const subscription = database
+      .get("regale") // Assuming your table is called "regale"
+      .query() // Query all "Regal" items
+      .observe()
+      .subscribe(async (regaleData) => {
+        try {
+          // Fetch articles for each regal reactively
+          const regaleWithArtikel = await Promise.all(
+            regaleData.map(async (regal) => {
+              const artikelList = await database
+                .get("artikel_besitzer") // Assuming table name is "artikel_besitzer"
+                .query(Q.where("regal_id", regal.id))
+                .fetch();
 
+              return {
+                id: regal.id,
+                regalId: regal.regalId, // Each Regal has a unique regalId
+                regalName: regal.regalName,
+                fachName: regal.fachName,
+                artikelMenge: artikelList.length, // Number of articles in this Regal
+              };
+            })
+          );
 
-  
-  const data = [
-    { name: "Baby Oil", id: "#3451F", menge: "x3", status: "out" },
-    { name: "Kiwi", id: "#6341E", menge: "x265", status: "high" },
-    { name: "Keyboard", id: "#8253A", menge: "x60", status: "low" },
-    { name: "Mouse", id: "#5434R", menge: "x1", status: "out" },
-    { name: "Cup", id: "#1244T", menge: "x4", status: "out" },
-  ];
+          // Group by regalName but preserve individual regalId for each fach
+          const grouped = regaleWithArtikel.reduce((acc, regal) => {
+            if (!acc[regal.regalName]) {
+              acc[regal.regalName] = {
+                regalName: regal.regalName,
+                fachList: [],
+              };
+            }
+            // Each fach gets its own regalId, even though they are in the same regalName group
+            acc[regal.regalName].fachList.push({
+              id: regal.id, // Unique ID for the fach
+              regalId: regal.regalId, // Unique regalId for this fach
+              fachName: regal.fachName, // Name of the fach
+              artikelMenge: regal.artikelMenge, // Number of articles in this fach
+            });
 
-  
-  async function OrderArtikel() {
-    try {
-      const regaleundso = await RegalService.getAllRegal();
-      console.log("Regale:", regaleundso);
+            return acc;
+          }, {});
 
-      const orderedData = {}; // This object will store our results
-
-      for (let i = 0; i < regaleundso.length; i++) {
-        const regalId = regaleundso[i].regalId;
-        const artikel = await ArtikelService.getArtikelByRegalId(regalId);
-
-        console.log("Regal ID:", regalId);
-        if (artikel[0]) {
-          console.log("Artikel:", artikel[0].gwId);
-        } else {
-          console.log("keine Artikel");
+          // Convert object to array for rendering
+          setGroupedRegale(Object.values(grouped));
+          setLoading(false);
+        } catch (error) {
+          console.error("Error fetching observed data:", error);
         }
+      });
 
-        // If there are no articles, skip to the next regal
-        if (artikel.length === 0) {
-          continue;
-        }
+    return () => subscription.unsubscribe(); // Cleanup subscription on unmount
+  }, []);
 
-        // Save the artikel data into the object with regalId as the key
-        orderedData[regalId] = artikel.map((item) => ({
-          gwId: item.gwId,
-          beschreibung: item.beschreibung,
-          menge: item.menge,
-          mindestmenge: item.mindestmenge,
-        }));
-
-        // Logging the orderedData object for verification
-        console.log("Ordered Data:", orderedData);
-      }
-
-      // Do something with the orderedData, for example, you can save it to a state if you need to display it
-      // setOrderedData(orderedData);
-    } catch (error) {
-      console.error("Fehler beim Abrufen der Artikel:", error);
-    }
+  if (loading) {
+    return (
+      <ActivityIndicator
+        size={"large"}
+        color={styles.lightBlue}
+        style={{ backgroundColor: styles.backgroundColor, flex: 1 }}
+      />
+    );
   }
+  const RenderFach = ({ item }) => {
+    const artikelMenge = item.artikelMenge;
+    useEffect(() => {}, [artikelMenge]);
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate("Actions", {
+            screen: "LagerNavigator",
+            params: { screen: "Regalliste", params: { regalId: item.regalId } },
+          });
+        }}
+        style={[
+          {
+            height: heightPercentageToDP(10),
+            flex: 1,
+            borderRadius: 10,
+            marginHorizontal: 5,
+            marginVertical: 5,
+            justifyContent: "center",
+            alignItems: "center",
+          },
+          item.artikelMenge < 1
+            ? { backgroundColor: "#FFDADB" }
+            : { backgroundColor: "#C7E5F3" },
+        ]}
+      >
+        <Text
+          style={[
+            localStyles.MengeAnzeige,
+            item.artikelMenge < 1 ? { color: "#fc2024" } : { color: "#30a6de" },
+          ]}
+        >
+          {item.fachName}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
+  const RenderRegal = ({ item }) => {
+    return (
+      <View style={[localStyles.regalContainer]}>
+        <Text style={localStyles.regalBez}>{item.regalName}</Text>
 
-  async function LoadArtikel() {
-    try {
-      const artikel = await ArtikelService.getAllArtikel();
-      console.log("Alle Artikel:", artikel);
-      setJsonData(artikel);
-    } catch (error) {
-      console.error("Fehler beim Abrufen der Artikel1:", error);
-    }
-  }
-
-
-  const handlePress = () => {
-    console.log("Action was pressed!");
+        <View style={{ flex: 1, width: "100%" }}>
+          <FlashList
+            data={item.fachList}
+            numColumns={3}
+            renderItem={({ item }) => <RenderFach item={item}></RenderFach>}
+            estimatedItemSize={100}
+          />
+        </View>
+      </View>
+    );
   };
 
   return (
-    <ScrollView contentContainerStyle={localStyles.scrollContainer}>
-      <Text style={localStyles.regalBez}>Regal Bezeichnung</Text>
-      <View style={localStyles.table}>
-        {/* Table Header */}
-        <View style={[localStyles.row, localStyles.rowBorder]}>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Produkt Name</Text>
-          </View>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Produkt ID</Text>
-          </View>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Menge</Text>
-          </View>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Status</Text>
-          </View>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Aktion</Text>
-          </View>
-        </View>
-
-        {/* Table Rows */}
-        {data.map((item, index) => (
-          <View key={index} style={[localStyles.row, localStyles.rowBorder]}>
-            <View style={localStyles.cell}>
-              <Text style={localStyles.name}>{item.name}</Text>
-            </View>
-            <View style={localStyles.cell}>
-              <Text style={localStyles.cellText}>{item.id}</Text>
-            </View>
-            <View style={localStyles.cell}>
-              <Text style={localStyles.cell}>{item.menge}</Text>
-            </View>
-            <View style={localStyles.cell}>
-              <Text style={[localStyles.cell, localStyles[item.status]]}>
-                {item.status}
-              </Text>
-            </View>
-            <View style={localStyles.cell}>
-              <TouchableOpacity onPress={handlePress}>
-                <MaterialIcons name="more-horiz" size={24} color="#D3D3D3" />
-              </TouchableOpacity>
-            </View>
-          </View>
-        ))}
-      </View>
-      <Text style={localStyles.regalBez}>Regal Bezeichnung</Text>
-      <View style={localStyles.table}>
-        {/* Table Header */}
-        <View style={[localStyles.row, localStyles.rowBorder]}>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Produkt Name</Text>
-          </View>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Produkt ID</Text>
-          </View>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Menge</Text>
-          </View>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Status</Text>
-          </View>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Aktion</Text>
-          </View>
-        </View>
-
-        {/* Table Rows */}
-        {data.map((item, index) => (
-          <View key={index} style={[localStyles.row, localStyles.rowBorder]}>
-            <View style={localStyles.cell}>
-              <Text style={localStyles.name}>{item.name}</Text>
-            </View>
-            <View style={localStyles.cell}>
-              <Text style={localStyles.cellText}>{item.id}</Text>
-            </View>
-            <View style={localStyles.cell}>
-              <Text style={localStyles.cell}>{item.menge}</Text>
-            </View>
-            <View style={localStyles.cell}>
-              <Text style={[localStyles.cell, localStyles[item.status]]}>
-                {item.status}
-              </Text>
-            </View>
-            <View style={localStyles.cell}>
-              <TouchableOpacity onPress={handlePress}>
-                <MaterialIcons name="more-horiz" size={24} color="#D3D3D3" />
-              </TouchableOpacity>
-            </View>
-          </View>
-        ))}
-      </View>
-      <Text style={localStyles.regalBez}>Regal Bezeichnung</Text>
-      <View style={localStyles.table}>
-        {/* Table Header */}
-        <View style={[localStyles.row, localStyles.rowBorder]}>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Produkt Name</Text>
-          </View>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Produkt ID</Text>
-          </View>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Menge</Text>
-          </View>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Status</Text>
-          </View>
-          <View style={localStyles.cell}>
-            <Text style={localStyles.tableContent}>Aktion</Text>
-          </View>
-        </View>
-
-        {/* Table Rows */}
-        {data.map((item, index) => (
-          <View key={index} style={[localStyles.row, localStyles.rowBorder]}>
-            <View style={localStyles.cell}>
-              <Text style={localStyles.name}>{item.name}</Text>
-            </View>
-            <View style={localStyles.cell}>
-              <Text style={localStyles.cellText}>{item.id}</Text>
-            </View>
-            <View style={localStyles.cell}>
-              <Text style={localStyles.cell}>{item.menge}</Text>
-            </View>
-            <View style={localStyles.cell}>
-              <Text style={[localStyles.cell, localStyles[item.status]]}>
-                {item.status}
-              </Text>
-            </View>
-            <View style={localStyles.cell}>
-              <TouchableOpacity onPress={handlePress}>
-                <MaterialIcons name="more-horiz" size={24} color="#D3D3D3" />
-              </TouchableOpacity>
-            </View>
-          </View>
-        ))}
-      </View>
-    </ScrollView>
+    <View style={localStyles.container}>
+      <FlashList
+        data={groupedRegale}
+        renderItem={({ item }) => <RenderRegal item={item} />}
+        estimatedItemSize={100}
+      />
+    </View>
   );
-}
+};
 
 const localStyles = StyleSheet.create({
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: "center",
-    alignItems: "center",
+  container: {
+    flex: 1,
     backgroundColor: styles.backgroundColor,
-    paddingVertical: 20,
+    paddingVertical: 0,
+    paddingTop: 10,
+  },
+  regalContainer: {
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: styles.white,
+    flex: 1,
+    marginHorizontal: 25,
+    marginBottom: 20,
+    elevation: 5,
+    padding: 10,
   },
   table: {
     borderRadius: 20,
@@ -239,25 +175,22 @@ const localStyles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 4,
-    width: 349,
-    marginBottom: 20,
+    flex: 1,
+    margin: 20,
     padding: 5,
   },
   regalBez: {
-    color: "#292D32", // Text color
+    //color: "#292D32", // Text color
     fontFamily: "Inter", // Font family
-    fontSize: 12, // Font size in points
-    fontStyle: "normal", // Normal font style
-    fontWeight: "400", // Font weight
-    lineHeight: 16, // lineHeight, you can adjust it based on your design preference
-    marginBottom: 10,
+    fontSize: 50, // Font size in points
+    //fontStyle: "bold", // Normal font style
+    fontWeight: "800", // Font weight
+
+    marginVertical: 10,
   },
-  tableContent: {
-    color: "#AFAFAF",
-    fontFamily: "Inter",
-    fontSize: 12,
-    fontStyle: "normal",
-    fontWeight: "400",
+  MengeAnzeige: {
+    fontSize: 20,
+    fontWeight: "800",
   },
   row: {
     flexDirection: "row",
@@ -273,51 +206,5 @@ const localStyles = StyleSheet.create({
     color: "#AFAFAF",
     textAlign: "center",
   },
-  cell: {
-    fontSize: 12,
-    color: "#AFAFAF",
-    justifyContent: "center",
-    alignItems: "center",
-    textAlign: "center",
-    width: 60,
-  },
-  rowBorder: {
-    borderBottomWidth: 2,
-    borderBottomColor: "#ffffff",
-  },
-  out: {
-    backgroundColor: "#FFEEEE",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
-    color: "red",
-    fontSize: 10,
-    textAlign: "center",
-    width: 40,
-  },
-  high: {
-    backgroundColor: "#DFFFD8",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
-    color: "green",
-    fontSize: 10,
-    textAlign: "center",
-    width: 40,
-  },
-  low: {
-    backgroundColor: "#FFF4D8",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
-    color: "orange",
-    fontSize: 10,
-    textAlign: "center",
-    width: 40,
-  },
-  name: {
-    fontSize: 12,
-    color: "#333",
-    textAlign: "left",
-  },
 });
+export default LagerScreen;

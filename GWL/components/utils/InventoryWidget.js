@@ -3,7 +3,7 @@ import { Text, View, StyleSheet } from "react-native";
 import { database } from "../../database/database";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { Q } from "@nozbe/watermelondb";
-import { testInsertAndFetch } from "../../Old_Code/insertLogswithArtikel";
+import { styles as theme } from "../styles";
 
 const InventoryWidget = () => {
   const [logs, setLogs] = useState([]);
@@ -18,7 +18,8 @@ const InventoryWidget = () => {
             Q.sortBy("created_at", "desc"),
             Q.or(
               Q.where("beschreibung", "Entnehmen"),
-              Q.where("beschreibung", "Einlagern")
+              Q.where("beschreibung", "Einlagern"),
+              Q.where("beschreibung", "Nachfüllen")
             ),
             Q.where("is_backup", false),
             Q.take(3) // Limit to the latest 3 logs
@@ -63,7 +64,7 @@ const InventoryWidget = () => {
         console.error("Error fetching logs:", error);
       }
     };
-    testInsertAndFetch();
+
     fetchLogs();
   }, []);
 
@@ -81,6 +82,9 @@ const InventoryWidget = () => {
   };
 
   const getMengeColor = (menge) => {
+    if (menge == 0) {
+      return "grey";
+    }
     if (menge < 0) {
       return "red";
     } else {
@@ -115,7 +119,11 @@ const InventoryWidget = () => {
             ]}
             numberOfLines={1}
           >
-            {item.menge < 0 ? item.menge : `+${item.menge}`}
+            {item.menge == 0
+              ? item.menge
+              : item.menge < 0
+              ? item.menge
+              : `+${item.menge}`}
           </Text>
 
           <View style={styles.statusContainer}>
@@ -162,7 +170,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   statusBox: {
-    width: "80%",
+    width: "60%",
     borderRadius: 30,
     elevation: 2,
     overflow: "hidden",
@@ -174,7 +182,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   out: { backgroundColor: "#FFEEEE" },
-  ok: { backgroundColor: "#CDEDD8" },
+  ok: { backgroundColor: theme.lightGreen },
   low: { backgroundColor: "#FFF4D8" },
   emptyContainer: {
     justifyContent: "center",

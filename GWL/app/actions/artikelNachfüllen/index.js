@@ -10,6 +10,7 @@ import Feather from "@expo/vector-icons/Feather";
 import ArticleTextInput from "./articleTextInput";
 import { Alert } from "react-native";
 import OverviewWithQuantity from "./overviewWithQuantity.js";
+import ActionButton from "../../../components/Buttons/ActionsButton.js";
 
 export default function IndexScreen() {
   const [gwId, setGwId] = useState("");
@@ -20,6 +21,7 @@ export default function IndexScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   const passedGwId = route.params?.gwId;
+  const passedRegalId = route.params?.regalId;
   const handleCancel = () => navigation.navigate("Tabs");
   useEffect(() => {
     if (passedGwId) {
@@ -46,23 +48,19 @@ export default function IndexScreen() {
       </View>
 
       <View style={{ marginTop: 50, alignItems: "center" }}>
-        <TouchableOpacity
-          style={{
-            backgroundColor: "#dcebf9",
-            padding: 10,
-            borderRadius: 5,
-            height: 50,
-            alignItems: "center",
-            justifyContent: "center",
+        <ActionButton
+          isDone={true}
+          FertigCallBack={() => {
+            console.log("Fertig");
           }}
-          onPress={handleCancel}
-        >
-          <Text style={{ color: "#30A6DE", fontSize: 20 }}>Cancel</Text>
-        </TouchableOpacity>
+          CancelCallBack={() => {
+            console.log("Cancel");
+          }}
+        />
       </View>
 
       <Modal
-        animationType={"fade"}
+        animationType={"slide"}
         transparent={true}
         visible={showMengeOverview}
         statusBarTranslucent={true}

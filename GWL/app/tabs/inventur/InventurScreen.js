@@ -3,7 +3,7 @@ import { View, Text, Alert } from "react-native";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper.js";
 import { styles } from "../../../components/styles.js";
 import InventoryItem from "../../../components/oneTimeUse/InventoryItem.js";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import SearchBar from "../../../components/utils/SearchBar.js";
 import WeiterButton from "../../../components/oneTimeUse/WeiterButton.js";
@@ -14,9 +14,16 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
   const [artikelList, setArtikelList] = useState([]);
   const [isScanning, setIsScanning] = useState(false);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchArtikel();
+    }, [])
+  );
+
   const fetchArtikel = async () => {
     try {
-      const artikelData = await ArtikelBesitzerService.getAllArtikelOwners();
+      const artikelData = await ArtikelBesitzerService.getAllArtikelOwners(); //#endregio
+      console.log(await artikelData[0].artikel.fetch());
       setArtikelList(artikelData);
     } catch (error) {
       console.error("Fehler beim Laden der Artikel:", error);
@@ -36,7 +43,7 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
   const handleSearch = async () => {
     if (!gwId) {
       try {
-        const artikelData = await ArtikelService.getAllArtikel();
+        const artikelData = await ArtikelBesitzerService.getAllArtikelOwners();
         setArtikelList(artikelData);
       } catch (error) {
         console.error("Fehler beim Laden der Artikel:", error);
@@ -45,11 +52,11 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
     }
 
     try {
-      const artikel = await ArtikelService.getArtikelById(gwId);
+      const artikel = await ArtikelBesitzerService.getArtikelOwnerByGwId(gwId);
       if (!artikel) {
         Alert.alert("Fehler", "Artikel nicht gefunden.");
       } else {
-        setArtikelList([artikel]);
+        setArtikelList(artikel);
       }
     } catch (error) {
       console.error("Fehler beim Finden des Artikels:", error);

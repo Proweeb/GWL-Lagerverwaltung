@@ -1,8 +1,9 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { FlashList } from "@shopify/flash-list";
+import { View, Text, StyleSheet, SafeAreaView, Dimensions } from "react-native";
+import Carousel from "react-native-reanimated-carousel"; // Carousel import
 import { styles } from "../styles";
 import ArtikelService from "../../database/datamapper/ArtikelHelper";
+import { widthPercentageToDP } from "react-native-responsive-screen";
 
 export default function NotificationsWidget() {
   const [expiredArticles, setExpiredArticles] = React.useState([]);
@@ -56,19 +57,29 @@ export default function NotificationsWidget() {
   };
 
   return (
-    <View style={notificationstyle.container}>
+    <SafeAreaView style={notificationstyle.container}>
       {expiredArticles.length === 0 ? (
         <Text style={notificationstyle.noNotifications}>
           Keine Benachrichtigungen
         </Text>
       ) : (
-        <View style={{ width: "100%", height: "100%" }}>
-          <FlashList
+        <View
+          style={{
+            width: "100%",
+            height: "100%",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Carousel
+            loop
+            autoPlay
+            width={widthPercentageToDP(80)} // Dynamic width for the carousel
+            //height={widthPercentageToDP(80) * 0.25}
             data={expiredArticles}
-            estimatedItemSize={120}
-            showsVerticalScrollIndicator={true}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
+            scrollAnimationDuration={1000}
+            //onSnapToItem={(index) => console.log("Active Index: ", index)} // Optional: Log active index
+            renderItem={({ item, index }) => (
               <View
                 style={[
                   notificationstyle.notificationItem,
@@ -100,7 +111,7 @@ export default function NotificationsWidget() {
           />
         </View>
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -121,28 +132,23 @@ const notificationstyle = StyleSheet.create({
     fontSize: 16,
   },
   notificationItem: {
-    padding: 10,
-    borderRadius: 8,
-    marginVertical: 5,
+    padding: 2,
+    borderRadius: 10,
     alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-around",
+    flexDirection: "column", // Use column layout for the carousel
+    justifyContent: "center",
     flex: 1,
-    borderColor: styles.red,
     borderWidth: 1,
+    marginHorizontal: 10, // Margin for spacing between carousel items
   },
   articleText: {
     fontSize: 18,
-    flex: 1,
     textAlign: "center",
-
     color: styles.textColor,
   },
   statusText: {
     fontSize: 18,
     color: styles.darkRed,
     textAlign: "center",
-
-    flex: 1,
   },
 });

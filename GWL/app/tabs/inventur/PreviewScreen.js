@@ -1,86 +1,108 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Alert } from "react-native";
-import ArtikelService from "../../../database/datamapper/ArtikelHelper.js";
+import { View, Text, Modal, TouchableOpacity } from "react-native";
 import { styles } from "../../../components/styles.js";
-import XLSX from "xlsx";
-import LogService from "../../../database/datamapper/LogHelper.js";
-import { useNavigation } from "@react-navigation/native";
-import SearchBar from "../../../components/utils/SearchBar.js";
 import ArtikelVorschau from "../../../components/oneTimeUse/ArtikelVorschau.js";
 import ZurückButton from "../../../components/oneTimeUse/ZurückButton.js";
 import FertigButton from "../../../components/utils/FertigButton.js";
 import * as FileSystem from "expo-file-system";
 import * as MailComposer from "expo-mail-composer";
+import { useNavigation } from "@react-navigation/native";
+import ArtikelService from "../../../database/datamapper/ArtikelHelper.js";
 import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper.js";
+import XLSX from "xlsx";
+import LogService from "../../../database/datamapper/LogHelper.js";
+import ConfirmPopup from "../../../components/Modals/ConfirmPopUp.js";
+import { database } from "../../../database/database.js";
+import { Q } from "@nozbe/watermelondb/index.js";
 
 const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
   const navigation = useNavigation();
-  const [gwId, setGwId] = useState("");
+  const [modalVisible, setModalVisible] = useState(false);
   const [artikelList, setArtikelList] = useState([]);
   const [isScanning, setIsScanning] = useState(false);
 
   console.log(changedMenge);
 
-  const fetchArtikel = async () => {
-    try {
-      const artikelData = await ArtikelBesitzerService.getAllArtikelOwners();
-      setArtikelList(artikelData);
-    } catch (error) {
-      console.error("Fehler beim Laden der Artikel:", error);
-    }
-  };
+  // useEffect(() => {
+  //   if (gwId === "") {
+  //     handleSearch();
+  //   }
+  // }, [gwId]); // Runs when `gwId` changes
 
   useEffect(() => {
-    if (gwId === "") {
-      handleSearch();
-    }
-  }, [gwId]); // Runs when `gwId` changes
-
-  useEffect(() => {
+    const fetchArtikel = async () => {
+      try {
+        const artikelData = await ArtikelBesitzerService.getAllArtikelOwners();
+        setArtikelList(artikelData);
+      } catch (error) {
+        console.error("Fehler beim Laden der Artikel:", error);
+      }
+    };
     fetchArtikel();
   }, []);
 
   const handleExportToEmail = async () => {
     try {
       await LogService.createLog(
-        {
-          beschreibung: "Inventurliste gesendet",
-        },
+        { beschreibung: "Inventurliste gesendet" },
         null,
         null
       );
-      const dataForExcel = artikelList.map((item) => ({
-        ID: item.gwId,
-        Beschreibung: item.beschreibung,
-        Soll: item.menge,
-        Haben: changedMenge[item.gwId] || item.menge,
-        Datum: new Date().toLocaleString("de-DE", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        }),
-      }));
+
+      // Fetch data asynchronously and ensure it completes before proceeding
+      const dataForExcel = await Promise.all(
+        artikelList.map(async (item) => {
+          const artikel = await item.artikel.fetch();
+          const regal = await item.regal.fetch();
+          return {
+            ID: artikel.gwId,
+            Beschreibung: artikel.beschreibung,
+            Regal: regal.regalId,
+            Ist: changedMenge[item._raw.gw_id + "" + regal.id] || item.menge,
+            Datum: new Date().toLocaleString("de-DE", {
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+            }),
+          };
+        })
+      );
+
+      // Convert data to Excel
       const ws = XLSX.utils.json_to_sheet(dataForExcel);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Inventory Data");
+
+      // Convert Excel data to Base64
       const excelOutput = XLSX.write(wb, { type: "base64", bookType: "xlsx" });
-      const formattedDate = new Date().toLocaleString("de-DE", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        minute: "2-digit",
-        hour: "2-digit",
-      });
+
+      // Create file path
+      const formattedDate = new Date()
+        .toLocaleString("de-DE", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+        .replace(/[: ]/g, "_"); // Format file name to avoid illegal characters
+
       const fileName = `Inventur_${formattedDate}.xlsx`;
-      const fileUri = FileSystem.documentDirectory + fileName;
+      const fileUri = `${FileSystem.documentDirectory}${fileName}`;
+
+      // Write file to system
       await FileSystem.writeAsStringAsync(fileUri, excelOutput, {
         encoding: FileSystem.EncodingType.Base64,
       });
+
+      // Ensure MailComposer is available
       const isAvailable = await MailComposer.isAvailableAsync();
       if (!isAvailable) {
         Alert.alert("Fehler", "E-Mail kann nicht gesendet werden.");
         return;
       }
+
+      // Send email with attachment
       await MailComposer.composeAsync({
         subject: "Inventur Export",
         body: "Hier ist die exportierte Inventur-Datei.",
@@ -88,61 +110,79 @@ const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
       });
     } catch (error) {
       console.error("Fehler beim Exportieren per E-Mail:", error);
-      Alert.alert("Fehler", "Excel-Datei konnte nicht gesendet werden.");
-    }
-  };
-
-  const handleSearch = async () => {
-    if (!gwId) {
-      try {
-        const artikelData = await ArtikelService.getAllArtikel();
-        setArtikelList(artikelData);
-      } catch (error) {
-        console.error("Fehler beim Laden der Artikel:", error);
-      }
-      return;
-    }
-
-    try {
-      const artikel = await ArtikelService.getArtikelById(gwId);
-      if (!artikel) {
-        Alert.alert("Fehler", "Artikel nicht gefunden.");
-      } else {
-        setArtikelList([artikel]);
-      }
-    } catch (error) {
-      console.error("Fehler beim Finden des Artikels:", error);
-      Alert.alert("Fehler", "Fehler bei der Artikelsuche.");
+      Alert.alert("Fehler", "Beim Export ist ein Problem aufgetreten.");
     }
   };
 
   const handleUpdateMenge = async () => {
     try {
-      const updates = Object.entries(changedMenge).map(
-        async ([id, newMenge]) => {
-          const artikel = await ArtikelService.getArtikelById(id);
-          await ArtikelService.updateArtikel(id, {
-            gwId: artikel.gwId,
-            firmenId: artikel.firmenId,
-            beschreibung: artikel.beschreibung,
-            menge: Number(newMenge),
-            mindestMenge: artikel.mindestMenge,
-            ablaufdatum: artikel.ablaufdatum,
-            regalId: artikel.regalId,
-          });
+      const updates = artikelList.map(async (item) => {
+        const artikel_id = item._raw.gw_id;
+        const regal_id = item._raw.regal_id;
+        const artikel = await item.artikel.fetch();
+        const regal = await item.regal.fetch();
+
+        const combinedId = `${artikel_id}${regal_id}`; // Construct key
+        if (changedMenge[combinedId]) {
+          const newMenge = changedMenge[combinedId];
+          await ArtikelBesitzerService.updateArtikelBesitzerByGwIdAndRegalId(
+            {
+              menge: Number(newMenge),
+            },
+            regal.regalId,
+            artikel.gwId
+          );
         }
-      );
+      });
 
       await Promise.all(updates);
 
       // Refresh the list
-      const artikelData = await ArtikelService.getAllArtikel();
+      const artikelData = await ArtikelBesitzerService.getAllArtikelOwners();
       setArtikelList(artikelData);
     } catch (error) {
       console.error("Fehler beim Aktualisieren der Mengen:", error);
-      Alert.alert("Fehler", "Mengen konnten nicht aktualisiert werden.");
+      Alert.alert("Mengen konnten nicht aktualisiert werden.");
     }
   };
+
+  const handleGesamtmenge = async () => {
+    try {
+      const updates = artikelList.map(async (item) => {
+        const artikel_id = item._raw.gw_id;
+        const artikel = await item.artikel.fetch();
+        const artikelBesitzer = await database
+          .get("artikel_besitzer")
+          .query(Q.where("gw_id", artikel_id)) // Ensure "gwId" matches your schema
+          .fetch();
+        console.log(artikelBesitzer);
+        let menge = 0;
+        for (let i = 0; i < artikelBesitzer.length; i++) {
+          menge += Number(artikelBesitzer[i].menge);
+        }
+        await ArtikelService.updateInventurArtikel(artikel.gwId, {
+          menge: menge,
+        });
+      });
+      await Promise.all(updates);
+    } catch (error) {
+      console.error("Fehler beim Aktualisieren der Mengen:", error);
+      Alert.alert("Mengen konnten nicht aktualisiert werden.");
+    }
+  };
+
+  const handleConfirm = async () => {
+    setModalVisible(false);
+    await handleUpdateMenge();
+    await handleGesamtmenge();
+    handleExportToEmail();
+    setChangedMenge({});
+    navigation.navigate("Tabs", {
+      screen: "Inventur",
+      params: { screen: "startinventur" },
+    });
+  };
+
   return (
     <View
       style={{
@@ -151,17 +191,6 @@ const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
         alignItems: "center",
       }}
     >
-      <View style={{ width: "95%", borderRadius: 20 }}>
-        <View style={{ paddingLeft: 20 }}>
-          <Text style={styles.subHeader}>GWID</Text>
-        </View>
-        <SearchBar
-          gwId={gwId}
-          setGwId={setGwId}
-          handleSearch={handleSearch}
-          setIsScanning={setIsScanning}
-        />
-      </View>
       <View style={{ flex: 1 }}>
         <ArtikelVorschau
           artikelList={artikelList}
@@ -176,27 +205,28 @@ const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
         }}
       >
         <ZurückButton
-          onPress={() => {
+          onPress={() =>
             navigation.navigate("Tabs", {
               screen: "Inventur",
               params: { screen: "inventurscreen" },
-            });
-          }}
+            })
+          }
         ></ZurückButton>
-        <FertigButton
-          onPress={() => {
-            handleUpdateMenge();
-            handleExportToEmail();
-            setChangedMenge({});
-            navigation.navigate("Tabs", {
-              screen: "Inventur",
-              params: { screen: "startinventur" },
-            });
-          }}
-        ></FertigButton>
+        <FertigButton onPress={() => setModalVisible(true)} />
       </View>
+      <Modal
+        transparent={true}
+        animationType="slide"
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <ConfirmPopup
+          colorCallback={handleConfirm}
+          greyCallback={() => setModalVisible(false)}
+          text={"Sind Sie sicher, dass Sie die Inventur abschließen möchten?"}
+        ></ConfirmPopup>
+      </Modal>
     </View>
   );
 };
-
 export default PreviewScreen;

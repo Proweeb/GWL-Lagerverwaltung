@@ -4,7 +4,7 @@ export const styles = {
   // Background Colors
   backgroundColor: "#FFFFFF",
   white: "#F8F8FF",
-  
+
   // Text Colors
   greyedText: "#AFAFAF",
   textColor: "#292D32",
@@ -26,7 +26,7 @@ export const styles = {
     fontWeight: "700",
     textAlign: "left",
     color: "#292D32",
-    marginBottom: 10
+    marginBottom: 10,
   },
 
   text: {
@@ -39,7 +39,6 @@ export const styles = {
     alignItems: "center",
     backgroundColor: "#ffffff",
     padding: 16,
-    
   },
 
   title: {
@@ -61,7 +60,6 @@ export const styles = {
     shadowRadius: 4,
     elevation: 5, // Android shadow
     marginBottom: 50,
-    
   },
 
   fileBox: {
@@ -88,7 +86,7 @@ export const styles = {
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
-    elevation: 3, 
+    elevation: 3,
   },
 
   buttonBlue: {
@@ -102,7 +100,6 @@ export const styles = {
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
-   
   },
 
   buttonText: {
@@ -119,7 +116,7 @@ export const styles = {
   // Light
   lightLightBlue: "#70BBDF33",
   lightBlue: "#70BBDF",
-  lightGreen: "#CDEDD8",
+  lightGreen: "#D9FFE9",
   lightYellow: "#FFE9C7",
   lightRed: "#FFDADB",
 

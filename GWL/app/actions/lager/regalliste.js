@@ -1,62 +1,97 @@
-import { Button, Text, View, TouchableOpacity, Modal } from "react-native";
+import { Text, View, TouchableOpacity, Modal } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { styles } from "../../components/styles";
+import { styles } from "../../../components/styles";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { useState, useEffect } from "react";
 import { StyleSheet } from "react-native";
-import ArtikelService from "../../database/datamapper/ArtikelHelper";
-import RegalService from "../../database/datamapper/RegalHelper";
-import ArtikelBesitzerService from "../../database/datamapper/ArtikelBesitzerHelper";
+import RegalService from "../../../database/datamapper/RegalHelper";
+import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper";
 import { FlashList } from "@shopify/flash-list";
-import CustomPopup from "../../components/Modals/CustomPopUp";
+import CustomPopup from "../../../components/Modals/CustomPopUp";
 import Toast from "react-native-toast-message";
-import { database } from "../../database/database"; // Import your WatermelonDB database instance
-import ConfirmPopup from "../../components/Modals/ConfirmPopUp";
-import LogService from "../../database/datamapper/LogHelper";
+import { database } from "../../../database/database";
+import ConfirmPopup from "../../../components/Modals/ConfirmPopUp";
+import LogService from "../../../database/datamapper/LogHelper";
+import { useRoute } from "@react-navigation/native";
+import { Q } from "@nozbe/watermelondb";
 
-const WarenScreen = () => {
+const RegallisteScreen = () => {
   const navigation = useNavigation();
   const [jsonData, setJsonData] = useState([]);
+  const [sortColumn, setSortColumn] = useState(null);
+  const [sortDirection, setSortDirection] = useState("asc");
   const [action, setAction] = useState(null);
   const [confirm, setConfirm] = useState(null);
-  const [sortColumn, setSortColumn] = useState("gwId");
-  const [sortDirection, setSortDirection] = useState("asc");
   const isFocused = useIsFocused();
 
+  const route = useRoute();
+  const passedRegalId = route.params?.regalId;
+
   useEffect(() => {
+    navigation.setOptions({
+      headerShown: true,
+      title: passedRegalId,
+    });
+
     const fetchData = async () => {
       try {
-        // Fetch initial data from the database
-        const artikel = await ArtikelService.getAllArtikel();
-        setJsonData(artikel);
+        const regal = await RegalService.getRegalById(passedRegalId);
+        if (!regal) {
+          console.error("Regal not found");
+          return;
+        }
+
+        const artikelList =
+          await ArtikelBesitzerService.getArtikelOwnersByRegalId(passedRegalId);
+
+        const artikelWithDetails = await Promise.all(
+          artikelList.map(async (artikelOwner) => {
+            const artikel = await artikelOwner.artikel.fetch();
+            return {
+              regalId: passedRegalId,
+              gwId: artikel.gwId,
+              beschreibung: artikel.beschreibung,
+              status: artikel.status,
+              artikelOwnerId: artikelOwner.id,
+              menge: artikelOwner.menge,
+            };
+          })
+        );
+
+        setJsonData(artikelWithDetails);
+
+        const subscriber = database.collections
+          .get("artikel_besitzer")
+          .query(Q.where("regal_id", regal.id))
+          .observe()
+          .subscribe(async (artikelBesitzerSnapshot) => {
+            const updatedArtikelList = await Promise.all(
+              artikelBesitzerSnapshot.map(async (artikelOwner) => {
+                const artikel = await artikelOwner.artikel.fetch();
+                return {
+                  regalId: passedRegalId,
+                  gwId: artikel.gwId,
+                  beschreibung: artikel.beschreibung,
+                  status: artikel.status,
+                  artikelOwnerId: artikelOwner.id,
+                  menge: artikelOwner.menge,
+                };
+              })
+            );
+
+            setJsonData(updatedArtikelList);
+          });
+
+        return () => subscriber.unsubscribe();
       } catch (error) {
         console.error("Fehler beim Abrufen der Artikel:", error);
       }
     };
 
     fetchData();
+  }, [isFocused]);
 
-    // Set up a real-time listener for changes in the `artikel` table
-    const subscriber = database.collections
-      .get("artikel")
-      .query()
-      .observe()
-      .subscribe((artikelSnapshot) => {
-        const artikelData = artikelSnapshot.map((artikel) => ({
-          gwId: artikel.gwId,
-          beschreibung: artikel.beschreibung,
-          menge: artikel.menge,
-          status: artikel.status,
-        }));
-
-        // Update the state with the new data to trigger re-render
-        setJsonData(artikelData);
-      });
-
-    // Cleanup subscription on component unmount
-    return () => subscriber.unsubscribe();
-  }, [isFocused]); // The effect will re-run when the screen gains focus
-
+  //Sorting Function
   const handleSort = (column) => {
     let newDirection = "asc";
     if (sortColumn === column && sortDirection === "asc") {
@@ -104,7 +139,7 @@ const WarenScreen = () => {
     return (
       <TouchableOpacity
         style={[localStyles.row, localStyles.rowBorder]}
-        onPress={() => setAction(item.gwId)}
+        onPress={() => setAction({ gwId: item.gwId, regalId: item.regalId })}
         activeOpacity={0.6}
       >
         <View style={localStyles.cell}>
@@ -219,14 +254,15 @@ const WarenScreen = () => {
             setConfirm(null);
           }}
           colorCallback={async () => {
-            await ArtikelBesitzerService.deleteArtikelOwnerByArtikelId(confirm);
-            await LogService.BackupLogByArtikelId(confirm);
-            await ArtikelService.deleteArtikel(confirm);
+            await ArtikelBesitzerService.deleteArtikelOwnerByArtikelIdAndRegalId(
+              confirm.gwId,
+              confirm.regalId
+            );
 
             Toast.show({
               type: "success",
               text1: "Erfolgreich",
-              text2: `Artikel mit GWID ${confirm} gelöscht`,
+              text2: `Artikel ${confirm.gwId} aus dem Regal ${confirm.regalId} gelöscht`,
               visibilityTime: 1000,
             });
 
@@ -238,7 +274,7 @@ const WarenScreen = () => {
   );
 };
 
-export default WarenScreen;
+export default RegallisteScreen;
 
 const localStyles = StyleSheet.create({
   listContainer: {
@@ -305,9 +341,9 @@ const localStyles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 10,
+    fontWeight: "bold",
     color: "green",
     fontSize: 10,
-    fontWeight: "bold",
     textAlign: "center",
     width: 40,
   },

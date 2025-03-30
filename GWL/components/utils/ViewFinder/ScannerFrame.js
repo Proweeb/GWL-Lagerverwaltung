@@ -21,23 +21,23 @@ export default function ScannerFrame({
   const width = size;
   const cornerSize = size * 0.2;
 
-  // Use Reanimated shared value for opacity
+  // Reanimated shared value for opacity
   const opacityValue = useSharedValue(0);
 
+  // Use Reanimated's worklet to trigger the animation on UI thread
   useEffect(() => {
     if (animationStart) {
-      // Run animation with reanimated
       opacityValue.value = withSequence(
         withTiming(1, { duration: 300, easing: Easing.linear }),
         withTiming(0, { duration: 150, easing: Easing.linear })
       );
 
-      // Reset animation flag after completion
-      setTimeout(() => setAnimation(false), 300);
+      // Reset the animation state after the sequence
+      setTimeout(() => setAnimation(false), 450); // Ensure animation state is reset after animation duration
     }
   }, [animationStart]);
 
-  // Create an animated style
+  // Animated style to control opacity
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacityValue.value,
   }));
