@@ -291,6 +291,7 @@ const ArtikelService = {
   updateArtikelById,
   getArtikelsById,
   updateInventurArtikel,
+  createArtikelImport,
 };
 
 export default ArtikelService;
