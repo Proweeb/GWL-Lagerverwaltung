@@ -3,9 +3,9 @@ import {
   Text,
   View,
   TouchableOpacity,
-  Alert,
   ScrollView,
   StyleSheet,
+  Modal,
 } from "react-native";
 import * as XLSX from "xlsx";
 import * as DocumentPicker from "expo-document-picker";
@@ -22,10 +22,16 @@ import { database } from "../../../database/database";
 import { FlashList } from "@shopify/flash-list";
 import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper";
 import { logTypes } from "../../../components/enum";
+import ConfirmPopup from "../../../components/Modals/ConfirmPopUp";
+import Toast from "react-native-toast-message";
+
+
 
 const ImportScreen = ({ navigation }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [jsonData, setJsonData] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [validationErrors, setValidationErrors] = useState([]);
 
   // Handle file picker for Excel files
   const pickFile = async () => {
@@ -37,7 +43,13 @@ const ImportScreen = ({ navigation }) => {
       setSelectedFile(result.assets[0]);
       parseExcel(result.assets[0]);
     } catch (error) {
-      Alert.alert("Fehler", "Dateiauswahl fehlgeschlagen");
+      Toast.show({
+        type: "error",
+        text1: "Fehler",
+        text2: "Dateiauswahl fehlgeschlagen",
+        position: "bottom",
+        autoHide: false,
+      });
     }
   };
 
@@ -52,110 +64,177 @@ const ImportScreen = ({ navigation }) => {
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: "array" });
         let allSheetsData = {};
+        let allErrors = [];
 
         console.log("=== DEBUG: Excel Parsing ===");
         console.log("Found sheets:", workbook.SheetNames);
 
-        const validateNumber = (value, fieldName, rowIndex) => {
+        const validateNumber = (value, fieldName, rowIndex, sheetName) => {
           const num = Number(value);
           if (isNaN(num)) {
-            throw new Error(
-              `Ungültiger Wert für ${fieldName} in Zeile ${
-                rowIndex + 1
-              }: ${value} muss eine Zahl sein.`
-            );
+            allErrors.push({
+              sheet: sheetName,
+              row: rowIndex + 1,
+              field: fieldName,
+              value: value,
+              error: `Muss eine Zahl sein`
+            });
+            return false;
           }
-          return num;
+          return true;
         };
 
-        const validateDate = (value, fieldName, rowIndex) => {
+        const validateDate = (value, fieldName, rowIndex, sheetName) => {
           try {
             const date = stringToDate(value, "dd.MM.yyyy", ".");
             if (isNaN(date.getTime())) {
-              throw new Error(
-                `Ungültiges Datum für ${fieldName} in Zeile ${
-                  rowIndex + 1
-                }: ${value}`
-              );
+              allErrors.push({
+                sheet: sheetName,
+                row: rowIndex + 1,
+                field: fieldName,
+                value: value,
+                error: `Ungültiges Datum`
+              });
+              return false;
             }
-            return value;
+            return true;
           } catch (error) {
-            throw new Error(
-              `Ungültiges Datumsformat für ${fieldName} in Zeile ${
-                rowIndex + 1
-              }: ${value}`
-            );
+            allErrors.push({
+              sheet: sheetName,
+              row: rowIndex + 1,
+              field: fieldName,
+              value: value,
+              error: `Ungültiges Datumsformat (erwartet: dd.MM.yyyy)`
+            });
+            return false;
           }
+        };
+
+        const validateRequired = (value, fieldName, rowIndex, sheetName) => {
+          if (!value || value.trim() === '') {
+            allErrors.push({
+              sheet: sheetName,
+              row: rowIndex + 1,
+              field: fieldName,
+              value: value,
+              error: `Pflichtfeld`
+            });
+            return false;
+          }
+          return true;
         };
 
         workbook.SheetNames.forEach((sheetName) => {
           const sheet = workbook.Sheets[sheetName];
           console.log(`Processing sheet: ${sheetName}`);
-          console.log("Sheet headers:", Object.keys(sheet));
-
+          
           let parsedData = XLSX.utils.sheet_to_json(sheet);
-          console.log(
-            `Raw parsed data for ${sheetName}:`,
-            JSON.stringify(parsedData, null, 2)
-          );
+          console.log(`Raw parsed data for ${sheetName}:`, JSON.stringify(parsedData, null, 2));
 
           if (parsedData.length > 0) {
             try {
               parsedData = parsedData.map((row, index) => {
-                console.log(
-                  `Processing row ${index} in ${sheetName}:`,
-                  JSON.stringify(row)
-                );
                 const processedRow = { ...row };
-
+                
                 // Convert all values to strings first
                 Object.entries(row).forEach(([key, value]) => {
                   processedRow[key] = String(value);
                 });
 
-                // Validate specific fields
-                if ("Menge" in processedRow) {
-                  validateNumber(processedRow.Menge, "Menge", index);
-                }
-                if ("AblaufDatum" in processedRow) {
-                  validateDate(processedRow.AblaufDatum, "AblaufDatum", index);
-                }
-                if ("ErstelltungsDatum" in processedRow) {
-                  validateDate(
-                    processedRow.ErstelltungsDatum,
-                    "ErstelltungsDatum",
-                    index
-                  );
+                // Validate fields based on sheet type
+                switch(sheetName) {
+                  case 'Regale':
+                    validateRequired(processedRow['Regal ID'], 'Regal ID', index, sheetName);
+                    validateRequired(processedRow['Regal Name'], 'Regal Name', index, sheetName);
+                    validateRequired(processedRow['Fach Name'], 'Fach Name', index, sheetName);
+                    if (processedRow['Erstellt am']) {
+                      validateDate(processedRow['Erstellt am'], 'Erstellt am', index, sheetName);
+                    }
+                    break;
+                  
+                  case 'Artikel':
+                    validateRequired(processedRow['GWID'], 'GWID', index, sheetName);
+                    validateRequired(processedRow['Firmen ID'], 'Firmen ID', index, sheetName);
+                    if (processedRow['Gesamtmenge']) {
+                      validateNumber(processedRow['Gesamtmenge'], 'Gesamtmenge', index, sheetName);
+                    }
+                    if (processedRow['Mindestmenge']) {
+                      validateNumber(processedRow['Mindestmenge'], 'Mindestmenge', index, sheetName);
+                    }
+                    if (processedRow['Ablaufdatum']) {
+                      validateDate(processedRow['Ablaufdatum'], 'Ablaufdatum', index, sheetName);
+                    }
+                    break;
+                  
+                  case 'Lagerplan':
+                    validateRequired(processedRow['Regal ID'], 'Regal ID', index, sheetName);
+                    validateRequired(processedRow['GWID'], 'GWID', index, sheetName);
+                    if (processedRow['Menge']) {
+                      validateNumber(processedRow['Menge'], 'Menge', index, sheetName);
+                    }
+                    if (processedRow['Erstellt am']) {
+                      validateDate(processedRow['Erstellt am'], 'Erstellt am', index, sheetName);
+                    }
+                    break;
                 }
 
                 return processedRow;
               });
               allSheetsData[sheetName] = parsedData;
-              console.log(
-                `Processed data for ${sheetName}:`,
-                JSON.stringify(parsedData, null, 2)
-              );
             } catch (error) {
               console.error(`Error processing sheet ${sheetName}:`, error);
-              Alert.alert("Validierungsfehler", error.message);
-              return;
+              allErrors.push({
+                sheet: sheetName,
+                row: 'All',
+                field: 'General',
+                value: '',
+                error: error.message
+              });
             }
           }
         });
+
+        // If there are any errors, display them all at once
+        if (allErrors.length > 0) {
+          const errorMessage = allErrors.map(error => 
+            `Blatt: ${error.sheet}\n` +
+            `Zeile: ${error.row}\n` +
+            `Feld: ${error.field}\n` +
+            `Wert: ${error.value}\n` +
+            `Fehler: ${error.error}\n` +
+            '-------------------'
+          ).join('\n\n');
+
+          setValidationErrors(allErrors);
+          setModalVisible(true);
+          return;
+        }
 
         console.log("=== END Excel Parsing DEBUG ===");
 
         if (Object.keys(allSheetsData).length > 0) {
           setJsonData(allSheetsData);
         } else {
-          Alert.alert("Fehler", "Keine Daten gefunden.");
+          Toast.show({
+            type: "error",
+            text1: "Fehler",
+            text2: "Keine Daten gefunden",
+            position: "bottom",
+            autoHide: false,
+          });
         }
       };
 
       reader.readAsArrayBuffer(blob);
     } catch (error) {
       console.error("Excel parsing error:", error);
-      Alert.alert("Fehler", "Datei konnte nicht verarbeitet werden.");
+      Toast.show({
+        type: "error",
+        text1: "Fehler",
+        text2: "Datei konnte nicht verarbeitet werden",
+        position: "bottom",
+        autoHide: false,
+      });
     }
   };
 
@@ -197,7 +276,13 @@ const ImportScreen = ({ navigation }) => {
   // Handle the import of data into the database
   const handleImport = async () => {
     if (!jsonData) {
-      Alert.alert("Fehler", "Es gibt keine Daten zu importieren.");
+      Toast.show({
+        type: "error",
+        text1: "Fehler",
+        text2: "Es gibt keine Daten zu importieren",
+        position: "bottom",
+        autoHide: false,
+      });
       return;
     }
     try {
@@ -219,10 +304,22 @@ const ImportScreen = ({ navigation }) => {
       console.log("Neue Datenbank wird erstellt und Daten importiert...");
       await insertData(jsonData);
       console.log("Daten erfolgreich importiert!");
-      Alert.alert("Erfolg", "Daten wurden erfolgreich importiert.");
+      Toast.show({
+        type: "success",
+        text1: "Erfolg",
+        text2: "Daten wurden erfolgreich importiert",
+        position: "bottom",
+        autoHide: true,
+      });
     } catch (error) {
       console.error("Fehler beim Import:", error);
-      Alert.alert("Fehler", "Datenimport fehlgeschlagen.");
+      Toast.show({
+        type: "error",
+        text1: "Import Fehler",
+        text2: error.message,
+        position: "bottom",
+        autoHide: false,
+      });
     }
   };
 
@@ -271,7 +368,13 @@ const ImportScreen = ({ navigation }) => {
 
       // Import Regale
       if (!Array.isArray(data.Regale)) {
-        console.warn("No Regale data found or invalid format");
+        Toast.show({
+          type: "error",
+          text1: "Fehler",
+          text2: "Keine Regale gefunden oder ungültiges Format",
+          position: "bottom",
+          autoHide: false,
+        });
       } else {
         console.log(`Processing ${data.Regale.length} Regale records`);
         for (const regal of data.Regale) {
@@ -322,7 +425,13 @@ const ImportScreen = ({ navigation }) => {
       }
       // Import Artikel
       if (!Array.isArray(data.Artikel)) {
-        console.warn("No Artikel data found or invalid format");
+        Toast.show({
+          type: "error",
+          text1: "Fehler",
+          text2: "Keine Artikel gefunden oder ungültiges Format",
+          position: "bottom",
+          autoHide: false,
+        });
       } else {
         console.log(`Processing ${data.Artikel.length} Artikel records`);
         for (const artikel of data.Artikel) {
@@ -392,7 +501,13 @@ const ImportScreen = ({ navigation }) => {
       }
       // Artikel Besitzer
       if (!Array.isArray(data.Lagerplan)) {
-        console.warn("No Lagerplan data found or invalid format");
+        Toast.show({
+          type: "error",
+          text1: "Fehler",
+          text2: "Kein Lagerplan gefunden oder ungültiges Format",
+          position: "bottom",
+          autoHide: false,
+        });
       } else {
         console.log(`Processing ${data.Lagerplan.length} Lagerplan records`);
         for (const relation of data.Lagerplan) {
@@ -456,7 +571,13 @@ const ImportScreen = ({ navigation }) => {
       }
     } catch (error) {
       console.error("Import error:", error);
-      Alert.alert("Import Fehler", error.message);
+      Toast.show({
+        type: "error",
+        text1: "Import Fehler",
+        text2: error.message,
+        position: "bottom",
+        autoHide: false,
+      });
       throw error;
     }
   };
@@ -499,116 +620,199 @@ const ImportScreen = ({ navigation }) => {
       {selectedFile && jsonData && (
         <ScrollView style={styles.scrollContainer}>
           {/* Artikel Vorschau */}
-          <Text numberOfLines={1} style={styles.subHeader}>
-            Artikel Vorschau
-          </Text>
-          <View style={localStyles.table}>
-            <View style={[localStyles.row, localStyles.rowBorder]}>
-              <View style={localStyles.cell}>
-                <Text numberOfLines={1} style={localStyles.tableContent}>
-                  Name
-                </Text>
+          <View style={localStyles.previewSection}>
+            <Text numberOfLines={1} style={styles.subHeader}>
+              Artikel Vorschau
+            </Text>
+            <View style={localStyles.table}>
+              <View style={[localStyles.row, localStyles.rowBorder]}>
+                <View style={localStyles.cell}>
+                  <Text numberOfLines={1} style={localStyles.tableContent}>
+                    Beschreibung
+                  </Text>
+                </View>
+                <View style={localStyles.cell}>
+                  <Text numberOfLines={1} style={localStyles.tableContent}>
+                    GWID
+                  </Text>
+                </View>
+                <View style={localStyles.cell}>
+                  <Text numberOfLines={1} style={localStyles.tableContent}>
+                    Firma
+                  </Text>
+                </View>
+                <View style={localStyles.cell}>
+                  <Text numberOfLines={1} style={localStyles.tableContent}>
+                    Menge
+                  </Text>
+                </View>
               </View>
-              <View style={localStyles.cell}>
-                <Text numberOfLines={1} style={localStyles.tableContent}>
-                  Produkt ID
-                </Text>
-              </View>
-              <View style={localStyles.cell}>
-                <Text numberOfLines={1} style={localStyles.tableContent}>
-                  Ablaufdatum
-                </Text>
-              </View>
-              <View style={localStyles.cell}>
-                <Text numberOfLines={1} style={localStyles.tableContent}>
-                  Menge
-                </Text>
-              </View>
-            </View>
 
-            <View style={{ height: 200 }}>
-              <FlashList
-                data={jsonData.Artikel || []}
-                renderItem={({ item }) => (
-                  <View style={[localStyles.row, localStyles.rowBorder]}>
-                    <View style={localStyles.cell}>
-                      <Text numberOfLines={1} style={localStyles.name}>
-                        {item.beschreibung}
-                      </Text>
+              <View style={localStyles.tableContainer}>
+                <FlashList
+                  data={jsonData.Artikel || []}
+                  renderItem={({ item }) => (
+                    <View style={[localStyles.row, localStyles.rowBorder]}>
+                      <View style={localStyles.cell}>
+                        <Text numberOfLines={1} style={localStyles.name}>
+                          {item['Beschreibung']}
+                        </Text>
+                      </View>
+                      <View style={localStyles.cell}>
+                        <Text numberOfLines={1} style={localStyles.cellText}>
+                          {item['GWID']}
+                        </Text>
+                      </View>
+                      <View style={localStyles.cell}>
+                        <Text numberOfLines={1} style={localStyles.cellText}>
+                          {item['Firmen ID']}
+                        </Text>
+                      </View>
+                      <View style={localStyles.cell}>
+                        <Text numberOfLines={1} style={localStyles.cellText}>
+                          {item['Gesamtmenge']}
+                        </Text>
+                      </View>
                     </View>
-                    <View style={localStyles.cell}>
-                      <Text numberOfLines={1} style={localStyles.cellText}>
-                        {item.gwId}
-                      </Text>
-                    </View>
-                    <View style={localStyles.cell}>
-                      <Text numberOfLines={1} style={localStyles.cellText}>
-                        {item.ablaufdatum}
-                      </Text>
-                    </View>
-                    <View style={localStyles.cell}>
-                      <Text numberOfLines={1} style={localStyles.cellText}>
-                        {item.menge}
-                      </Text>
-                    </View>
-                  </View>
-                )}
-                estimatedItemSize={35}
-              />
+                  )}
+                  estimatedItemSize={35}
+                />
+              </View>
             </View>
           </View>
 
           {/* Regale Vorschau */}
-          <Text numberOfLines={1} style={styles.subHeader}>
-            Regale Vorschau
-          </Text>
-          <View style={localStyles.table}>
-            <View style={[localStyles.row, localStyles.rowBorder]}>
-              <View style={localStyles.cell}>
-                <Text numberOfLines={1} style={localStyles.tableContent}>
-                  Regal Name
-                </Text>
+          <View style={localStyles.previewSection}>
+            <Text numberOfLines={1} style={styles.subHeader}>
+              Regale Vorschau
+            </Text>
+            <View style={localStyles.table}>
+              <View style={[localStyles.row, localStyles.rowBorder]}>
+                <View style={localStyles.cell}>
+                  <Text numberOfLines={1} style={localStyles.tableContent}>
+                    Regal ID
+                  </Text>
+                </View>
+                <View style={localStyles.cell}>
+                  <Text numberOfLines={1} style={localStyles.tableContent}>
+                    Regal Name
+                  </Text>
+                </View>
+                <View style={localStyles.cell}>
+                  <Text numberOfLines={1} style={localStyles.tableContent}>
+                    Fach Name
+                  </Text>
+                </View>
               </View>
-              <View style={localStyles.cell}>
-                <Text numberOfLines={1} style={localStyles.tableContent}>
-                  Regal ID
-                </Text>
-              </View>
-              <View style={localStyles.cell}>
-                <Text numberOfLines={1} style={localStyles.tableContent}>
-                  Fach Name
-                </Text>
+
+              <View style={localStyles.tableContainer}>
+                <FlashList
+                  data={jsonData.Regale || []}
+                  renderItem={({ item }) => (
+                    <View style={[localStyles.row, localStyles.rowBorder]}>
+                      <View style={localStyles.cell}>
+                        <Text numberOfLines={1} style={localStyles.cellText}>
+                          {item['Regal ID']}
+                        </Text>
+                      </View>
+                      <View style={localStyles.cell}>
+                        <Text numberOfLines={1} style={localStyles.name}>
+                          {item['Regal Name']}
+                        </Text>
+                      </View>
+                      <View style={localStyles.cell}>
+                        <Text numberOfLines={1} style={localStyles.cellText}>
+                          {item['Fach Name']}
+                        </Text>
+                      </View>
+                    </View>
+                  )}
+                  estimatedItemSize={35}
+                />
               </View>
             </View>
+          </View>
 
-            <View style={{ height: 200 }}>
-              <FlashList
-                data={jsonData.Regale || []}
-                renderItem={({ item }) => (
-                  <View style={[localStyles.row, localStyles.rowBorder]}>
-                    <View style={localStyles.cell}>
-                      <Text numberOfLines={1} style={localStyles.name}>
-                        {item.regalName}
-                      </Text>
+          {/* Lagerplan Vorschau */}
+          <View style={localStyles.previewSection}>
+            <Text numberOfLines={1} style={styles.subHeader}>
+              Lagerplan Vorschau
+            </Text>
+            <View style={localStyles.table}>
+              <View style={[localStyles.row, localStyles.rowBorder]}>
+                <View style={localStyles.cell}>
+                  <Text numberOfLines={1} style={localStyles.tableContent}>
+                    Regal ID
+                  </Text>
+                </View>
+                <View style={localStyles.cell}>
+                  <Text numberOfLines={1} style={localStyles.tableContent}>
+                    GWID
+                  </Text>
+                </View>
+                <View style={localStyles.cell}>
+                  <Text numberOfLines={1} style={localStyles.tableContent}>
+                    Menge
+                  </Text>
+                </View>
+              </View>
+
+              <View style={localStyles.tableContainer}>
+                <FlashList
+                  data={jsonData.Lagerplan || []}
+                  renderItem={({ item }) => (
+                    <View style={[localStyles.row, localStyles.rowBorder]}>
+                      <View style={localStyles.cell}>
+                        <Text numberOfLines={1} style={localStyles.cellText}>
+                          {item['Regal ID']}
+                        </Text>
+                      </View>
+                      <View style={localStyles.cell}>
+                        <Text numberOfLines={1} style={localStyles.cellText}>
+                          {item['GWID']}
+                        </Text>
+                      </View>
+                      <View style={localStyles.cell}>
+                        <Text numberOfLines={1} style={localStyles.cellText}>
+                          {item['Menge']}
+                        </Text>
+                      </View>
                     </View>
-                    <View style={localStyles.cell}>
-                      <Text numberOfLines={1} style={localStyles.cellText}>
-                        {item.regalId}
-                      </Text>
-                    </View>
-                    <View style={localStyles.cell}>
-                      <Text numberOfLines={1} style={localStyles.cellText}>
-                        {item.fachName}
-                      </Text>
-                    </View>
-                  </View>
-                )}
-                estimatedItemSize={35}
-              />
+                  )}
+                  estimatedItemSize={35}
+                />
+              </View>
             </View>
           </View>
         </ScrollView>
       )}
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        statusBarTranslucent={true}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <ConfirmPopup
+          text={validationErrors.map(error => 
+            `Blatt: ${error.sheet}\n` +
+            `Zeile: ${error.row}\n` +
+            `Feld: ${error.field}\n` +
+            `Wert: ${error.value}\n` +
+            `Fehler: ${error.error}\n` +
+            '-------------------'
+          ).join('\n\n')}
+          greyCallback={() => setModalVisible(false)}
+          colorCallback={() => {
+            setSelectedFile(null);
+            setJsonData(null);
+            setModalVisible(false);
+          }}
+          greenMode={false}
+          confirmText="Erneut Hochladen"
+        />
+      </Modal>
     </View>
   );
 };
@@ -628,6 +832,7 @@ const localStyles = StyleSheet.create({
     width: "100%",
     marginBottom: 20,
     padding: 5,
+    flex: 1,
   },
   tableContent: {
     color: "#AFAFAF",
@@ -665,5 +870,12 @@ const localStyles = StyleSheet.create({
     fontSize: 12,
     color: "#AFAFAF",
     textAlign: "center",
+  },
+  tableContainer: {
+    height: 200,
+    width: "100%",
+  },
+  previewSection: {
+    marginBottom: 20,
   },
 });
