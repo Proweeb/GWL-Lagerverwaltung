@@ -32,6 +32,23 @@ async function createArtikel(artikelData, regalId) {
     return artikel;
   });
 }
+
+
+async function createArtikelImport(artikelData) {
+  
+  return database.write(async () => {
+    const artikel = await database.get("artikel").create((artikel) => {
+      artikel.gwId = artikelData.gwId;
+      artikel.firmenId = artikelData.firmenId;
+      artikel.beschreibung = artikelData.beschreibung;
+      artikel.menge = artikelData.menge;
+      artikel.mindestMenge = artikelData.mindestMenge;
+      artikel.kunde = artikelData.kunde;
+      artikel.ablaufdatum = artikelData.ablaufdatum;
+    });
+    return artikel;
+  });
+}
 async function getAllArtikel() {
   return await database.get("artikel").query().fetch();
 }
@@ -156,6 +173,7 @@ const ArtikelService = {
   updateArtikel,
   deleteArtikel,
   deleteAllData,
+  createArtikelImport,
 };
 
 export default ArtikelService;

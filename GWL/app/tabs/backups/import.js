@@ -19,6 +19,8 @@ import {
 } from "../../../components/utils/Functions/parseDate";
 import { useFocusEffect } from "@react-navigation/native"; // Import useFocusEffect from react-navigation
 import { database } from "../../../database/database";
+import { FlashList } from "@shopify/flash-list";
+import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper";
 
 const ImportScreen = ({ navigation }) => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -50,19 +52,72 @@ const ImportScreen = ({ navigation }) => {
         const workbook = XLSX.read(data, { type: "array" });
         let allSheetsData = {};
 
+        console.log("=== DEBUG: Excel Parsing ===");
+        console.log("Found sheets:", workbook.SheetNames);
+
+        const validateNumber = (value, fieldName, rowIndex) => {
+          const num = Number(value);
+          if (isNaN(num)) {
+            throw new Error(`Ungültiger Wert für ${fieldName} in Zeile ${rowIndex + 1}: ${value} muss eine Zahl sein.`);
+          }
+          return num;
+        };
+
+        const validateDate = (value, fieldName, rowIndex) => {
+          try {
+            const date = stringToDate(value, "dd.MM.yyyy", ".");
+            if (isNaN(date.getTime())) {
+              throw new Error(`Ungültiges Datum für ${fieldName} in Zeile ${rowIndex + 1}: ${value}`);
+            }
+            return value;
+          } catch (error) {
+            throw new Error(`Ungültiges Datumsformat für ${fieldName} in Zeile ${rowIndex + 1}: ${value}`);
+          }
+        };
+
         workbook.SheetNames.forEach((sheetName) => {
           const sheet = workbook.Sheets[sheetName];
+          console.log(`Processing sheet: ${sheetName}`);
+          console.log("Sheet headers:", Object.keys(sheet));
+          
           let parsedData = XLSX.utils.sheet_to_json(sheet);
+          console.log(`Raw parsed data for ${sheetName}:`, JSON.stringify(parsedData, null, 2));
 
           if (parsedData.length > 0) {
-            parsedData = parsedData.map((row) =>
-              Object.fromEntries(
-                Object.entries(row).map(([key, value]) => [key, String(value)])
-              )
-            );
-            allSheetsData[sheetName] = parsedData;
+            try {
+              parsedData = parsedData.map((row, index) => {
+                console.log(`Processing row ${index} in ${sheetName}:`, JSON.stringify(row));
+                const processedRow = { ...row };
+                
+                // Convert all values to strings first
+                Object.entries(row).forEach(([key, value]) => {
+                  processedRow[key] = String(value);
+                });
+
+                // Validate specific fields
+                if ('Menge' in processedRow) {
+                  validateNumber(processedRow.Menge, 'Menge', index);
+                }
+                if ('AblaufDatum' in processedRow) {
+                  validateDate(processedRow.AblaufDatum, 'AblaufDatum', index);
+                }
+                if ('ErstelltungsDatum' in processedRow) {
+                  validateDate(processedRow.ErstelltungsDatum, 'ErstelltungsDatum', index);
+                }
+
+                return processedRow;
+              });
+              allSheetsData[sheetName] = parsedData;
+              console.log(`Processed data for ${sheetName}:`, JSON.stringify(parsedData, null, 2));
+            } catch (error) {
+              console.error(`Error processing sheet ${sheetName}:`, error);
+              Alert.alert("Validierungsfehler", error.message);
+              return;
+            }
           }
         });
+
+        console.log("=== END Excel Parsing DEBUG ===");
 
         if (Object.keys(allSheetsData).length > 0) {
           setJsonData(allSheetsData);
@@ -73,6 +128,7 @@ const ImportScreen = ({ navigation }) => {
 
       reader.readAsArrayBuffer(blob);
     } catch (error) {
+      console.error("Excel parsing error:", error);
       Alert.alert("Fehler", "Datei konnte nicht verarbeitet werden.");
     }
   };
@@ -111,12 +167,15 @@ const ImportScreen = ({ navigation }) => {
       return;
     }
     try {
-      console.log(JSON.stringify(jsonData));
+      // Debug logging
+      console.log("=== DEBUG: Full JSON Data Structure ===");
+      console.log("Available sheets:", Object.keys(jsonData));
+      console.log("Regale data:", JSON.stringify(jsonData.Regale, null, 2));
+      console.log("Artikel data:", JSON.stringify(jsonData.Artikel, null, 2));
+      console.log("=== END DEBUG ===");
+
       console.log("Backup der aktuellen Datenbank wird erstellt...");
       const backup = await backupDatabase();
-
-      console.log("Alte Logs werden auf Backup Mode gesetzt.");
-      await backupLogsBeforeImport();
 
       console.log("Bestehende Datenbank wird gelöscht...");
       await ArtikelService.deleteAllData();
@@ -136,8 +195,7 @@ const ImportScreen = ({ navigation }) => {
       console.log("Here");
       const regale = await RegalService.getAllRegal();
       const artikel = await ArtikelService.getAllArtikel();
-      const logs = await LogService.getAllLogs();
-      return { regale, artikel, logs };
+      return { regale, artikel };
     } catch (error) {
       console.error("Fehler beim Backup:", error);
       throw new Error("Backup fehlgeschlagen");
@@ -147,39 +205,138 @@ const ImportScreen = ({ navigation }) => {
   // Insert new data into the database
   const insertData = async (data) => {
     try {
-      for (const regal of data.Regale) {
-        regal.regalId = String(regal.regalId);
-        console.log("Regal:", regal);
-        await RegalService.createRegal(regal);
+      if (!data || typeof data !== 'object') {
+        throw new Error(`Invalid data structure: ${JSON.stringify(data)}`);
       }
-      for (const artikel of data.Artikel) {
-        artikel.gwId = String(artikel.gwId);
-        artikel.firmenId = String(artikel.firmenId);
-        artikel.kunde = String(artikel.kunde);
-        artikel.menge = Number(artikel.menge);
-        artikel.mindestMenge = Number(artikel.mindestMenge);
-        artikel.ablaufdatum = stringToDate(
-          artikel.ablaufdatum,
-          "dd.MM.yyyy",
-          "."
-        ).getTime();
-        artikel.regalId = String(artikel.regalId);
-        console.log("Artikel:", artikel);
-        await ArtikelService.createArtikel(artikel);
+
+      // Import Regale
+      if (!Array.isArray(data.Regale)) {
+        console.warn('No Regale data found or invalid format');
+      } else {
+        console.log(`Processing ${data.Regale.length} Regale records`);
+        for (const regal of data.Regale) {
+          try {
+            // Convert Excel column names to database field names
+            const regalData = {
+              regalId: String(regal['Regal ID'] || '').trim(),
+              regalName: String(regal['Regal Name'] || '').trim(),
+              fachName: String(regal['Fach Name'] || '').trim(),
+              erstelltAm: regal['Erstellt am'] ? 
+                stringToDate(regal['Erstellt am'], "dd.MM.yyyy", ".").getTime() :
+                new Date().getTime()
+            };
+
+            // Validate required fields
+            if (!regalData.regalId) {
+              throw new Error(`Regal ID ist erforderlich: ${JSON.stringify(regal)}`);
+            }
+            if (!regalData.regalName) {
+              throw new Error(`Regal Name ist erforderlich: ${JSON.stringify(regal)}`);
+            }
+            if (!regalData.fachName) {
+              throw new Error(`Fach Name ist erforderlich: ${JSON.stringify(regal)}`);
+            }
+
+            console.log("Importing Regal:", regalData);
+            await RegalService.createRegal(regalData);
+          } catch (error) {
+            console.error(`Fehler beim Import von Regal: ${JSON.stringify(regal)}`, error);
+            throw new Error(`Fehler beim Import von Regal ${regal['Regal ID']}: ${error.message}`);
+          }
+        }
       }
-      for (const log of data.Logs) {
-        log.gwId = String(log.gwId);
-        log.regalId = String(log.regalId);
-        log.menge = Number(log.menge);
-        log.createdAt = parseCustomDate(
-          log.datum,
-          "dd.mm.yyyy hh:mm"
-        ).getTime();
-        console.log("Log:", log);
-        await LogService.createLog(log, log.gwId, log.regalId);
+
+      // Artikel Besitzer
+      if (!Array.isArray(data.Lagerplan)) {
+        console.warn('No Lagerplan data found or invalid format');
+      } else {
+        console.log(`Processing ${data.Lagerplan.length} Lagerplan records`);
+        for (const relation of data.Lagerplan) {
+          try {
+            // Convert Excel column names to database field names
+            const lagerplanData = {
+              regalId: String(relation['Regal ID'] || '').trim(),
+              gwId: String(relation['GWID'] || '').trim(),
+              menge: relation['Menge'] !== undefined && relation['Menge'] !== '' ? 
+                Number(relation['Menge']) : 0,
+              erstelltAm: relation['Erstellt am'] ? 
+                stringToDate(relation['Erstellt am'], "dd.MM.yyyy", ".").getTime() :
+                new Date().getTime()
+            };
+
+            // Validate required fields
+            if (!lagerplanData.regalId) {
+              throw new Error(`Regal ID ist erforderlich im Lagerplan: ${JSON.stringify(relation)}`);
+            }
+            if (!lagerplanData.gwId) {
+              throw new Error(`GWID ist erforderlich im Lagerplan: ${JSON.stringify(relation)}`);
+            }
+
+            // Validate numeric fields
+            if (isNaN(lagerplanData.menge)) {
+              throw new Error(`Ungültige Menge im Lagerplan für Artikel ${lagerplanData.gwId}: ${relation['Menge']}`);
+            }
+
+            console.log("Importing Lagerplan:", lagerplanData);
+            await ArtikelBesitzerService.createArtikelOwner(lagerplanData, lagerplanData.gwId, lagerplanData.regalId);
+          } catch (error) {
+            console.error(`Fehler beim Import von Lagerplan: ${JSON.stringify(relation)}`, error);
+            throw new Error(`Fehler beim Import von Lagerplan für Artikel ${relation['GWID']}: ${error.message}`);
+          }
+        }
+      }
+
+      // Import Artikel
+      if (!Array.isArray(data.Artikel)) {
+        console.warn('No Artikel data found or invalid format');
+      } else {
+        console.log(`Processing ${data.Artikel.length} Artikel records`);
+        for (const artikel of data.Artikel) {
+          try {
+            // Convert Excel column names to database field names and ensure proper types
+            const artikelData = {
+              gwId: String(artikel['GWID'] || '').trim(),
+              firmenId: String(artikel['Firmen ID'] || '').trim(),
+              beschreibung: String(artikel['Beschreibung'] || '').trim(),
+              menge: artikel['Gesamtmenge'] !== undefined && artikel['Gesamtmenge'] !== '' ? 
+                Number(artikel['Gesamtmenge']) : 0,
+              mindestMenge: artikel['Mindestmenge'] !== undefined && artikel['Mindestmenge'] !== '' ? 
+                Number(artikel['Mindestmenge']) : 0,
+              kunde: String(artikel['Kunde'] || '').trim(),
+              ablaufdatum: artikel['Ablaufdatum'] ? 
+                stringToDate(artikel['Ablaufdatum'], "dd.MM.yyyy", ".").getTime() :
+                new Date().getTime()
+            };
+
+            // Validate required fields
+            if (!artikelData.gwId) {
+              throw new Error(`GWID ist erforderlich: ${JSON.stringify(artikel)}`);
+            }
+            if (!artikelData.firmenId) {
+              throw new Error(`Firmen ID ist erforderlich: ${JSON.stringify(artikel)}`);
+            }
+
+            // Validate numeric fields
+            if (isNaN(artikelData.menge)) {
+              throw new Error(`Ungültige Gesamtmenge für Artikel ${artikelData.gwId}: ${artikel['Gesamtmenge']}`);
+            }
+            if (isNaN(artikelData.mindestMenge)) {
+              throw new Error(`Ungültige Mindestmenge für Artikel ${artikelData.gwId}: ${artikel['Mindestmenge']}`);
+            }
+
+            console.log("Importing Artikel:", artikelData);
+            
+            await ArtikelService.createArtikelImport(artikelData);
+          } catch (error) {
+            console.error(`Fehler beim Import von Artikel: ${JSON.stringify(artikel)}`, error);
+            throw new Error(`Fehler beim Import von Artikel ${artikel['GWID']}: ${error.message}`);
+          }
+        }
       }
     } catch (error) {
-      console.log(error);
+      console.error("Import error:", error);
+      Alert.alert("Import Fehler", error.message);
+      throw error;
     }
   };
 
@@ -248,33 +405,36 @@ const ImportScreen = ({ navigation }) => {
               </View>
             </View>
 
-            {jsonData.Artikel.map((item, index) => (
-              <View
-                key={index}
-                style={[localStyles.row, localStyles.rowBorder]}
-              >
-                <View style={localStyles.cell}>
-                  <Text numberOfLines={1} style={localStyles.name}>
-                    {item.beschreibung}
-                  </Text>
-                </View>
-                <View style={localStyles.cell}>
-                  <Text numberOfLines={1} style={localStyles.cellText}>
-                    {item.gwId}
-                  </Text>
-                </View>
-                <View style={localStyles.cell}>
-                  <Text numberOfLines={1} style={localStyles.cellText}>
-                    {item.ablaufdatum}
-                  </Text>
-                </View>
-                <View style={localStyles.cell}>
-                  <Text numberOfLines={1} style={localStyles.cellText}>
-                    {item.menge}
-                  </Text>
-                </View>
-              </View>
-            ))}
+            <View style={{ height: 200 }}>
+              <FlashList
+                data={jsonData.Artikel || []}
+                renderItem={({ item }) => (
+                  <View style={[localStyles.row, localStyles.rowBorder]}>
+                    <View style={localStyles.cell}>
+                      <Text numberOfLines={1} style={localStyles.name}>
+                        {item.beschreibung}
+                      </Text>
+                    </View>
+                    <View style={localStyles.cell}>
+                      <Text numberOfLines={1} style={localStyles.cellText}>
+                        {item.gwId}
+                      </Text>
+                    </View>
+                    <View style={localStyles.cell}>
+                      <Text numberOfLines={1} style={localStyles.cellText}>
+                        {item.ablaufdatum}
+                      </Text>
+                    </View>
+                    <View style={localStyles.cell}>
+                      <Text numberOfLines={1} style={localStyles.cellText}>
+                        {item.menge}
+                      </Text>
+                    </View>
+                  </View>
+                )}
+                estimatedItemSize={35}
+              />
+            </View>
           </View>
 
           {/* Regale Vorschau */}
@@ -300,85 +460,31 @@ const ImportScreen = ({ navigation }) => {
               </View>
             </View>
 
-            {jsonData.Regale.map((item, index) => (
-              <View
-                key={index}
-                style={[localStyles.row, localStyles.rowBorder]}
-              >
-                <View style={localStyles.cell}>
-                  <Text numberOfLines={1} style={localStyles.name}>
-                    {item.regalName}
-                  </Text>
-                </View>
-                <View style={localStyles.cell}>
-                  <Text numberOfLines={1} style={localStyles.cellText}>
-                    {item.regalId}
-                  </Text>
-                </View>
-                <View style={localStyles.cell}>
-                  <Text numberOfLines={1} style={localStyles.cellText}>
-                    {item.fachName}
-                  </Text>
-                </View>
-              </View>
-            ))}
-          </View>
-
-          {/* Logs Vorschau */}
-          <Text numberOfLines={1} style={styles.subHeader}>
-            Lagerbewegungen Vorschau
-          </Text>
-          <View style={localStyles.table}>
-            <View style={[localStyles.row, localStyles.rowBorder]}>
-              <View style={localStyles.cell}>
-                <Text numberOfLines={1} style={localStyles.tableContent}>
-                  Beschreibung
-                </Text>
-              </View>
-              <View style={localStyles.cell}>
-                <Text numberOfLines={1} style={localStyles.tableContent}>
-                  Artikel ID
-                </Text>
-              </View>
-              <View style={localStyles.cell}>
-                <Text numberOfLines={1} style={localStyles.tableContent}>
-                  Regal ID
-                </Text>
-              </View>
-              <View style={localStyles.cell}>
-                <Text numberOfLines={1} style={localStyles.tableContent}>
-                  Menge
-                </Text>
-              </View>
+            <View style={{ height: 200 }}>
+              <FlashList
+                data={jsonData.Regale || []}
+                renderItem={({ item }) => (
+                  <View style={[localStyles.row, localStyles.rowBorder]}>
+                    <View style={localStyles.cell}>
+                      <Text numberOfLines={1} style={localStyles.name}>
+                        {item.regalName}
+                      </Text>
+                    </View>
+                    <View style={localStyles.cell}>
+                      <Text numberOfLines={1} style={localStyles.cellText}>
+                        {item.regalId}
+                      </Text>
+                    </View>
+                    <View style={localStyles.cell}>
+                      <Text numberOfLines={1} style={localStyles.cellText}>
+                        {item.fachName}
+                      </Text>
+                    </View>
+                  </View>
+                )}
+                estimatedItemSize={35}
+              />
             </View>
-
-            {jsonData.Logs.map((item, index) => (
-              <View
-                key={index}
-                style={[localStyles.row, localStyles.rowBorder]}
-              >
-                <View style={localStyles.cell}>
-                  <Text numberOfLines={1} style={localStyles.name}>
-                    {item.beschreibung}
-                  </Text>
-                </View>
-                <View style={localStyles.cell}>
-                  <Text numberOfLines={1} style={localStyles.cellText}>
-                    {item.gwId}
-                  </Text>
-                </View>
-                <View style={localStyles.cell}>
-                  <Text numberOfLines={1} style={localStyles.cellText}>
-                    {item.regalId}
-                  </Text>
-                </View>
-                <View style={localStyles.cell}>
-                  <Text numberOfLines={1} style={localStyles.cellText}>
-                    {item.menge}
-                  </Text>
-                </View>
-              </View>
-            ))}
           </View>
         </ScrollView>
       )}
