@@ -50,6 +50,9 @@ const WarenScreen = () => {
         }));
 
         // Update the state with the new data to trigger re-render
+        if (sortColumn != "gwId") {
+          handleSort(sortColumn);
+        }
         setJsonData(artikelData);
       });
 

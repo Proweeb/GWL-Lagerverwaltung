@@ -428,15 +428,17 @@ const ExportScreen = () => {
       });
 
       // Share the file
-      const result = await Sharing.shareAsync(fileUri);
-      console.log(result);
-      if (result) {
-        Toast.show({
-          type: "success",
-          text1: "Export",
-          text2: "Erfolgreich Exportiert",
-        });
+      try {
+        await Sharing.shareAsync(fileUri);
+      } catch (error) {
+        console.log(error);
       }
+
+      // Toast.show({
+      //   type: "success",
+      //   text1: "Export",
+      //   text2: "Erfolgreich Exportiert",
+      // });
     } catch (error) {
       console.error("Fehler beim Export:", error);
       Toast.show({

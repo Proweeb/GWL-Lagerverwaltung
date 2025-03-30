@@ -1,6 +1,7 @@
 import { database } from "../database";
 import { Q } from "@nozbe/watermelondb";
 import RegalService from "./RegalHelper";
+import { logTypes } from "../../components/enum";
 
 async function createArtikel(artikelData, regalId) {
   const regal = await RegalService.getRegalById(regalId);
@@ -15,7 +16,7 @@ async function createArtikel(artikelData, regalId) {
       artikel.ablaufdatum = artikelData.ablaufdatum;
     });
     await database.get("logs").create((log) => {
-      log.beschreibung = "Einlagern";
+      log.beschreibung = logTypes.artikelEinlagern;
       log.menge = Number(artikelData.menge);
       log.gesamtMenge = Number(artikelData.menge);
       log.artikel.set(artikel);
@@ -32,9 +33,7 @@ async function createArtikel(artikelData, regalId) {
   });
 }
 
-
 async function createArtikelImport(artikelData) {
-  
   return database.write(async () => {
     const artikel = await database.get("artikel").create((artikel) => {
       artikel.gwId = artikelData.gwId;
@@ -132,9 +131,9 @@ async function updateInventurArtikel(gwid, updatedData) {
     }
     let text;
     if (updatedData.menge < 0) {
-      text = "Entnehmen";
+      text = logTypes.artikelEntnehmen;
     } else {
-      text = "Nachfüllen";
+      text = logTypes.artikelNachfüllen;
     }
     await database.get("logs").create((log) => {
       log.beschreibung = text;
@@ -197,31 +196,6 @@ async function deleteArtikel(gwid) {
   });
 }
 
-async function deleteAllData() {
-  return await database.write(async () => {
-    const batchOperations = [];
-
-    const allArtikel = await database.get("artikel").query().fetch();
-    allArtikel.forEach((artikel) =>
-      batchOperations.push(artikel.prepareDestroyPermanently())
-    );
-
-    // const allLogs = await database.get("logs").query().fetch();
-    // allLogs.forEach((log) =>
-    //   batchOperations.push(log.prepareDestroyPermanently())
-    // );
-
-    const allRegale = await database.get("regale").query().fetch();
-    allRegale.forEach((regal) =>
-      batchOperations.push(regal.prepareDestroyPermanently())
-    );
-
-    if (batchOperations.length > 0) {
-      await database.batch(...batchOperations);
-    }
-  });
-}
-
 async function updateArtikelById(id, updatedData) {
   return await database.write(async () => {
     const artikel = await database
@@ -234,9 +208,9 @@ async function updateArtikelById(id, updatedData) {
     }
     let text;
     if (updatedData.menge < 0) {
-      text = "Entnehmen";
+      text = logTypes.artikelEntnehmen;
     } else {
-      text = "Nachfüllen";
+      text = logTypes.artikelNachfüllen;
     }
     await database.get("logs").create((log) => {
       log.beschreibung = text;
@@ -287,7 +261,6 @@ const ArtikelService = {
   getArtikelById,
   updateArtikel,
   deleteArtikel,
-  deleteAllData,
   updateArtikelById,
   getArtikelsById,
   updateInventurArtikel,

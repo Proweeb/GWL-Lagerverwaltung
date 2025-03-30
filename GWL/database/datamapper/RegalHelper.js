@@ -1,6 +1,7 @@
 import { database } from "../database";
 import { Q } from "@nozbe/watermelondb";
 import Regal from "../models/Regal";
+import { logTypes } from "../../components/enum";
 
 async function createRegal(regalData) {
   return database.write(async () => {
@@ -10,7 +11,7 @@ async function createRegal(regalData) {
       regal.regalName = regalData.regalName;
     });
     await database.get("logs").create((log) => {
-      log.beschreibung = "Lagerplatz hinzufügen";
+      log.beschreibung = logTypes.LagerplatzHinzufügen;
       log.regal.set(regal);
       log.createdAt = Date.now();
     });

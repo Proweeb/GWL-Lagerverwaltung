@@ -160,9 +160,9 @@ async function updateArtikelBesitzerByGwIdAndRegalId(
   return await database.write(async () => {
     let text;
     if (updatedArtikelBesitzer.menge < 0) {
-      text = "Entnehmen";
+      text = logTypes.artikelEntnehmen;
     } else {
-      text = "Nachfüllen";
+      text = logTypes.artikelNachfüllen;
     }
     await database.get("logs").create((log) => {
       log.beschreibung = text;
@@ -218,9 +218,9 @@ async function updateArtikelBesitzerMengeByGwIdAndRegalId(
 
     let text;
     if (updatedArtikelBesitzer.menge < 0) {
-      text = "Entnehmen";
+      text = logTypes.artikelEntnehmen;
     } else {
-      text = "Nachfüllen";
+      text = logTypes.artikelNachfüllen;
     }
     await database.get("logs").create((log) => {
       log.beschreibung = text;
