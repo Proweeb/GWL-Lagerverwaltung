@@ -202,20 +202,25 @@ async function updateArtikelBesitzerMengeByGwIdAndRegalId(
   regalId,
   gwId
 ) {
+  const artikelId = await ArtikelService.getArtikelById(gwId);
+  const newRegalId = await RegalService.getRegalById(regalId);
+  const artikelBesitzer = await database
+    .get("artikel_besitzer")
+    .query(Q.where("gw_id", artikelId.id), Q.where("regal_id", newRegalId.id)) // Ensure "gwId" matches your schema
+    .fetch();
+  if (!artikelBesitzer.length) {
+    console.error("ArtikelBesitzer not found for gwId:", gwId);
+    return;
+  }
+  if (
+    updatedArtikelBesitzer.menge !== null &&
+    updatedArtikelBesitzer.menge !== undefined
+  ) {
+    await ArtikelService.updateInventurArtikel(artikelId.gwId, {
+      menge: Number(updatedArtikelBesitzer.menge),
+    });
+  }
   return await database.write(async () => {
-    const artikelId = await ArtikelService.getArtikelById(gwId);
-    console.log("_*_*___*_*__*_*");
-    console.log(artikelId);
-    const newRegalId = await RegalService.getRegalById(regalId);
-    const artikelBesitzer = await database
-      .get("artikel_besitzer")
-      .query(Q.where("gw_id", artikelId.id), Q.where("regal_id", newRegalId.id)) // Ensure "gwId" matches your schema
-      .fetch();
-    if (!artikelBesitzer.length) {
-      console.error("ArtikelBesitzer not found for gwId:", gwId);
-      return;
-    }
-
     let text;
     if (updatedArtikelBesitzer.menge < 0) {
       text = logTypes.artikelEntnehmen;
@@ -230,15 +235,6 @@ async function updateArtikelBesitzerMengeByGwIdAndRegalId(
       log.artikel.set(artikelId);
       log.createdAt = Date.now();
     });
-
-    if (
-      updatedArtikelBesitzer.menge !== null &&
-      updatedArtikelBesitzer.menge !== undefined
-    ) {
-      await ArtikelService.updateArtikel(artikelId.gwId, {
-        menge: Number(artikelId.menge + updatedArtikelBesitzer.menge),
-      });
-    }
 
     await artikelBesitzer[0].update((art) => {
       if (

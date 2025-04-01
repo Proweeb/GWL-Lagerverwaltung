@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Modal, TouchableOpacity } from "react-native";
+import { View, Text, Modal, TouchableOpacity, Alert } from "react-native";
 import { styles } from "../../../components/styles.js";
 import ArtikelVorschau from "../../../components/oneTimeUse/ArtikelVorschau.js";
 import ZurückButton from "../../../components/oneTimeUse/ZurückButton.js";
@@ -14,20 +14,13 @@ import LogService from "../../../database/datamapper/LogHelper.js";
 import ConfirmPopup from "../../../components/Modals/ConfirmPopUp.js";
 import { database } from "../../../database/database.js";
 import { Q } from "@nozbe/watermelondb/index.js";
+import Toast from "react-native-toast-message";
 
 const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
   const [artikelList, setArtikelList] = useState([]);
   const [isScanning, setIsScanning] = useState(false);
-
-  console.log(changedMenge);
-
-  // useEffect(() => {
-  //   if (gwId === "") {
-  //     handleSearch();
-  //   }
-  // }, [gwId]); // Runs when `gwId` changes
 
   useEffect(() => {
     const fetchArtikel = async () => {
@@ -49,7 +42,6 @@ const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
         null
       );
 
-      // Fetch data asynchronously and ensure it completes before proceeding
       const dataForExcel = await Promise.all(
         artikelList.map(async (item) => {
           const artikel = await item.artikel.fetch();
@@ -68,15 +60,11 @@ const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
         })
       );
 
-      // Convert data to Excel
       const ws = XLSX.utils.json_to_sheet(dataForExcel);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Inventory Data");
-
-      // Convert Excel data to Base64
       const excelOutput = XLSX.write(wb, { type: "base64", bookType: "xlsx" });
 
-      // Create file path
       const formattedDate = new Date()
         .toLocaleString("de-DE", {
           year: "numeric",
@@ -85,24 +73,21 @@ const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
           hour: "2-digit",
           minute: "2-digit",
         })
-        .replace(/[: ]/g, "_"); // Format file name to avoid illegal characters
+        .replace(/[: ]/g, "_");
 
       const fileName = `Inventur_${formattedDate}.xlsx`;
       const fileUri = `${FileSystem.documentDirectory}${fileName}`;
 
-      // Write file to system
       await FileSystem.writeAsStringAsync(fileUri, excelOutput, {
         encoding: FileSystem.EncodingType.Base64,
       });
 
-      // Ensure MailComposer is available
       const isAvailable = await MailComposer.isAvailableAsync();
       if (!isAvailable) {
         Alert.alert("Fehler", "E-Mail kann nicht gesendet werden.");
         return;
       }
 
-      // Send email with attachment
       await MailComposer.composeAsync({
         subject: "Inventur Export",
         body: "Hier ist die exportierte Inventur-Datei.",
@@ -122,13 +107,11 @@ const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
         const artikel = await item.artikel.fetch();
         const regal = await item.regal.fetch();
 
-        const combinedId = `${artikel_id}${regal_id}`; // Construct key
+        const combinedId = `${artikel_id}${regal_id}`;
         if (changedMenge[combinedId]) {
           const newMenge = changedMenge[combinedId];
           await ArtikelBesitzerService.updateArtikelBesitzerByGwIdAndRegalId(
-            {
-              menge: Number(newMenge),
-            },
+            { menge: Number(newMenge) },
             regal.regalId,
             artikel.gwId
           );
@@ -136,8 +119,6 @@ const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
       });
 
       await Promise.all(updates);
-
-      // Refresh the list
       const artikelData = await ArtikelBesitzerService.getAllArtikelOwners();
       setArtikelList(artikelData);
     } catch (error) {
@@ -146,41 +127,32 @@ const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
     }
   };
 
-  const handleGesamtmenge = async () => {
-    try {
-      const updates = artikelList.map(async (item) => {
-        const artikel_id = item._raw.gw_id;
-        const artikel = await item.artikel.fetch();
-        const artikelBesitzer = await database
-          .get("artikel_besitzer")
-          .query(Q.where("gw_id", artikel_id)) // Ensure "gwId" matches your schema
-          .fetch();
-        console.log(artikelBesitzer);
-        let menge = 0;
-        for (let i = 0; i < artikelBesitzer.length; i++) {
-          menge += Number(artikelBesitzer[i].menge);
-        }
-        await ArtikelService.updateInventurArtikel(artikel.gwId, {
-          menge: menge,
-        });
-      });
-      await Promise.all(updates);
-    } catch (error) {
-      console.error("Fehler beim Aktualisieren der Mengen:", error);
-      Alert.alert("Mengen konnten nicht aktualisiert werden.");
-    }
-  };
-
   const handleConfirm = async () => {
     setModalVisible(false);
-    await handleUpdateMenge();
-    await handleGesamtmenge();
-    handleExportToEmail();
-    setChangedMenge({});
-    navigation.navigate("Tabs", {
-      screen: "Inventur",
-      params: { screen: "startinventur" },
-    });
+    try {
+      await handleUpdateMenge();
+      await handleExportToEmail();
+      setChangedMenge({});
+
+      Toast.show({
+        type: "success",
+        text1: "Inventur",
+        text2: "Inventur erfolgreich abgeschlossen.",
+        position: "bottom",
+      });
+
+      navigation.navigate("Tabs", {
+        screen: "Inventur",
+        params: { screen: "startinventur" },
+      });
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Inventur",
+        text2: "Fehler beim Abschließen der Inventur: " + error,
+        position: "bottom",
+      });
+    }
   };
 
   return (
@@ -197,6 +169,7 @@ const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
           changedMenge={changedMenge}
         />
       </View>
+
       <View
         style={{
           flexDirection: "row",
@@ -211,9 +184,10 @@ const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
               params: { screen: "inventurscreen" },
             })
           }
-        ></ZurückButton>
+        />
         <FertigButton onPress={() => setModalVisible(true)} />
       </View>
+
       <Modal
         transparent={true}
         animationType="slide"
@@ -222,11 +196,20 @@ const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
       >
         <ConfirmPopup
           colorCallback={handleConfirm}
-          greyCallback={() => setModalVisible(false)}
+          greyCallback={() => {
+            Toast.show({
+              type: "warning",
+              text1: "Inventur",
+              text2: "Inventur wurde abgebrochen.",
+              position: "bottom",
+            });
+            setModalVisible(false);
+          }}
           text={"Sind Sie sicher, dass Sie die Inventur abschließen möchten?"}
-        ></ConfirmPopup>
+        />
       </Modal>
     </View>
   );
 };
+
 export default PreviewScreen;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Alert } from "react-native";
+import { View, Text, Alert, TouchableOpacity, Modal } from "react-native";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper.js";
 import { styles } from "../../../components/styles.js";
 import InventoryItem from "../../../components/oneTimeUse/InventoryItem.js";
@@ -8,11 +8,17 @@ import { FlashList } from "@shopify/flash-list";
 import SearchBar from "../../../components/utils/SearchBar.js";
 import WeiterButton from "../../../components/oneTimeUse/WeiterButton.js";
 import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper.js";
+import LogService from "../../../database/datamapper/LogHelper.js";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import Toast from "react-native-toast-message";
+import ConfirmPopup from "../../../components/Modals/ConfirmPopUp.js";
+
 const InventurScreen = ({ setChangedMenge, changedMenge }) => {
   const navigation = useNavigation();
   const [gwId, setGwId] = useState("");
   const [artikelList, setArtikelList] = useState([]);
   const [isScanning, setIsScanning] = useState(false);
+  const [resetModalVisible, setResetModalVisible] = useState(false);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -22,7 +28,7 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
 
   const fetchArtikel = async () => {
     try {
-      const artikelData = await ArtikelBesitzerService.getAllArtikelOwners(); //#endregio
+      const artikelData = await ArtikelBesitzerService.getAllArtikelOwners();
       console.log(await artikelData[0].artikel.fetch());
       setArtikelList(artikelData);
     } catch (error) {
@@ -34,7 +40,7 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
     if (gwId === "") {
       handleSearch();
     }
-  }, [gwId]); // Runs when `gwId` changes
+  }, [gwId]);
 
   useEffect(() => {
     fetchArtikel();
@@ -64,6 +70,30 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
     }
   };
 
+  const handleResetInventory = async () => {
+    try {
+      await LogService.createLog(
+        {
+          beschreibung: "Inventur Abgebrochen",
+        },
+        null,
+        null
+      );
+      setChangedMenge({});
+      setResetModalVisible(false);
+      navigation.navigate("Tabs", {
+        screen: "Inventur",
+        params: { screen: "startinventur" },
+      });
+    } catch (error) {
+      console.error("Error resetting inventory:", error);
+      Alert.alert(
+        "Fehler",
+        "Beim Zurücksetzen der Inventur ist ein Fehler aufgetreten."
+      );
+    }
+  };
+
   return (
     <View
       style={{
@@ -72,7 +102,22 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
         alignItems: "center",
       }}
     >
-      <View style={{ width: "95%", borderRadius: 20 }}>
+      <TouchableOpacity
+        style={{
+          position: "absolute",
+          top: 20,
+          right: 20,
+          zIndex: 1,
+          padding: 10,
+        }}
+        onPress={() => {
+          setResetModalVisible(true);
+        }}
+      >
+        <MaterialIcons name="cancel" size={24} color={styles.errorColor} />
+      </TouchableOpacity>
+
+      <View style={{ width: "95%", borderRadius: 20, marginTop: 40 }}>
         <View style={{ paddingLeft: 20 }}>
           <Text style={styles.subHeader}>GWID</Text>
         </View>
@@ -83,6 +128,7 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
           setIsScanning={setIsScanning}
         />
       </View>
+
       <View style={{ flex: 1, width: "100%" }}>
         <FlashList
           data={artikelList}
@@ -99,7 +145,8 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
           )}
         />
       </View>
-      <View style={{ alignItems: "center" }}>
+
+      <View style={{ alignItems: "center", marginBottom: 20 }}>
         <WeiterButton
           onPress={() => {
             navigation.navigate("Tabs", {
@@ -107,9 +154,38 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
               params: { screen: "preview", changedMenge },
             });
           }}
-        ></WeiterButton>
+        />
       </View>
+      <Modal
+        transparent={true}
+        animationType="slide"
+        visible={resetModalVisible}
+        onRequestClose={() => setResetModalVisible(false)}
+      >
+        <ConfirmPopup
+          colorCallback={() => {
+            Toast.show({
+              type: "success",
+              text1: "Inventur",
+              text2: "Inventur wurde abgebrochen.",
+              position: "bottom",
+            });
+            handleResetInventory();
+          }}
+          greyCallback={() => {
+            Toast.show({
+              type: "success",
+              text1: "Inventur",
+              text2: "Inventur nicht abgebrochen.",
+              position: "bottom",
+            });
+            setResetModalVisible(false);
+          }}
+          text={"Wollen Sie wirklich die Inventur beenden?"}
+        />
+      </Modal>
     </View>
   );
 };
+
 export default InventurScreen;
