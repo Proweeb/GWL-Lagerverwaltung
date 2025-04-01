@@ -15,6 +15,8 @@ import ArtikelService from "../../../database/datamapper/ArtikelHelper.js";
 import { Keyboard } from "react-native";
 import RegalTextInput from "./regalTextInput.js";
 import RegalService from "../../../database/datamapper/RegalHelper.js";
+import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper";
+import Toast from "react-native-toast-message";
 
 export default function IndexScreen() {
   const [gwId, setGwId] = useState("");
@@ -23,11 +25,12 @@ export default function IndexScreen() {
   const [menge, setMenge] = useState(0);
   const [showMengeOverview, setShowMengeOverview] = useState(false);
   const [foundArticle, setFoundArticle] = useState(null);
+  const [foundRegal, setFoundRegal] = useState(null);
   const [dbArtikel, setDbArtikel] = useState("-1");
   const [dbRegal, setDbRegal] = useState("-1");
 
   useEffect(() => {
-    if (dbArtikel === "-1" || dbRegal === "-1") {
+    if (dbArtikel === "-1") {
       return;
     }
     if (!dbArtikel) {
@@ -43,39 +46,73 @@ export default function IndexScreen() {
       console.log("Artikel gefunden!");
       //qconsole.log(dbArtikel);
       setFoundArticle(dbArtikel);
-      setMenge(dbArtikel.menge);
-      setShowMengeOverview(true);
-      if (dbRegal & dbArtikel) {
+      if (dbRegal && dbArtikel) {
+        checkArticleInRegal();
       }
       Keyboard.dismiss();
       setDbArtikel("-1");
     }
-  }, [dbArtikel, dbRegal]);
+  }, [dbArtikel]);
 
-  const handleSearch = async () => {
-    if (!gwId) {
+  useEffect(() => {
+    if (dbRegal === "-1") {
+      return;
+    }
+    if (!dbRegal) {
       Toast.show({
-        type: "warning",
-        text1: "Artikel",
-        text2: "Bitte füllen Sie alle Felder aus",
+        type: "error",
+        text1: "Regal",
+        text2: "Existiert nicht",
         position: "bottom",
       });
-      console.log(gwId);
+      console.log("Regal existiert nicht");
+      setShowMengeOverview(false);
     } else {
-      console.log("Alle Felder sind befüllt:", gwId);
-
-      try {
-        setDbArtikel(await ArtikelService.getArtikelById(gwId));
-        setDbRegal(await RegalService.getRegalById(regalId)); //Schauen, weil müssen wissen wann genau dann Overview gezeigt wird.
-      } catch (error) {
-        console.error("Fehler beim Finden:", error);
-        Toast.show({
-          type: "error",
-          text1: "Artikel",
-          text2: "Fehler beim Finden",
-          position: "bottom",
-        });
+      console.log("Regal gefunden!");
+      //qconsole.log(dbArtikel);
+      setFoundRegal(dbRegal);
+      if (dbRegal && dbArtikel) {
+        checkArticleInRegal();
       }
+      Keyboard.dismiss();
+      setDbRegal("-1");
+    }
+  }, [dbRegal]);
+
+  const checkArticleInRegal = async () => {
+    articleInRegal =
+      await ArtikelBesitzerService.getArtikelOwnersByGwIdAndRegalId(
+        gwId,
+        regalId
+      );
+
+    if (articleInRegal.length != 0) {
+      setMenge(articleInRegal[0].menge);
+      setShowMengeOverview(true);
+    } else {
+      Toast.show({
+        type: "error",
+        text1: "Artikel im Regal",
+        text2: "Existiert nicht",
+        position: "bottom",
+      });
+    }
+  };
+
+  const handleSearch = async () => {
+    console.log("Alle Felder sind befüllt:", gwId);
+
+    try {
+      setDbArtikel(await ArtikelService.getArtikelById(gwId));
+      setDbRegal(await RegalService.getRegalById(regalId));
+    } catch (error) {
+      console.error("Fehler beim Finden:", error);
+      Toast.show({
+        type: "error",
+        text1: "Artikel",
+        text2: "Fehler beim Finden",
+        position: "bottom",
+      });
     }
   };
 
@@ -135,7 +172,7 @@ export default function IndexScreen() {
           setMenge={setMenge}
           setShowMengeOverview={setShowMengeOverview}
           foundArticle={foundArticle}
-          regalId={regalId}
+          foundRegal={foundRegal}
         />
       </Modal>
     </View>

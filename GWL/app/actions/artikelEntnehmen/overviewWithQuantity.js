@@ -15,6 +15,7 @@ export default function OverviewWithQuantity({
   setMenge,
   setShowMengeOverview,
   foundArticle,
+  foundRegal,
 }) {
   const [nachfüllmenge, setNachfüllmenge] = useState(0);
 
@@ -67,19 +68,19 @@ export default function OverviewWithQuantity({
       setNachfüllmenge(0);
     }
 
-    console.log(foundArticle);
     //Regal Id muss hier noch rein gehören also beim nachfüllen und entnehmen braucht man die RegalID
-    await ArtikelBesitzerService.updateArtikelBesitzerByGwIdAndRegalId(
+    await ArtikelBesitzerService.updateArtikelBesitzerMengeByGwIdAndRegalId(
       {
-        menge: nachfüllmenge,
-      }, //hier noch regalID
+        menge: nachfüllmenge * -1,
+      },
+      foundRegal.regalId,
       foundArticle.gwId
     );
 
     Toast.show({
       type: "success",
       text1: "Artikel: " + foundArticle.beschreibung,
-      text2: "Neue Menge: " + foundArticle.menge,
+      text2: "Neue Menge: " + menge,
       position: "top",
     });
   };

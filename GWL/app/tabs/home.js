@@ -11,6 +11,13 @@ import NotificationsWidget from "../../components/oneTimeUse/NotifcationsWidget"
 const actions = [
   [
     {
+      screen: "ArtikelEinlagernNavigator",
+      iconName: "cart-plus", // Represents storing an item
+      iconType: "MaterialCommunityIcons",
+      label: "Art.-Einlagern",
+      route: "ArtikelEinlagernNavigator",
+    },
+    {
       screen: "ArtikelNachfüllenNavigator",
       iconName: "cart-heart", // Represents adding/refilling items
       iconType: "MaterialCommunityIcons",
@@ -18,13 +25,6 @@ const actions = [
       route: "ArtikelNachfüllenNavigator",
     },
 
-    {
-      screen: "ArtikelEinlagernNavigator",
-      iconName: "cart-plus", // Represents storing an item
-      iconType: "MaterialCommunityIcons",
-      label: "Art.-Einlagern",
-      route: "ArtikelEinlagernNavigator",
-    },
     {
       screen: "ArtikelEntnehmenNavigator",
       iconName: "cart-minus", // Represents taking an item out
