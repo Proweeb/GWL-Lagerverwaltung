@@ -27,7 +27,7 @@ export default function IndexScreen() {
   const [dbRegal, setDbRegal] = useState("-1");
 
   useEffect(() => {
-    if (dbArtikel === "-1") {
+    if (dbArtikel === "-1" || dbRegal === "-1") {
       return;
     }
     if (!dbArtikel) {
@@ -45,10 +45,12 @@ export default function IndexScreen() {
       setFoundArticle(dbArtikel);
       setMenge(dbArtikel.menge);
       setShowMengeOverview(true);
+      if (dbRegal & dbArtikel) {
+      }
       Keyboard.dismiss();
       setDbArtikel("-1");
     }
-  }, [dbArtikel]);
+  }, [dbArtikel, dbRegal]);
 
   const handleSearch = async () => {
     if (!gwId) {
