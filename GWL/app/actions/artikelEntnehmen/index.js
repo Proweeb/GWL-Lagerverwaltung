@@ -17,6 +17,7 @@ import { Keyboard } from "react-native";
 import RegalService from "../../../database/datamapper/RegalHelper.js";
 import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper";
 import Toast from "react-native-toast-message";
+import * as Progress from "react-native-progress";
 
 export default function IndexScreen() {
   const [gwId, setGwId] = useState("");
@@ -28,6 +29,13 @@ export default function IndexScreen() {
   const [foundRegal, setFoundRegal] = useState(null);
   const [dbArtikel, setDbArtikel] = useState("-1");
   const [dbRegal, setDbRegal] = useState("-1");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!showMengeOverview) {
+      setLoading(false);
+    }
+  }, [showMengeOverview]);
 
   useEffect(() => {
     if (dbArtikel === "-1") {
@@ -103,6 +111,7 @@ export default function IndexScreen() {
     console.log("Alle Felder sind befüllt:", gwId);
 
     try {
+      setLoading(true);
       setDbArtikel(await ArtikelService.getArtikelById(gwId));
       setDbRegal(await RegalService.getRegalById(regalId));
     } catch (error) {
@@ -149,13 +158,17 @@ export default function IndexScreen() {
       </View>
 
       <View style={{ marginTop: 50, alignItems: "center" }}>
-        <ActionButton
-          isDone={gwId.length > 0 && regalIdValid}
-          FertigCallBack={handleSearch}
-          CancelCallBack={() => {
-            navigation.navigate("Home");
-          }}
-        />
+        {loading ? (
+          <Progress.Circle size={50} indeterminate={true} />
+        ) : (
+          <ActionButton
+            isDone={gwId.length > 0 && regalIdValid}
+            FertigCallBack={handleSearch}
+            CancelCallBack={() => {
+              navigation.navigate("Home");
+            }}
+          />
+        )}
       </View>
 
       <Modal
