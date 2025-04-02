@@ -114,7 +114,7 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
           setResetModalVisible(true);
         }}
       >
-        <MaterialIcons name="cancel" size={24} color={styles.errorColor} />
+        <MaterialIcons name="cancel" size={24} color={"red"} />
       </TouchableOpacity>
 
       <View style={{ width: "95%", borderRadius: 20, marginTop: 40 }}>
