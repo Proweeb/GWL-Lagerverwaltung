@@ -319,41 +319,74 @@ const ImportScreen = ({ navigation }) => {
     }
   };
 
+  // async function backupLogsBeforeImport() {
+  //   await database.write(async () => {
+  //     const logs = await database.get("logs").query().fetch();
+  //     const acceptedBoth = {
+  //       Entnehmen: true,
+  //       Einlagern: true,
+  //       Nachfüllen: true,
+  //     };
+
+  //     // Use Promise.all to resolve asynchronous map operations
+  //     const updates = await Promise.all(
+  //       logs.map(async (log) => {
+  //         if (!log.isBackup) {
+  //           const regal = await log.regal.fetch();
+  //           const artikel = await log.artikel.fetch();
+  //           console.log(log.isBackup);
+
+  //           await log.prepareUpdate((logRecord) => {
+  //             logRecord.isBackup = true;
+  //             // Only update regalId and gwId if the log.beschreibung is accepted
+  //             if (acceptedBoth[log.beschreibung]) {
+  //               logRecord.regalId = regal.regalId;
+  //               logRecord.gwId = artikel.gwId;
+  //             }
+
+  //             if (log.beschreibung == logTypes.LagerplatzHinzufügen) {
+  //               logRecord.regalId = regal.regalId;
+  //             }
+  //           });
+  //           console.log(log.isBackup);
+  //         }
+  //       })
+  //     );
+
+  //     await database.batch(...updates);
+  //   });
+  // }
   async function backupLogsBeforeImport() {
     await database.write(async () => {
       const logs = await database.get("logs").query().fetch();
       const acceptedBoth = {
-        Entnehmen: true,
-        Einlagern: true,
-        Nachfüllen: true,
+        /* your config */
       };
 
-      // Use Promise.all to resolve asynchronous map operations
-      const updates = await Promise.all(
+      // Collect ALL update operations (including potential `undefined` for non-updated logs)
+      const updateOperations = await Promise.all(
         logs.map(async (log) => {
-          const regal = await log.regal.fetch();
-          const artikel = await log.artikel.fetch();
-          console.log(log.beschreibung);
+          if (!log.isBackup) {
+            const regal = await log.regal.fetch();
+            const artikel = await log.artikel.fetch();
 
-          return log.prepareUpdate((logRecord) => {
-            logRecord.isBackup = true;
-            // Only update regalId and gwId if the log.beschreibung is accepted
-            if (acceptedBoth[log.beschreibung]) {
-              logRecord.regalId = regal.regalId;
-              logRecord.gwId = artikel.gwId;
-            }
-
-            if (log.beschreibung == logTypes.LagerplatzHinzufügen) {
-              logRecord.regalId = regal.regalId;
-            }
-          });
+            // 👇 Return the prepared update operation
+            return log.prepareUpdate((logRecord) => {
+              logRecord.isBackup = true;
+              // ... your update logic ...
+            });
+          }
+          return null; // No update for this log
         })
       );
 
-      await database.batch(...updates);
+      // Filter out null entries (logs that didn't need updates)
+      const validUpdates = updateOperations.filter((op) => op !== null);
+
+      // Execute batch with valid updates
+      await database.batch(...validUpdates);
     });
   }
-
   // Handle the import of data into the database
   const handleImport = async () => {
     if (!jsonData) {
@@ -383,7 +416,11 @@ const ImportScreen = ({ navigation }) => {
 
       console.log("Backup der Trackingliste");
       setImportProgress(20);
-      await backupLogsBeforeImport();
+      try {
+        await backupLogsBeforeImport();
+      } catch (error) {
+        console.log("damn");
+      }
 
       console.log("Bestehende Datenbank wird gelöscht...");
       setImportProgress(30);
@@ -393,6 +430,12 @@ const ImportScreen = ({ navigation }) => {
       setImportProgress(40);
       await insertData(jsonData);
 
+      console.log("Log erstellt für Import");
+      await LogService.createLog(
+        { beschreibung: logTypes.ImportDB },
+        null,
+        null
+      );
       setImportProgress(100);
       console.log("Daten erfolgreich importiert!");
       Toast.show({
