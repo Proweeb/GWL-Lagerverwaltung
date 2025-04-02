@@ -315,14 +315,14 @@ const ImportScreen = ({ navigation }) => {
       await backupLogsBeforeImport();
 
       console.log("Bestehende Datenbank wird gelöscht...");
-      setImportProgress(30);
+      setImportProgress(40);
       await DBdeleteAllData();
       
       console.log("Neue Datenbank wird erstellt und Daten importiert...");
-      setImportProgress(40);
+      setImportProgress(60);
       await insertData(jsonData);
       
-      setImportProgress(100);
+      setImportProgress(80);
       console.log("Daten erfolgreich importiert!");
       Toast.show({
         type: "success",
@@ -331,6 +331,10 @@ const ImportScreen = ({ navigation }) => {
         position: "bottom",
         autoHide: true,
       });
+
+      // Clear the document data after successful import
+      setSelectedFile(null);
+      setJsonData(null);
     } catch (error) {
       console.error("Fehler beim Import:", error);
       Toast.show({
@@ -569,11 +573,17 @@ const ImportScreen = ({ navigation }) => {
         </TouchableOpacity>
         {!isImporting && (
           <TouchableOpacity
-            style={styles.buttonBlue}
+            style={[
+              styles.buttonBlue,
+              !jsonData && { backgroundColor: '#d9d9d9' }
+            ]}
             onPress={handleImport}
             disabled={!jsonData}
           >
-            <Text numberOfLines={1} style={styles.buttonTextLightBlue}>
+            <Text numberOfLines={1} style={[
+              styles.buttonTextLightBlue,
+              !jsonData && { color: '#AFAFAF' }
+            ]}>
               Importieren
             </Text>
           </TouchableOpacity>
@@ -588,7 +598,7 @@ const ImportScreen = ({ navigation }) => {
               style={{ width: "100%" }}
             />
             <Text style={styles.progressText}>
-              {Math.round(importProgress)}%
+              {Math.round(importProgress).toFixed(0)}%
             </Text>
           </View>
         )}
