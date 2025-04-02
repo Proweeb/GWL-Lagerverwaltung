@@ -214,6 +214,7 @@ const ImportScreen = ({ navigation }) => {
                       );
                     }
                     if (processedRow["Ablaufdatum"]) {
+                      console.log(processedRow["Ablaufdatum"]);
                       validateDate(
                         processedRow["Ablaufdatum"],
                         "Ablaufdatum",
@@ -445,8 +446,7 @@ const ImportScreen = ({ navigation }) => {
       const artikel = await ArtikelService.getAllArtikel();
       const artikelBesitzer =
         await ArtikelBesitzerService.getAllArtikelOwners();
-      const logs = await LogService.getAllLogs();
-      return { regale, artikel, artikelBesitzer, logs };
+      return { regale, artikel, artikelBesitzer };
     } catch (error) {
       console.error("Fehler beim Backup:", error);
       throw new Error("Backup fehlgeschlagen");
@@ -554,7 +554,7 @@ const ImportScreen = ({ navigation }) => {
               ablaufdatum: artikel["Ablaufdatum"]
                 ? stringToDate(
                     artikel["Ablaufdatum"].replace(/\//g, "."),
-                    "d.M.yyyy",
+                    "dd.MM.yyyy",
                     "."
                   ).getTime()
                 : new Date().getTime(),
@@ -595,6 +595,77 @@ const ImportScreen = ({ navigation }) => {
             );
             throw new Error(
               `Fehler beim Import von Artikel ${artikel["GWID"]}: ${error.message}`
+            );
+          }
+        }
+      }
+      setImportProgress(80);
+      // Artikel Besitzer
+      if (!Array.isArray(data.Lagerplan)) {
+        Toast.show({
+          type: "error",
+          text1: "Fehler",
+          text2: "Kein Lagerplan gefunden oder ungültiges Format",
+          position: "bottom",
+          autoHide: false,
+        });
+      } else {
+        console.log(`Processing ${data.Lagerplan.length} Lagerplan records`);
+        for (const relation of data.Lagerplan) {
+          try {
+            // Convert Excel column names to database field names
+            const lagerplanData = {
+              regalId: String(relation["Regal ID"] || "").trim(),
+              gwId: String(relation["GWID"] || "").trim(),
+              menge:
+                relation["Menge"] !== undefined && relation["Menge"] !== ""
+                  ? Number(relation["Menge"])
+                  : 0,
+              erstelltAm: relation["Zuletzt aktualisiert"]
+                ? stringToDate(
+                    relation["Zuletzt aktualisiert"].replace(/\//g, "."),
+                    "dd.MM.yyyy",
+                    "."
+                  ).getTime()
+                : new Date().getTime(),
+            };
+
+            // Validate required fields
+            if (!lagerplanData.regalId) {
+              throw new Error(
+                `Regal ID ist erforderlich im Lagerplan: ${JSON.stringify(
+                  relation
+                )}`
+              );
+            }
+            if (!lagerplanData.gwId) {
+              throw new Error(
+                `GWID ist erforderlich im Lagerplan: ${JSON.stringify(
+                  relation
+                )}`
+              );
+            }
+
+            // Validate numeric fields
+            if (isNaN(lagerplanData.menge)) {
+              throw new Error(
+                `Ungültige Menge im Lagerplan für Artikel ${lagerplanData.gwId}: ${relation["Menge"]}`
+              );
+            }
+
+            console.log("Importing Lagerplan:", lagerplanData);
+            await ArtikelBesitzerService.createArtikelOwner(
+              lagerplanData,
+              lagerplanData.gwId,
+              lagerplanData.regalId
+            );
+          } catch (error) {
+            console.error(
+              `Fehler beim Import von Lagerplan: ${JSON.stringify(relation)}`,
+              error
+            );
+            throw new Error(
+              `Fehler beim Import von Lagerplan für Artikel ${relation["GWID"]}: ${error.message}`
             );
           }
         }
