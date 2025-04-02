@@ -6,6 +6,7 @@ import {
   ScrollView,
   StyleSheet,
   Modal,
+  ProgressBarAndroid,
 } from "react-native";
 import * as XLSX from "xlsx";
 import * as DocumentPicker from "expo-document-picker";
@@ -32,6 +33,8 @@ const ImportScreen = ({ navigation }) => {
   const [jsonData, setJsonData] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [validationErrors, setValidationErrors] = useState([]);
+  const [importProgress, setImportProgress] = useState(0);
+  const [isImporting, setIsImporting] = useState(false);
 
   // Handle file picker for Excel files
   const pickFile = async () => {
@@ -86,25 +89,32 @@ const ImportScreen = ({ navigation }) => {
 
         const validateDate = (value, fieldName, rowIndex, sheetName) => {
           try {
-            const date = stringToDate(value, "dd.MM.yyyy", ".");
-            if (isNaN(date.getTime())) {
-              allErrors.push({
-                sheet: sheetName,
-                row: rowIndex + 1,
-                field: fieldName,
-                value: value,
-                error: `Ungültiges Datum`
-              });
-              return false;
+            // Normalize the date string to use dots as separators
+            const normalizedDate = value.replace(/\//g, ".");
+            
+            // Try both date formats
+            const date1 = stringToDate(normalizedDate, "dd.MM.yyyy", ".");
+            const date2 = stringToDate(normalizedDate, "d.M.yyyy", ".");
+            
+            if (!isNaN(date1.getTime()) || !isNaN(date2.getTime())) {
+              return true;
             }
-            return true;
+            
+            allErrors.push({
+              sheet: sheetName,
+              row: rowIndex + 1,
+              field: fieldName,
+              value: value,
+              error: `Ungültiges Datum`
+            });
+            return false;
           } catch (error) {
             allErrors.push({
               sheet: sheetName,
               row: rowIndex + 1,
               field: fieldName,
               value: value,
-              error: `Ungültiges Datumsformat (erwartet: dd.MM.yyyy)`
+              error: `Ungültiges Datumsformat (erwartet: dd.MM.yyyy oder d.M.yyyy oder d/M/yyyy)`
             });
             return false;
           }
@@ -172,8 +182,8 @@ const ImportScreen = ({ navigation }) => {
                     if (processedRow['Menge']) {
                       validateNumber(processedRow['Menge'], 'Menge', index, sheetName);
                     }
-                    if (processedRow['Erstellt am']) {
-                      validateDate(processedRow['Erstellt am'], 'Erstellt am', index, sheetName);
+                    if (processedRow['Zuletzt aktualisiert']) {
+                      validateDate(processedRow['Zuletzt aktualisiert'], 'Zuletzt aktualisiert', index, sheetName);
                     }
                     break;
                 }
@@ -286,6 +296,9 @@ const ImportScreen = ({ navigation }) => {
       return;
     }
     try {
+      setIsImporting(true);
+      setImportProgress(0);
+
       // Debug logging
       console.log("=== DEBUG: Full JSON Data Structure ===");
       console.log("Available sheets:", Object.keys(jsonData));
@@ -294,15 +307,22 @@ const ImportScreen = ({ navigation }) => {
       console.log("=== END DEBUG ===");
 
       console.log("Backup der aktuellen Datenbank wird erstellt...");
+      setImportProgress(10);
       const backup = await backupDatabase();
 
       console.log("Backup der Trackingliste");
-      await backupLogsBeforeImport;
+      setImportProgress(20);
+      await backupLogsBeforeImport();
 
       console.log("Bestehende Datenbank wird gelöscht...");
+      setImportProgress(30);
       await DBdeleteAllData();
+      
       console.log("Neue Datenbank wird erstellt und Daten importiert...");
+      setImportProgress(40);
       await insertData(jsonData);
+      
+      setImportProgress(100);
       console.log("Daten erfolgreich importiert!");
       Toast.show({
         type: "success",
@@ -320,6 +340,9 @@ const ImportScreen = ({ navigation }) => {
         position: "bottom",
         autoHide: false,
       });
+    } finally {
+      setIsImporting(false);
+      setImportProgress(0);
     }
   };
 
@@ -377,7 +400,9 @@ const ImportScreen = ({ navigation }) => {
         });
       } else {
         console.log(`Processing ${data.Regale.length} Regale records`);
-        for (const regal of data.Regale) {
+        const regalProgressStep = 20 / data.Regale.length; // 20% for Regale
+        for (let i = 0; i < data.Regale.length; i++) {
+          const regal = data.Regale[i];
           try {
             // Convert Excel column names to database field names
             const regalData = {
@@ -392,7 +417,7 @@ const ImportScreen = ({ navigation }) => {
                   ).getTime()
                 : new Date().getTime(),
             };
-
+            
             // Validate required fields
             if (!regalData.regalId) {
               throw new Error(
@@ -412,6 +437,7 @@ const ImportScreen = ({ navigation }) => {
 
             console.log("Importing Regal:", regalData);
             await RegalService.createRegal(regalData);
+            setImportProgress(40 + (i + 1) * regalProgressStep);
           } catch (error) {
             console.error(
               `Fehler beim Import von Regal: ${JSON.stringify(regal)}`,
@@ -423,6 +449,7 @@ const ImportScreen = ({ navigation }) => {
           }
         }
       }
+      setImportProgress(60);
       // Import Artikel
       if (!Array.isArray(data.Artikel)) {
         Toast.show({
@@ -434,7 +461,9 @@ const ImportScreen = ({ navigation }) => {
         });
       } else {
         console.log(`Processing ${data.Artikel.length} Artikel records`);
-        for (const artikel of data.Artikel) {
+        const artikelProgressStep = 30 / data.Artikel.length; // 30% for Artikel
+        for (let i = 0; i < data.Artikel.length; i++) {
+          const artikel = data.Artikel[i];
           try {
             // Convert Excel column names to database field names and ensure proper types
             const artikelData = {
@@ -454,8 +483,8 @@ const ImportScreen = ({ navigation }) => {
               kunde: String(artikel["Kunde"] || "").trim(),
               ablaufdatum: artikel["Ablaufdatum"]
                 ? stringToDate(
-                    artikel["Ablaufdatum"],
-                    "dd.MM.yyyy",
+                    artikel["Ablaufdatum"].replace(/\//g, "."),
+                    "d.M.yyyy",
                     "."
                   ).getTime()
                 : new Date().getTime(),
@@ -488,6 +517,7 @@ const ImportScreen = ({ navigation }) => {
             console.log("Importing Artikel:", artikelData);
 
             await ArtikelService.createArtikelImport(artikelData);
+            setImportProgress(60 + (i + 1) * artikelProgressStep);
           } catch (error) {
             console.error(
               `Fehler beim Import von Artikel: ${JSON.stringify(artikel)}`,
@@ -499,76 +529,7 @@ const ImportScreen = ({ navigation }) => {
           }
         }
       }
-      // Artikel Besitzer
-      if (!Array.isArray(data.Lagerplan)) {
-        Toast.show({
-          type: "error",
-          text1: "Fehler",
-          text2: "Kein Lagerplan gefunden oder ungültiges Format",
-          position: "bottom",
-          autoHide: false,
-        });
-      } else {
-        console.log(`Processing ${data.Lagerplan.length} Lagerplan records`);
-        for (const relation of data.Lagerplan) {
-          try {
-            // Convert Excel column names to database field names
-            const lagerplanData = {
-              regalId: String(relation["Regal ID"] || "").trim(),
-              gwId: String(relation["GWID"] || "").trim(),
-              menge:
-                relation["Menge"] !== undefined && relation["Menge"] !== ""
-                  ? Number(relation["Menge"])
-                  : 0,
-              erstelltAm: relation["Erstellt am"]
-                ? stringToDate(
-                    relation["Erstellt am"],
-                    "dd.MM.yyyy",
-                    "."
-                  ).getTime()
-                : new Date().getTime(),
-            };
-
-            // Validate required fields
-            if (!lagerplanData.regalId) {
-              throw new Error(
-                `Regal ID ist erforderlich im Lagerplan: ${JSON.stringify(
-                  relation
-                )}`
-              );
-            }
-            if (!lagerplanData.gwId) {
-              throw new Error(
-                `GWID ist erforderlich im Lagerplan: ${JSON.stringify(
-                  relation
-                )}`
-              );
-            }
-
-            // Validate numeric fields
-            if (isNaN(lagerplanData.menge)) {
-              throw new Error(
-                `Ungültige Menge im Lagerplan für Artikel ${lagerplanData.gwId}: ${relation["Menge"]}`
-              );
-            }
-
-            console.log("Importing Lagerplan:", lagerplanData);
-            await ArtikelBesitzerService.createArtikelOwner(
-              lagerplanData,
-              lagerplanData.gwId,
-              lagerplanData.regalId
-            );
-          } catch (error) {
-            console.error(
-              `Fehler beim Import von Lagerplan: ${JSON.stringify(relation)}`,
-              error
-            );
-            throw new Error(
-              `Fehler beim Import von Lagerplan für Artikel ${relation["GWID"]}: ${error.message}`
-            );
-          }
-        }
-      }
+      setImportProgress(90);
     } catch (error) {
       console.error("Import error:", error);
       Toast.show({
@@ -606,18 +567,34 @@ const ImportScreen = ({ navigation }) => {
             Hochladen
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.buttonBlue}
-          onPress={handleImport}
-          disabled={!jsonData}
-        >
-          <Text numberOfLines={1} style={styles.buttonTextLightBlue}>
-            Importieren
-          </Text>
-        </TouchableOpacity>
+        {!isImporting && (
+          <TouchableOpacity
+            style={styles.buttonBlue}
+            onPress={handleImport}
+            disabled={!jsonData}
+          >
+            <Text numberOfLines={1} style={styles.buttonTextLightBlue}>
+              Importieren
+            </Text>
+          </TouchableOpacity>
+        )}
+        {isImporting && (
+          <View style={styles.progressContainer}>
+            <ProgressBarAndroid
+              styleAttr="Horizontal"
+              indeterminate={false}
+              progress={importProgress / 100}
+              color="#dcebf9"
+              style={{ width: "100%" }}
+            />
+            <Text style={styles.progressText}>
+              {Math.round(importProgress)}%
+            </Text>
+          </View>
+        )}
       </View>
 
-      {selectedFile && jsonData && (
+      {selectedFile && jsonData && !isImporting && (
         <ScrollView style={styles.scrollContainer}>
           {/* Artikel Vorschau */}
           <View style={localStyles.previewSection}>
@@ -877,5 +854,19 @@ const localStyles = StyleSheet.create({
   },
   previewSection: {
     marginBottom: 20,
+  },
+  progressContainer: {
+    width: '100%',
+    marginTop: 10,
+    alignItems: 'center',
+  },
+  progressText: {
+    marginTop: 5,
+    color: '#30A6DE',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
 });

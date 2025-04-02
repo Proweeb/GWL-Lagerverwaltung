@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 
 const ConfirmPopup = ({
@@ -24,7 +24,7 @@ const ConfirmPopup = ({
         >
           <MaterialIcons name="error-outline" size={32} color={accentColor} />
         </View>
-
+        <ScrollView style={{width: "100%", height: 200}}>
         {/* Message */}
         <Text style={styles.message}>
           {text
@@ -32,7 +32,7 @@ const ConfirmPopup = ({
             : "Bist du sicher, dass du diesen Artikel löschen möchtest?\n" +
               "Diese Aktion kann nicht rückgängig gemacht werden."}
         </Text>
-
+        </ScrollView>
         {/* Buttons */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.cancelButton} onPress={greyCallback}>
