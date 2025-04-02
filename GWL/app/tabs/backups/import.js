@@ -411,11 +411,11 @@ const ImportScreen = ({ navigation }) => {
       console.log("=== END DEBUG ===");
 
       console.log("Backup der aktuellen Datenbank wird erstellt...");
-      setImportProgress(10);
+      setImportProgress(5);
       const backup = await backupDatabase();
 
       console.log("Backup der Trackingliste");
-      setImportProgress(20);
+      setImportProgress(10);
       try {
         await backupLogsBeforeImport();
       } catch (error) {
@@ -423,20 +423,21 @@ const ImportScreen = ({ navigation }) => {
       }
 
       console.log("Bestehende Datenbank wird gelöscht...");
-      setImportProgress(40);
+      setImportProgress(15);
       await DBdeleteAllData();
 
       console.log("Neue Datenbank wird erstellt und Daten importiert...");
-      setImportProgress(60);
+      setImportProgress(20);
       await insertData(jsonData);
 
       console.log("Log erstellt für Import");
+      setImportProgress(95);
       await LogService.createLog(
         { beschreibung: logTypes.ImportDB },
         null,
         null
       );
-      setImportProgress(80);
+      
       console.log("Daten erfolgreich importiert!");
       Toast.show({
         type: "success",
@@ -517,7 +518,7 @@ const ImportScreen = ({ navigation }) => {
         });
       } else {
         console.log(`Processing ${data.Regale.length} Regale records`);
-        const regalProgressStep = 20 / data.Regale.length; // 20% for Regale
+        const regalProgressStep = 15 / data.Regale.length; // 15% for Regale
         for (let i = 0; i < data.Regale.length; i++) {
           const regal = data.Regale[i];
           try {
@@ -554,7 +555,7 @@ const ImportScreen = ({ navigation }) => {
 
             console.log("Importing Regal:", regalData);
             await RegalService.createRegal(regalData);
-            setImportProgress(40 + (i + 1) * regalProgressStep);
+            setImportProgress(20 + (i + 1) * regalProgressStep);
           } catch (error) {
             console.error(
               `Fehler beim Import von Regal: ${JSON.stringify(regal)}`,
@@ -566,7 +567,7 @@ const ImportScreen = ({ navigation }) => {
           }
         }
       }
-      setImportProgress(60);
+
       // Import Artikel
       if (!Array.isArray(data.Artikel)) {
         Toast.show({
@@ -578,7 +579,7 @@ const ImportScreen = ({ navigation }) => {
         });
       } else {
         console.log(`Processing ${data.Artikel.length} Artikel records`);
-        const artikelProgressStep = 30 / data.Artikel.length; // 30% for Artikel
+        const artikelProgressStep = 25 / data.Artikel.length; // 25% for Artikel
         for (let i = 0; i < data.Artikel.length; i++) {
           const artikel = data.Artikel[i];
           try {
@@ -634,7 +635,7 @@ const ImportScreen = ({ navigation }) => {
             console.log("Importing Artikel:", artikelData);
 
             await ArtikelService.createArtikelImport(artikelData);
-            setImportProgress(60 + (i + 1) * artikelProgressStep);
+            setImportProgress(35 + (i + 1) * artikelProgressStep);
           } catch (error) {
             console.error(
               `Fehler beim Import von Artikel: ${JSON.stringify(artikel)}`,
@@ -646,7 +647,7 @@ const ImportScreen = ({ navigation }) => {
           }
         }
       }
-      setImportProgress(80);
+
       // Artikel Besitzer
       if (!Array.isArray(data.Lagerplan)) {
         Toast.show({
@@ -658,7 +659,9 @@ const ImportScreen = ({ navigation }) => {
         });
       } else {
         console.log(`Processing ${data.Lagerplan.length} Lagerplan records`);
-        for (const relation of data.Lagerplan) {
+        const lagerplanProgressStep = 35 / data.Lagerplan.length; // 35% for Lagerplan
+        for (let i = 0; i < data.Lagerplan.length; i++) {
+          const relation = data.Lagerplan[i];
           try {
             // Convert Excel column names to database field names
             const lagerplanData = {
@@ -706,6 +709,7 @@ const ImportScreen = ({ navigation }) => {
               lagerplanData.gwId,
               lagerplanData.regalId
             );
+            setImportProgress(60 + (i + 1) * lagerplanProgressStep);
           } catch (error) {
             console.error(
               `Fehler beim Import von Lagerplan: ${JSON.stringify(relation)}`,
@@ -717,7 +721,6 @@ const ImportScreen = ({ navigation }) => {
           }
         }
       }
-      setImportProgress(90);
     } catch (error) {
       console.error("Import error:", error);
       Toast.show({
