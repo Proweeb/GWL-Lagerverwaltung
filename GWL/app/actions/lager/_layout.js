@@ -12,6 +12,7 @@ export default function LagerNavigator() {
         name="Lager"
         options={{
           title: "Lagerplätze",
+
           headerShown: true,
           headerStyle: {},
           headerTitleStyle: [styles.header],

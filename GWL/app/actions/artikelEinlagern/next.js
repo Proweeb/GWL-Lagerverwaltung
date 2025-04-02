@@ -104,13 +104,6 @@ export default function NextScreen() {
       }}
     >
       <View>
-        <Text style={styles.subHeader}>Lagerung</Text>
-        <MiniStorageMenu formData={formData} setFormData={setFormData} />
-      </View>
-
-      <View style={[siteStyles.longLine, { marginVertical: 10 }]}></View>
-
-      <View>
         <Text style={styles.subHeader}>Artikel</Text>
         <ArticleMenu formData={formData} setFormData={setFormData} />
       </View>

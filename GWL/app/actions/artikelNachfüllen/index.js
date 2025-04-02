@@ -134,6 +134,10 @@ export default function IndexScreen() {
     if (passedGwId) {
       setGwId(passedGwId);
     }
+    if (passedRegalId) {
+      setRegalId(passedRegalId);
+      setRegalIdValid(true);
+    }
   });
   return (
     <View

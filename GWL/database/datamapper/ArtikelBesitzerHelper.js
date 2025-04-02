@@ -261,7 +261,13 @@ async function updateArtikelBesitzerMengeByGwIdAndRegalId(
 
 async function getArtikelOwnersByGwIdAndRegalId(artikelId, regalId) {
   const artikel = await ArtikelService.getArtikelById(artikelId);
+  if (!artikel) {
+    throw new Error("Artikel existert nicht");
+  }
   const regal = await RegalService.getRegalById(regalId);
+  if (!regal) {
+    throw new Error("Regal existert nicht");
+  }
   return await database
     .get("artikel_besitzer")
     .query(Q.where("gw_id", artikel.id), Q.where("regal_id", regal.id))

@@ -129,10 +129,14 @@ export default function IndexScreen() {
   const route = useRoute();
   const passedGwId = route.params?.gwId;
   const passedRegalId = route.params?.regalId;
-  const handleCancel = () => navigation.navigate("Tabs");
   useEffect(() => {
     if (passedGwId) {
       setGwId(passedGwId);
+    }
+
+    if (passedRegalId) {
+      setRegalId(passedRegalId);
+      setRegalIdValid(true);
     }
   });
   return (
