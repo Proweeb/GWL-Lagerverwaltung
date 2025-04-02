@@ -110,7 +110,7 @@ const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
         const combinedId = `${artikel_id}${regal_id}`;
         if (changedMenge[combinedId]) {
           const newMenge = changedMenge[combinedId];
-          await ArtikelBesitzerService.updateArtikelBesitzerByGwIdAndRegalId(
+          await ArtikelBesitzerService.inventurUpdateArtikelBesitzerByGwIdAndRegalId(
             { menge: Number(newMenge) },
             regal.regalId,
             artikel.gwId

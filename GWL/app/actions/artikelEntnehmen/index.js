@@ -100,8 +100,8 @@ export default function IndexScreen() {
     } else {
       Toast.show({
         type: "error",
-        text1: "Artikel im Regal",
-        text2: "Existiert nicht",
+        text1: "Error",
+        text2: "Artikel befindet sich nicht im Regal",
         position: "bottom",
       });
     }

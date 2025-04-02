@@ -134,7 +134,7 @@ async function getArtikelOwnersByRegalId(regalId) {
   return await regal.artikelBesitzer.fetch();
 }
 
-async function updateArtikelBesitzerByGwIdAndRegalId(
+async function inventurUpdateArtikelBesitzerByGwIdAndRegalId(
   updatedArtikelBesitzer,
   regalId,
   gwId
@@ -216,7 +216,7 @@ async function updateArtikelBesitzerMengeByGwIdAndRegalId(
     updatedArtikelBesitzer.menge !== null &&
     updatedArtikelBesitzer.menge !== undefined
   ) {
-    await ArtikelService.updateInventurArtikel(artikelId.gwId, {
+    await ArtikelService.updateArtikel(artikelId.gwId, {
       menge: Number(updatedArtikelBesitzer.menge),
     });
   }
@@ -230,8 +230,7 @@ async function updateArtikelBesitzerMengeByGwIdAndRegalId(
     await database.get("logs").create((log) => {
       log.beschreibung = text;
       log.menge = Number(updatedArtikelBesitzer.menge);
-      log.gesamtMenge =
-        Number(artikelBesitzer[0].menge) + Number(updatedArtikelBesitzer.menge);
+      log.gesamtMenge = Number(artikelId.menge);
       log.artikel.set(artikelId);
       log.createdAt = Date.now();
     });
@@ -247,7 +246,7 @@ async function updateArtikelBesitzerMengeByGwIdAndRegalId(
         updatedArtikelBesitzer.menge !== null &&
         updatedArtikelBesitzer.menge !== undefined
       ) {
-        art.menge += updatedArtikelBesitzer.menge;
+        art.menge += Number(updatedArtikelBesitzer.menge);
       }
       if (
         updatedArtikelBesitzer.regalId !== null &&
@@ -278,7 +277,7 @@ const ArtikelBesitzerService = {
   deleteArtikelOwner,
   getArtikelOwnersByRegalId,
   getArtikelOwnersByGwIdAndRegalId,
-  updateArtikelBesitzerByGwIdAndRegalId,
+  inventurUpdateArtikelBesitzerByGwIdAndRegalId,
   updateArtikelBesitzerMengeByGwIdAndRegalId,
 };
 
