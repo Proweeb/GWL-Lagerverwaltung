@@ -102,6 +102,14 @@ export const styles = {
     shadowRadius: 3,
   },
 
+  progressContainer: {
+    width: "100%",
+    marginTop: 10,
+    alignItems: "center",
+  },
+  
+  
+
   buttonText: {
     color: "#202020",
     fontWeight: "bold",
