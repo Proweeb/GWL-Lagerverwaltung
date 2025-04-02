@@ -4,10 +4,11 @@ import Carousel from "react-native-reanimated-carousel"; // Carousel import
 import { styles } from "../styles";
 import ArtikelService from "../../database/datamapper/ArtikelHelper";
 import { widthPercentageToDP } from "react-native-responsive-screen";
+import { useIsFocused } from "@react-navigation/native";
 
 export default function NotificationsWidget() {
   const [expiredArticles, setExpiredArticles] = React.useState([]);
-
+  const IsFocused = useIsFocused();
   React.useEffect(() => {
     const fetchExpiredArticles = async () => {
       const allArticles = await ArtikelService.getAllArtikel();
@@ -18,7 +19,7 @@ export default function NotificationsWidget() {
     };
 
     fetchExpiredArticles();
-  }, []);
+  }, [IsFocused]);
 
   // Function to determine background color based on the status
   const getBackgroundColor = (status) => {

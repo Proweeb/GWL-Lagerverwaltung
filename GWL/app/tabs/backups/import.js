@@ -6,7 +6,6 @@ import {
   ScrollView,
   StyleSheet,
   Modal,
-  ProgressBarAndroid,
 } from "react-native";
 import * as XLSX from "xlsx";
 import * as DocumentPicker from "expo-document-picker";
@@ -25,8 +24,8 @@ import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzer
 import { logTypes } from "../../../components/enum";
 import ConfirmPopup from "../../../components/Modals/ConfirmPopUp";
 import Toast from "react-native-toast-message";
-
-
+import * as Progress from "react-native-progress";
+import { widthPercentageToDP } from "react-native-responsive-screen";
 
 const ImportScreen = ({ navigation }) => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -80,7 +79,7 @@ const ImportScreen = ({ navigation }) => {
               row: rowIndex + 1,
               field: fieldName,
               value: value,
-              error: `Muss eine Zahl sein`
+              error: `Muss eine Zahl sein`,
             });
             return false;
           }
@@ -91,21 +90,21 @@ const ImportScreen = ({ navigation }) => {
           try {
             // Normalize the date string to use dots as separators
             const normalizedDate = value.replace(/\//g, ".");
-            
+
             // Try both date formats
             const date1 = stringToDate(normalizedDate, "dd.MM.yyyy", ".");
             const date2 = stringToDate(normalizedDate, "d.M.yyyy", ".");
-            
+
             if (!isNaN(date1.getTime()) || !isNaN(date2.getTime())) {
               return true;
             }
-            
+
             allErrors.push({
               sheet: sheetName,
               row: rowIndex + 1,
               field: fieldName,
               value: value,
-              error: `Ungültiges Datum`
+              error: `Ungültiges Datum`,
             });
             return false;
           } catch (error) {
@@ -114,20 +113,20 @@ const ImportScreen = ({ navigation }) => {
               row: rowIndex + 1,
               field: fieldName,
               value: value,
-              error: `Ungültiges Datumsformat (erwartet: dd.MM.yyyy oder d.M.yyyy oder d/M/yyyy)`
+              error: `Ungültiges Datumsformat (erwartet: dd.MM.yyyy oder d.M.yyyy oder d/M/yyyy)`,
             });
             return false;
           }
         };
 
         const validateRequired = (value, fieldName, rowIndex, sheetName) => {
-          if (!value || value.trim() === '') {
+          if (!value || value.trim() === "") {
             allErrors.push({
               sheet: sheetName,
               row: rowIndex + 1,
               field: fieldName,
               value: value,
-              error: `Pflichtfeld`
+              error: `Pflichtfeld`,
             });
             return false;
           }
@@ -137,53 +136,122 @@ const ImportScreen = ({ navigation }) => {
         workbook.SheetNames.forEach((sheetName) => {
           const sheet = workbook.Sheets[sheetName];
           console.log(`Processing sheet: ${sheetName}`);
-          
+
           let parsedData = XLSX.utils.sheet_to_json(sheet);
-          console.log(`Raw parsed data for ${sheetName}:`, JSON.stringify(parsedData, null, 2));
+          console.log(
+            `Raw parsed data for ${sheetName}:`,
+            JSON.stringify(parsedData, null, 2)
+          );
 
           if (parsedData.length > 0) {
             try {
               parsedData = parsedData.map((row, index) => {
                 const processedRow = { ...row };
-                
+
                 // Convert all values to strings first
                 Object.entries(row).forEach(([key, value]) => {
                   processedRow[key] = String(value);
                 });
 
                 // Validate fields based on sheet type
-                switch(sheetName) {
-                  case 'Regale':
-                    validateRequired(processedRow['Regal ID'], 'Regal ID', index, sheetName);
-                    validateRequired(processedRow['Regal Name'], 'Regal Name', index, sheetName);
-                    validateRequired(processedRow['Fach Name'], 'Fach Name', index, sheetName);
-                    if (processedRow['Erstellt am']) {
-                      validateDate(processedRow['Erstellt am'], 'Erstellt am', index, sheetName);
+                switch (sheetName) {
+                  case "Regale":
+                    validateRequired(
+                      processedRow["Regal ID"],
+                      "Regal ID",
+                      index,
+                      sheetName
+                    );
+                    validateRequired(
+                      processedRow["Regal Name"],
+                      "Regal Name",
+                      index,
+                      sheetName
+                    );
+                    validateRequired(
+                      processedRow["Fach Name"],
+                      "Fach Name",
+                      index,
+                      sheetName
+                    );
+                    if (processedRow["Erstellt am"]) {
+                      validateDate(
+                        processedRow["Erstellt am"],
+                        "Erstellt am",
+                        index,
+                        sheetName
+                      );
                     }
                     break;
-                  
-                  case 'Artikel':
-                    validateRequired(processedRow['GWID'], 'GWID', index, sheetName);
-                    validateRequired(processedRow['Firmen ID'], 'Firmen ID', index, sheetName);
-                    if (processedRow['Gesamtmenge']) {
-                      validateNumber(processedRow['Gesamtmenge'], 'Gesamtmenge', index, sheetName);
+
+                  case "Artikel":
+                    validateRequired(
+                      processedRow["GWID"],
+                      "GWID",
+                      index,
+                      sheetName
+                    );
+                    validateRequired(
+                      processedRow["Firmen ID"],
+                      "Firmen ID",
+                      index,
+                      sheetName
+                    );
+                    if (processedRow["Gesamtmenge"]) {
+                      validateNumber(
+                        processedRow["Gesamtmenge"],
+                        "Gesamtmenge",
+                        index,
+                        sheetName
+                      );
                     }
-                    if (processedRow['Mindestmenge']) {
-                      validateNumber(processedRow['Mindestmenge'], 'Mindestmenge', index, sheetName);
+                    if (processedRow["Mindestmenge"]) {
+                      validateNumber(
+                        processedRow["Mindestmenge"],
+                        "Mindestmenge",
+                        index,
+                        sheetName
+                      );
                     }
-                    if (processedRow['Ablaufdatum']) {
-                      validateDate(processedRow['Ablaufdatum'], 'Ablaufdatum', index, sheetName);
+                    if (processedRow["Ablaufdatum"]) {
+                      console.log(processedRow["Ablaufdatum"]);
+                      validateDate(
+                        processedRow["Ablaufdatum"],
+                        "Ablaufdatum",
+                        index,
+                        sheetName
+                      );
                     }
                     break;
-                  
-                  case 'Lagerplan':
-                    validateRequired(processedRow['Regal ID'], 'Regal ID', index, sheetName);
-                    validateRequired(processedRow['GWID'], 'GWID', index, sheetName);
-                    if (processedRow['Menge']) {
-                      validateNumber(processedRow['Menge'], 'Menge', index, sheetName);
+
+                  case "Lagerplan":
+                    validateRequired(
+                      processedRow["Regal ID"],
+                      "Regal ID",
+                      index,
+                      sheetName
+                    );
+                    validateRequired(
+                      processedRow["GWID"],
+                      "GWID",
+                      index,
+                      sheetName
+                    );
+                    if (processedRow["Menge"]) {
+                      validateNumber(
+                        processedRow["Menge"],
+                        "Menge",
+                        index,
+                        sheetName
+                      );
                     }
-                    if (processedRow['Zuletzt aktualisiert']) {
-                      validateDate(processedRow['Zuletzt aktualisiert'], 'Zuletzt aktualisiert', index, sheetName);
+                    if (processedRow["Zuletzt aktualisiert"]) {
+                      validateDate(
+                        processedRow["Zuletzt aktualisiert"],
+                        "Zuletzt aktualisiert",
+                        index,
+                        sheetName
+                      );
                     }
                     break;
                 }
@@ -195,10 +263,10 @@ const ImportScreen = ({ navigation }) => {
               console.error(`Error processing sheet ${sheetName}:`, error);
               allErrors.push({
                 sheet: sheetName,
-                row: 'All',
-                field: 'General',
-                value: '',
-                error: error.message
+                row: "All",
+                field: "General",
+                value: "",
+                error: error.message,
               });
             }
           }
@@ -206,14 +274,17 @@ const ImportScreen = ({ navigation }) => {
 
         // If there are any errors, display them all at once
         if (allErrors.length > 0) {
-          const errorMessage = allErrors.map(error => 
-            `Blatt: ${error.sheet}\n` +
-            `Zeile: ${error.row}\n` +
-            `Feld: ${error.field}\n` +
-            `Wert: ${error.value}\n` +
-            `Fehler: ${error.error}\n` +
-            '-------------------'
-          ).join('\n\n');
+          const errorMessage = allErrors
+            .map(
+              (error) =>
+                `Blatt: ${error.sheet}\n` +
+                `Zeile: ${error.row}\n` +
+                `Feld: ${error.field}\n` +
+                `Wert: ${error.value}\n` +
+                `Fehler: ${error.error}\n` +
+                "-------------------"
+            )
+            .join("\n\n");
 
           setValidationErrors(allErrors);
           setModalVisible(true);
@@ -248,41 +319,74 @@ const ImportScreen = ({ navigation }) => {
     }
   };
 
+  // async function backupLogsBeforeImport() {
+  //   await database.write(async () => {
+  //     const logs = await database.get("logs").query().fetch();
+  //     const acceptedBoth = {
+  //       Entnehmen: true,
+  //       Einlagern: true,
+  //       Nachfüllen: true,
+  //     };
+
+  //     // Use Promise.all to resolve asynchronous map operations
+  //     const updates = await Promise.all(
+  //       logs.map(async (log) => {
+  //         if (!log.isBackup) {
+  //           const regal = await log.regal.fetch();
+  //           const artikel = await log.artikel.fetch();
+  //           console.log(log.isBackup);
+
+  //           await log.prepareUpdate((logRecord) => {
+  //             logRecord.isBackup = true;
+  //             // Only update regalId and gwId if the log.beschreibung is accepted
+  //             if (acceptedBoth[log.beschreibung]) {
+  //               logRecord.regalId = regal.regalId;
+  //               logRecord.gwId = artikel.gwId;
+  //             }
+
+  //             if (log.beschreibung == logTypes.LagerplatzHinzufügen) {
+  //               logRecord.regalId = regal.regalId;
+  //             }
+  //           });
+  //           console.log(log.isBackup);
+  //         }
+  //       })
+  //     );
+
+  //     await database.batch(...updates);
+  //   });
+  // }
   async function backupLogsBeforeImport() {
     await database.write(async () => {
       const logs = await database.get("logs").query().fetch();
       const acceptedBoth = {
-        Entnehmen: true,
-        Einlagern: true,
-        Nachfüllen: true,
+        /* your config */
       };
 
-      // Use Promise.all to resolve asynchronous map operations
-      const updates = await Promise.all(
+      // Collect ALL update operations (including potential `undefined` for non-updated logs)
+      const updateOperations = await Promise.all(
         logs.map(async (log) => {
-          const regal = await log.regal.fetch();
-          const artikel = await log.artikel.fetch();
-          console.log(log.beschreibung);
+          if (!log.isBackup) {
+            const regal = await log.regal.fetch();
+            const artikel = await log.artikel.fetch();
 
-          return log.prepareUpdate((logRecord) => {
-            logRecord.isBackup = true;
-            // Only update regalId and gwId if the log.beschreibung is accepted
-            if (acceptedBoth[log.beschreibung]) {
-              logRecord.regalId = regal.regalId;
-              logRecord.gwId = artikel.gwId;
-            }
-
-            if (log.beschreibung == logTypes.LagerplatzHinzufügen) {
-              logRecord.regalId = regal.regalId;
-            }
-          });
+            // 👇 Return the prepared update operation
+            return log.prepareUpdate((logRecord) => {
+              logRecord.isBackup = true;
+              // ... your update logic ...
+            });
+          }
+          return null; // No update for this log
         })
       );
 
-      await database.batch(...updates);
+      // Filter out null entries (logs that didn't need updates)
+      const validUpdates = updateOperations.filter((op) => op !== null);
+
+      // Execute batch with valid updates
+      await database.batch(...validUpdates);
     });
   }
-
   // Handle the import of data into the database
   const handleImport = async () => {
     if (!jsonData) {
@@ -312,16 +416,26 @@ const ImportScreen = ({ navigation }) => {
 
       console.log("Backup der Trackingliste");
       setImportProgress(20);
-      await backupLogsBeforeImport();
+      try {
+        await backupLogsBeforeImport();
+      } catch (error) {
+        console.log("damn");
+      }
 
       console.log("Bestehende Datenbank wird gelöscht...");
       setImportProgress(40);
       await DBdeleteAllData();
-      
+
       console.log("Neue Datenbank wird erstellt und Daten importiert...");
       setImportProgress(60);
       await insertData(jsonData);
-      
+
+      console.log("Log erstellt für Import");
+      await LogService.createLog(
+        { beschreibung: logTypes.ImportDB },
+        null,
+        null
+      );
       setImportProgress(80);
       console.log("Daten erfolgreich importiert!");
       Toast.show({
@@ -355,7 +469,7 @@ const ImportScreen = ({ navigation }) => {
     try {
       await database.write(async () => {
         // Delete all existing records from tables
-        const tables = ["artikel", "logs", "regale", "artikel_besitzer"];
+        const tables = ["artikel", "regale", "artikel_besitzer"];
         const allRecords = await Promise.all(
           tables.map((table) => database.get(table).query().fetch())
         );
@@ -379,8 +493,7 @@ const ImportScreen = ({ navigation }) => {
       const artikel = await ArtikelService.getAllArtikel();
       const artikelBesitzer =
         await ArtikelBesitzerService.getAllArtikelOwners();
-      const logs = await LogService.getAllLogs();
-      return { regale, artikel, artikelBesitzer, logs };
+      return { regale, artikel, artikelBesitzer };
     } catch (error) {
       console.error("Fehler beim Backup:", error);
       throw new Error("Backup fehlgeschlagen");
@@ -421,7 +534,7 @@ const ImportScreen = ({ navigation }) => {
                   ).getTime()
                 : new Date().getTime(),
             };
-            
+
             // Validate required fields
             if (!regalData.regalId) {
               throw new Error(
@@ -488,7 +601,7 @@ const ImportScreen = ({ navigation }) => {
               ablaufdatum: artikel["Ablaufdatum"]
                 ? stringToDate(
                     artikel["Ablaufdatum"].replace(/\//g, "."),
-                    "d.M.yyyy",
+                    "dd.MM.yyyy",
                     "."
                   ).getTime()
                 : new Date().getTime(),
@@ -529,6 +642,77 @@ const ImportScreen = ({ navigation }) => {
             );
             throw new Error(
               `Fehler beim Import von Artikel ${artikel["GWID"]}: ${error.message}`
+            );
+          }
+        }
+      }
+      setImportProgress(80);
+      // Artikel Besitzer
+      if (!Array.isArray(data.Lagerplan)) {
+        Toast.show({
+          type: "error",
+          text1: "Fehler",
+          text2: "Kein Lagerplan gefunden oder ungültiges Format",
+          position: "bottom",
+          autoHide: false,
+        });
+      } else {
+        console.log(`Processing ${data.Lagerplan.length} Lagerplan records`);
+        for (const relation of data.Lagerplan) {
+          try {
+            // Convert Excel column names to database field names
+            const lagerplanData = {
+              regalId: String(relation["Regal ID"] || "").trim(),
+              gwId: String(relation["GWID"] || "").trim(),
+              menge:
+                relation["Menge"] !== undefined && relation["Menge"] !== ""
+                  ? Number(relation["Menge"])
+                  : 0,
+              erstelltAm: relation["Zuletzt aktualisiert"]
+                ? stringToDate(
+                    relation["Zuletzt aktualisiert"].replace(/\//g, "."),
+                    "dd.MM.yyyy",
+                    "."
+                  ).getTime()
+                : new Date().getTime(),
+            };
+
+            // Validate required fields
+            if (!lagerplanData.regalId) {
+              throw new Error(
+                `Regal ID ist erforderlich im Lagerplan: ${JSON.stringify(
+                  relation
+                )}`
+              );
+            }
+            if (!lagerplanData.gwId) {
+              throw new Error(
+                `GWID ist erforderlich im Lagerplan: ${JSON.stringify(
+                  relation
+                )}`
+              );
+            }
+
+            // Validate numeric fields
+            if (isNaN(lagerplanData.menge)) {
+              throw new Error(
+                `Ungültige Menge im Lagerplan für Artikel ${lagerplanData.gwId}: ${relation["Menge"]}`
+              );
+            }
+
+            console.log("Importing Lagerplan:", lagerplanData);
+            await ArtikelBesitzerService.createArtikelOwner(
+              lagerplanData,
+              lagerplanData.gwId,
+              lagerplanData.regalId
+            );
+          } catch (error) {
+            console.error(
+              `Fehler beim Import von Lagerplan: ${JSON.stringify(relation)}`,
+              error
+            );
+            throw new Error(
+              `Fehler beim Import von Lagerplan für Artikel ${relation["GWID"]}: ${error.message}`
             );
           }
         }
@@ -590,12 +774,11 @@ const ImportScreen = ({ navigation }) => {
         )}
         {isImporting && (
           <View style={styles.progressContainer}>
-            <ProgressBarAndroid
-              styleAttr="Horizontal"
-              indeterminate={false}
+            <Progress.Bar
               progress={importProgress / 100}
               color="#dcebf9"
-              style={{ width: "100%" }}
+              width={widthPercentageToDP(80)}
+              height={8}
             />
             <Text style={styles.progressText}>
               {Math.round(importProgress).toFixed(0)}%
@@ -642,22 +825,22 @@ const ImportScreen = ({ navigation }) => {
                     <View style={[localStyles.row, localStyles.rowBorder]}>
                       <View style={localStyles.cell}>
                         <Text numberOfLines={1} style={localStyles.name}>
-                          {item['Beschreibung']}
+                          {item["Beschreibung"]}
                         </Text>
                       </View>
                       <View style={localStyles.cell}>
                         <Text numberOfLines={1} style={localStyles.cellText}>
-                          {item['GWID']}
+                          {item["GWID"]}
                         </Text>
                       </View>
                       <View style={localStyles.cell}>
                         <Text numberOfLines={1} style={localStyles.cellText}>
-                          {item['Firmen ID']}
+                          {item["Firmen ID"]}
                         </Text>
                       </View>
                       <View style={localStyles.cell}>
                         <Text numberOfLines={1} style={localStyles.cellText}>
-                          {item['Gesamtmenge']}
+                          {item["Gesamtmenge"]}
                         </Text>
                       </View>
                     </View>
@@ -699,17 +882,17 @@ const ImportScreen = ({ navigation }) => {
                     <View style={[localStyles.row, localStyles.rowBorder]}>
                       <View style={localStyles.cell}>
                         <Text numberOfLines={1} style={localStyles.cellText}>
-                          {item['Regal ID']}
+                          {item["Regal ID"]}
                         </Text>
                       </View>
                       <View style={localStyles.cell}>
                         <Text numberOfLines={1} style={localStyles.name}>
-                          {item['Regal Name']}
+                          {item["Regal Name"]}
                         </Text>
                       </View>
                       <View style={localStyles.cell}>
                         <Text numberOfLines={1} style={localStyles.cellText}>
-                          {item['Fach Name']}
+                          {item["Fach Name"]}
                         </Text>
                       </View>
                     </View>
@@ -751,17 +934,17 @@ const ImportScreen = ({ navigation }) => {
                     <View style={[localStyles.row, localStyles.rowBorder]}>
                       <View style={localStyles.cell}>
                         <Text numberOfLines={1} style={localStyles.cellText}>
-                          {item['Regal ID']}
+                          {item["Regal ID"]}
                         </Text>
                       </View>
                       <View style={localStyles.cell}>
                         <Text numberOfLines={1} style={localStyles.cellText}>
-                          {item['GWID']}
+                          {item["GWID"]}
                         </Text>
                       </View>
                       <View style={localStyles.cell}>
                         <Text numberOfLines={1} style={localStyles.cellText}>
-                          {item['Menge']}
+                          {item["Menge"]}
                         </Text>
                       </View>
                     </View>
@@ -782,14 +965,17 @@ const ImportScreen = ({ navigation }) => {
         onRequestClose={() => setModalVisible(false)}
       >
         <ConfirmPopup
-          text={validationErrors.map(error => 
-            `Blatt: ${error.sheet}\n` +
-            `Zeile: ${error.row}\n` +
-            `Feld: ${error.field}\n` +
-            `Wert: ${error.value}\n` +
-            `Fehler: ${error.error}\n` +
-            '-------------------'
-          ).join('\n\n')}
+          text={validationErrors
+            .map(
+              (error) =>
+                `Blatt: ${error.sheet}\n` +
+                `Zeile: ${error.row}\n` +
+                `Feld: ${error.field}\n` +
+                `Wert: ${error.value}\n` +
+                `Fehler: ${error.error}\n` +
+                "-------------------"
+            )
+            .join("\n\n")}
           greyCallback={() => setModalVisible(false)}
           colorCallback={() => {
             setSelectedFile(null);
@@ -866,15 +1052,15 @@ const localStyles = StyleSheet.create({
     marginBottom: 20,
   },
   progressContainer: {
-    width: '100%',
+    width: "100%",
     marginTop: 10,
-    alignItems: 'center',
+    alignItems: "center",
   },
   progressText: {
     marginTop: 5,
-    color: '#30A6DE',
+    color: "#30A6DE",
     fontSize: 12,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   buttonDisabled: {
     opacity: 0.7,
