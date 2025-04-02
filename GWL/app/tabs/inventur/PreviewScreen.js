@@ -127,10 +127,40 @@ const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
     }
   };
 
+  const handleGesamtmenge = async () => {
+    try {
+      for (const item of artikelList) {
+        // Process items sequentially instead of in parallel
+        const artikel_id = item._raw.gw_id;
+        const artikel = await item.artikel.fetch();
+
+        // Use database.read() for read operations
+        const artikelBesitzer = await database.read(async () => {
+          return await database
+            .get("artikel_besitzer")
+            .query(Q.where("gw_id", artikel_id))
+            .fetch();
+        });
+
+        let menge = 0;
+        for (const besitzer of artikelBesitzer) {
+          menge += Number(besitzer.menge);
+        }
+        await ArtikelService.updateInventurArtikel(artikel.gwId, {
+          menge: menge,
+        });
+      }
+    } catch (error) {
+      console.error("Fehler beim Aktualisieren der Mengen:", error);
+      Alert.alert("Mengen konnten nicht aktualisiert werden.");
+    }
+  };
+
   const handleConfirm = async () => {
     setModalVisible(false);
     try {
       await handleUpdateMenge();
+      await handleGesamtmenge();
       await handleExportToEmail();
       setChangedMenge({});
 
