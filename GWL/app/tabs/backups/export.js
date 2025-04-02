@@ -370,7 +370,7 @@ const ExportScreen = () => {
         "Regal ID": r.regalId,
         "Regal Name": r.regalName,
         "Fach Name": r.fachName,
-        "Erstellt am": new Date(r.createdAt).toLocaleDateString(),
+        "Erstellt am": new Date(r.createdAt).toLocaleDateString("de-DE"),
       }));
       const regalSheet = XLSX.utils.json_to_sheet(regalSheetData);
 
@@ -383,7 +383,7 @@ const ExportScreen = () => {
         Mindestmenge: a.mindestMenge,
         Kunde: a.kunde,
         Ablaufdatum: a.ablaufdatum
-          ? new Date(a.ablaufdatum).toLocaleDateString()
+          ? new Date(a.ablaufdatum).toLocaleDateString("de-DE")
           : "",
       }));
       const artikelSheet = XLSX.utils.json_to_sheet(artikelSheetData);
@@ -400,7 +400,9 @@ const ExportScreen = () => {
             "Regal ID": regal.regalId,
             "Regal Name": regal.regalName,
             Menge: ab.menge,
-            "Zuletzt aktualisiert": new Date(ab.updatedAt).toLocaleDateString(),
+            "Zuletzt aktualisiert": new Date(ab.updatedAt).toLocaleDateString(
+              "de-DE"
+            ),
           };
         })
       );

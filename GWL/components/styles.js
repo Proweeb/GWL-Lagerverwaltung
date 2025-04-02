@@ -1,4 +1,5 @@
 import { RFPercentage } from "react-native-responsive-fontsize";
+import { heightPercentageToDP } from "react-native-responsive-screen";
 
 export const styles = {
   // Background Colors
@@ -107,8 +108,6 @@ export const styles = {
     marginTop: 10,
     alignItems: "center",
   },
-  
-  
 
   buttonText: {
     color: "#202020",
