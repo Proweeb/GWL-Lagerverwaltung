@@ -23,9 +23,10 @@
     "android": {
       "foregroundService": {
         "notificationTitle": "Läuft...",
-        "notificationBody": "Checkt das Ablaufdatum der Artikel."
+        "notificationBody": "Checkt das Ablaufdatum der Artikel.",
+        "notificationColor": "#38aae1",
+        "notificationPriority": "high"
       },
-
       "jsEngine": "hermes",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
@@ -40,7 +41,9 @@
         "android.permission.POST_NOTIFICATIONS",
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.RECEIVE_BOOT_COMPLETED",
-        "android.permission.WAKE_LOCK"
+        "android.permission.WAKE_LOCK",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_DATA_SYNC"
       ],
       "package": "com.Lagerverwaltung"
     },
