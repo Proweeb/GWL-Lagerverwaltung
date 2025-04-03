@@ -18,7 +18,50 @@ import { toastConfig } from "../components/toastConfig";
 import BarcodeScreen from "./scan/barcode";
 import QrCodeScreen from "./scan/qrcode";
 import { testInsertAndFetch } from "../Old_Code/insertLogswithArtikel";
+import SettingsScreen from "./other/settings";
 
+import * as BackgroundFetch from "expo-background-fetch";
+import * as TaskManager from "expo-task-manager";
+import ArtikelService from "../database/datamapper/ArtikelHelper";
+
+const BACKGROUND_FETCH_TASK = "background-fetch";
+
+// 1. Define the task by providing a name and the function that should be executed
+// Note: This needs to be called in the global scope (e.g outside of your React components)
+TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
+  const allArticles = await ArtikelService.getAllArtikel();
+  const filteredArticles = allArticles.filter((article) =>
+    ["Kritisch", "Abgelaufen", "Warnung"].includes(article.isExpired)
+  );
+
+  console.log(
+    `[DEBUG] Background fetch task executed at ${new Date().toISOString()}`
+  );
+  //  console.log(filteredArticles);
+
+  return BackgroundFetch.BackgroundFetchResult.NewData;
+});
+
+async function registerBackgroundFetchAsync() {
+  try {
+    await BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
+      minimumInterval: 1 * 60, // 1 minute
+      stopOnTerminate: false, // android only
+      startOnBoot: true, // android only
+      notificationTitle: "Läuft...",
+      notificationBody: "Checkt das Ablaufdatum der Artikel.",
+      notificationColor: "#38aae1",
+      notificationChannelId: "background-fetch",
+    });
+    console.log("Background fetch task registered successfully");
+  } catch (err) {
+    console.error("Background fetch task registration failed:", err);
+  }
+}
+
+async function unregisterBackgroundFetchAsync() {
+  return BackgroundFetch.unregisterTaskAsync(BACKGROUND_FETCH_TASK);
+}
 // Create Stack & Tab Navigators
 const Stack = createStackNavigator();
 LogBox.ignoreLogs([
@@ -34,17 +77,19 @@ export default function App() {
     requestNotifications(["alert", "sound"]).then(({ status, settings }) => {
       // …
     });
-    const a = async () => {
-      await Notifications.setNotificationHandler({
-        handleNotification: async () => ({
-          shouldShowAlert: true,
-          shouldPlaySound: true,
-          shouldSetBadge: true,
-        }),
-      });
-    };
 
-    testInsertAndFetch();
+    const a = async () => {
+      await registerBackgroundFetchAsync();
+      //   await Notifications.setNotificationHandler({
+      //     handleNotification: async () => ({
+      //       shouldShowAlert: true,
+      //       shouldPlaySound: true,
+      //       shouldSetBadge: true,
+      //     }),
+      //   });
+    };
+    a();
+    //testInsertAndFetch();
   }, []);
 
   return (
@@ -71,6 +116,17 @@ function MainStack() {
       }}
     >
       <Stack.Screen name="Tabs" component={BottomTabNavigator} />
+      <Stack.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          title: "Einstellungen",
+          headerShown: true,
+          statusBarBackgroundColor: styles.backgroundColor,
+          statusBarStyle: "dark",
+          headerTitleStyle: styles.header,
+        }}
+      />
       <Stack.Screen
         name="Scan\Barcode"
         component={BarcodeScreen}

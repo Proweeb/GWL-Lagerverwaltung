@@ -1,7 +1,7 @@
 import { database } from "../database";
 import { Q } from "@nozbe/watermelondb";
 import Regal from "../models/Regal";
-import { logTypes } from "../../components/enum";
+import { logTypes, ErrorMessages } from "../../components/enum";
 
 async function createRegal(regalData) {
   return database.write(async () => {
@@ -18,15 +18,21 @@ async function createRegal(regalData) {
     return regal;
   });
 }
+
 async function getAllRegal() {
   return await database.get("regale").query().fetch();
 }
+
 async function getRegalById(regalid) {
   const regal = await database
     .get("regale")
     .query(Q.where("regal_id", regalid))
     .fetch();
-  return regal.length > 0 ? regal[0] : null;
+  
+  if (regal.length<1) {
+    throw new Error(ErrorMessages.REGAL_NOT_FOUND);
+  }
+  return regal[0];
 }
 
 async function updateRegal(regalid, updatedData) {
@@ -36,20 +42,36 @@ async function updateRegal(regalid, updatedData) {
       .query(Q.where("regal_id", regalid))
       .fetch();
 
+    if (!regal.length) {
+      throw new Error(ErrorMessages.REGAL_NOT_FOUND);
+    }
+
     await regal[0].update((reg) => {
-      reg.regalId = updatedData.regalId;
-      reg.fachName = updatedData.fachName;
-      reg.regalName = updatedData.regalName;
+      if (updatedData.regalId !== undefined) {
+        reg.regalId = updatedData.regalId;
+      }
+      if (updatedData.fachName !== undefined) {
+        reg.fachName = updatedData.fachName;
+      }
+      if (updatedData.regalName !== undefined) {
+        reg.regalName = updatedData.regalName;
+      }
     });
     return regal[0];
   });
 }
+
 async function deleteRegal(regalid) {
   return await database.write(async () => {
     const regal = await database
       .get("regale")
       .query(Q.where("regal_id", regalid))
       .fetch();
+    
+    if (regal.length<1) {
+      throw new Error(ErrorMessages.REGAL_NOT_FOUND);
+    }
+    
     await regal[0].destroyPermanently();
   });
 }

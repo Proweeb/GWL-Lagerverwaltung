@@ -20,11 +20,13 @@ import {
   widthPercentageToDP,
   heightPercentageToDP,
 } from "react-native-responsive-screen";
+import { useNavigation } from "@react-navigation/native";
 
 // Create Bottom Tabs
 const Tab = createBottomTabNavigator();
 
 export default function BottomTabNavigator() {
+  const navigation = useNavigation();
   return (
     <Tab.Navigator
       tabBar={(props) => <CustomTabBar {...props} />} // Custom Tab Bar (if applicable)
@@ -81,6 +83,9 @@ export default function BottomTabNavigator() {
                 height: heightPercentageToDP(10),
                 borderRadius: 20, // Optional: Make it circular
                 overflow: "hidden",
+              }}
+              onPress={() => {
+                navigation.navigate("Settings");
               }}
             >
               <Image

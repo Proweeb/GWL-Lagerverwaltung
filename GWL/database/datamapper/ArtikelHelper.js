@@ -1,7 +1,7 @@
 import { database } from "../database";
 import { Q } from "@nozbe/watermelondb";
 import RegalService from "./RegalHelper";
-import { logTypes } from "../../components/enum";
+import { logTypes, ErrorMessages } from "../../components/enum";
 
 async function createArtikel(artikelData, regalId) {
   const regal = await RegalService.getRegalById(regalId);
@@ -54,33 +54,36 @@ async function getAllArtikel() {
 async function getArtikelById(gwid) {
   const artikel = await database
     .get("artikel")
-    .query(
-      Q.where("gw_id", gwid) // Ensure "gwId" matches your schema
-    )
+    .query(Q.where("gw_id", gwid))
     .fetch();
 
-  return artikel.length > 0 ? artikel[0] : null; // Return first item or null if not found
+  if (!artikel.length) {
+    throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
+  }
+  return artikel[0];
 }
 
 async function getArtikelsById(gwid) {
   const artikel = await database
     .get("artikel")
-    .query(
-      Q.where("gw_id", gwid) // Ensure "gwId" matches your schema
-    )
+    .query(Q.where("gw_id", gwid))
     .fetch();
-  return artikel.length > 0 ? artikel : null; // Return first item or null if not found
+  
+  if (!artikel.length) {
+    throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
+  }
+  return artikel;
 }
 
 async function updateArtikel(gwid, updatedData) {
   return await database.write(async () => {
     const artikel = await database
       .get("artikel")
-      .query(Q.where("gw_id", gwid)) // Ensure "gwId" matches your schema
+      .query(Q.where("gw_id", gwid))
       .fetch();
-    if (!artikel.length) {
-      console.error("Artikel not found for gwId:", gwid);
-      return;
+    
+    if (artikel.length<1) {
+      throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
     }
 
     await artikel[0].update((art) => {
@@ -123,12 +126,13 @@ async function updateInventurArtikel(gwid, updatedData) {
   return await database.write(async () => {
     const artikel = await database
       .get("artikel")
-      .query(Q.where("gw_id", gwid)) // Ensure "gwId" matches your schema
+      .query(Q.where("gw_id", gwid))
       .fetch();
-    if (!artikel.length) {
-      console.error("Artikel not found for gwId:", gwid);
-      return;
+    
+    if (artikel.length<1) {
+      throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
     }
+
     let text;
     if (updatedData.menge < 0) {
       text = logTypes.artikelEntnehmen;
@@ -183,16 +187,16 @@ async function deleteArtikel(gwid) {
   return await database.write(async () => {
     const artikel = await database
       .get("artikel")
-      .query(
-        Q.where("gw_id", gwid) // Ensure "gwId" matches your schema
-      )
+      .query(Q.where("gw_id", gwid))
       .fetch();
 
-    if (artikel.length > 0) {
-      await database.batch(
-        ...artikel.map((artikel) => artikel.prepareDestroyPermanently())
-      );
+    if (artikel.length<1) {
+      throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
     }
+
+    await database.batch(
+      ...artikel.map((artikel) => artikel.prepareDestroyPermanently())
+    );
   });
 }
 
@@ -200,12 +204,13 @@ async function updateArtikelById(id, updatedData) {
   return await database.write(async () => {
     const artikel = await database
       .get("artikel")
-      .query(Q.where("id", id)) // Ensure "gwId" matches your schema
+      .query(Q.where("id", id))
       .fetch();
-    if (!artikel.length) {
-      console.error("Artikel not found for id:", id);
-      return;
+    
+    if (artikel.length<1) {
+      throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
     }
+
     let text;
     if (updatedData.menge < 0) {
       text = logTypes.artikelEntnehmen;
