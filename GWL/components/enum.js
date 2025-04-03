@@ -10,3 +10,10 @@ export const logTypes = {
   ExportLog: "Backup Trackingliste gesendet",
   BackupDB: "Backup Lagerliste gesendet",
 };
+
+export const ErrorMessages = {
+  ARTICLE_NOT_FOUND: "Artikel existiert nicht",
+  REGAL_NOT_FOUND: "Regal existiert nicht",
+  ARTIKELBESITZER_NOT_FOUND: "ArtikelBesitzer exisitert nicht",
+  LOG_NOT_FOUND: "Log existiert nicht",
+};
