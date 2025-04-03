@@ -57,7 +57,7 @@ async function getArtikelById(gwid) {
     .query(Q.where("gw_id", gwid))
     .fetch();
 
-  if (!artikel.length) {
+  if (artikel.length < 1) {
     throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
   }
   return artikel[0];
@@ -68,8 +68,8 @@ async function getArtikelsById(gwid) {
     .get("artikel")
     .query(Q.where("gw_id", gwid))
     .fetch();
-  
-  if (!artikel.length) {
+
+  if (artikel.length < 1) {
     throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
   }
   return artikel;
@@ -81,8 +81,8 @@ async function updateArtikel(gwid, updatedData) {
       .get("artikel")
       .query(Q.where("gw_id", gwid))
       .fetch();
-    
-    if (artikel.length<1) {
+
+    if (artikel.length < 1) {
       throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
     }
 
@@ -128,8 +128,8 @@ async function updateInventurArtikel(gwid, updatedData) {
       .get("artikel")
       .query(Q.where("gw_id", gwid))
       .fetch();
-    
-    if (artikel.length<1) {
+
+    if (artikel.length < 1) {
       throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
     }
 
@@ -190,7 +190,7 @@ async function deleteArtikel(gwid) {
       .query(Q.where("gw_id", gwid))
       .fetch();
 
-    if (artikel.length<1) {
+    if (artikel.length < 1) {
       throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
     }
 
@@ -206,8 +206,8 @@ async function updateArtikelById(id, updatedData) {
       .get("artikel")
       .query(Q.where("id", id))
       .fetch();
-    
-    if (artikel.length<1) {
+
+    if (artikel.length < 1) {
       throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
     }
 

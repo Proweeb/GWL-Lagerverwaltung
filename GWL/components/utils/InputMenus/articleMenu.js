@@ -50,7 +50,7 @@ export default function ArticleMenu({ formData, setFormData }) {
         margin: 10,
       }}
     >
-      <Text style={{ fontSize: RFPercentage(1.8) }}>GWID</Text>
+      <Text style={{ fontSize: RFPercentage(1.8) }}>GWID*</Text>
       <View
         style={{
           flexDirection: "row",
@@ -62,11 +62,13 @@ export default function ArticleMenu({ formData, setFormData }) {
           <TextInputField
             value={formData.gwId}
             onChangeText={(text) =>
-              setFormData((prevData) => ({ ...prevData, gwId: text }))
+              setFormData((prevData) => ({
+                ...prevData,
+                gwId: text.replace(/[^0-9]/g, ""), // Regex, das nur Zahlen zulässt
+              }))
             }
           />
         </View>
-
         <TouchableOpacity
           onPress={() => {
             navigation.navigate("Scan\\Qrcode", {
@@ -96,7 +98,7 @@ export default function ArticleMenu({ formData, setFormData }) {
       </View>
 
       <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>
-        Beschreibung
+        Beschreibung*
       </Text>
       <TextInputField
         value={formData.beschreibung}
@@ -105,12 +107,15 @@ export default function ArticleMenu({ formData, setFormData }) {
         }
       />
 
-      <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>Menge</Text>
+      <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>Menge*</Text>
       <TextInputField
         inputMode={"numeric"}
         value={formData.menge}
         onChangeText={(text) =>
-          setFormData((prevData) => ({ ...prevData, menge: text }))
+          setFormData((prevData) => ({
+            ...prevData,
+            menge: text.replace(/[^0-9]/g, ""), // Regex, das nur Zahlen zulässt
+          }))
         }
       />
 
@@ -151,7 +156,28 @@ export default function ArticleMenu({ formData, setFormData }) {
         inputMode={"numeric"}
         value={formData.mindestmenge}
         onChangeText={(text) =>
-          setFormData((prevData) => ({ ...prevData, mindestmenge: text }))
+          setFormData((prevData) => ({
+            ...prevData,
+            mindestmenge: text.replace(/[^0-9]/g, ""), // Regex, das nur Zahlen zulässt
+          }))
+        }
+      />
+
+      <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>
+        Firmen ID
+      </Text>
+      <TextInputField
+        value={formData.firmen_id}
+        onChangeText={(text) =>
+          setFormData((prevData) => ({ ...prevData, firmen_id: text }))
+        }
+      />
+
+      <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>Kunde</Text>
+      <TextInputField
+        value={formData.kunde}
+        onChangeText={(text) =>
+          setFormData((prevData) => ({ ...prevData, kunde: text }))
         }
       />
     </View>

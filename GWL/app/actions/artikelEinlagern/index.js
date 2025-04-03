@@ -1,6 +1,6 @@
 import { Text, View, ScrollView } from "react-native";
 import { styles } from "../../../components/styles";
-
+import { ErrorMessages } from "../../../components/enum.js";
 import { useState, useEffect } from "react";
 import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper.js";
 import { useNavigation } from "@react-navigation/native";
@@ -17,9 +17,6 @@ export default function IndexScreen() {
   const [menge, setMenge] = useState();
   const [regalIdValid, setRegalIdValid] = useState(false);
   const [regalId, setRegalId] = useState("");
-  const [isDone, setIsDone] = useState(false);
-  const [dbArtikel, setDbArtikel] = useState();
-  const [dbRegal, setRegal] = useState();
 
   const checkArticleInRegal = async () => {
     try {
@@ -51,7 +48,7 @@ export default function IndexScreen() {
         });
       }
     } catch (error) {
-      if (error.message == "Artikel existert nicht") {
+      if (error.message == ErrorMessages.ARTICLE_NOT_FOUND) {
         navigation.navigate("Actions", {
           screen: "ArtikelEinlagernNavigator",
           params: {
@@ -59,7 +56,7 @@ export default function IndexScreen() {
             params: { regalId: regalId, gwId: gwId, menge: menge },
           },
         });
-      } else if (error.message == "Regal existert nicht") {
+      } else if (error.message == ErrorMessages.REGAL_NOT_FOUND) {
         Toast.show({
           type: "error",
           text1: "Error",
@@ -106,15 +103,19 @@ export default function IndexScreen() {
 
       <View>
         <Text style={styles.subHeader}>Artikel</Text>
-        <ArticleTextInput gwId={gwId} setGwId={setGwId} />
-        <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>Menge</Text>
-        <TextInputField
-          inputMode={"numeric"}
-          value={menge}
-          onChangeText={(text) => {
-            setMenge(text.replace(/[^0-9]/g, ""));
-          }}
-        />
+        <View style={{ margin: 10 }}>
+          <ArticleTextInput gwId={gwId} setGwId={setGwId} />
+          <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>
+            Menge
+          </Text>
+          <TextInputField
+            inputMode={"numeric"}
+            value={menge}
+            onChangeText={(text) => {
+              setMenge(text.replace(/[^0-9]/g, ""));
+            }}
+          />
+        </View>
       </View>
 
       <View style={{ marginTop: 50, alignItems: "center" }}>

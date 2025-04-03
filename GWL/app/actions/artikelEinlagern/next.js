@@ -12,6 +12,11 @@ import { useNavigation } from "@react-navigation/native";
 import LogService from "../../../database/datamapper/LogHelper.js";
 import Toast from "react-native-toast-message";
 import { useRoute } from "@react-navigation/native";
+import { useEffect } from "react";
+import { ErrorMessages } from "../../../components/enum.js";
+import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper.js";
+import RegalTextInput from "../artikelNachfüllen/regalTextInput.js";
+import ActionButton from "../../../components/Buttons/ActionsButton.js";
 
 export default function NextScreen() {
   const navigation = useNavigation();
@@ -19,81 +24,68 @@ export default function NextScreen() {
   const passedGwId = route.params?.gwId;
   const passedRegalId = route.params?.regalId;
   const passedMenge = route.params?.menge;
+  const [regalIdValid, setRegalIdValid] = useState(true);
+  const [regalId, setRegalId] = useState("");
   const [formData, setFormData] = useState({
     gwId: "",
     beschreibung: "",
     menge: "",
     ablaufdatum: "",
     mindestmenge: "",
-    regalId: "",
+    firmen_id: "",
+    kunde: "",
   });
 
+  useEffect(() => {
+    setFormData({
+      gwId: passedGwId,
+      menge: passedMenge,
+    });
+    setRegalId(passedRegalId);
+  }, [passedGwId, passedMenge, passedRegalId]);
+
   const handleSubmit = async () => {
-    const { gwId, beschreibung, menge, ablaufdatum, mindestmenge, regalId } =
-      formData;
+    const {
+      gwId,
+      beschreibung,
+      menge,
+      ablaufdatum,
+      mindestmenge,
+      firmen_id,
+      kunde,
+    } = formData;
 
-    if (
-      !gwId ||
-      !beschreibung ||
-      !menge ||
-      !ablaufdatum ||
-      !mindestmenge ||
-      !regalId
-    ) {
-      Toast.show({
-        type: "warning",
-        text1: "Artikel/Regal",
-        text2: "Bitte füllen Sie alle Felder aus",
-        position: "bottom",
-      });
-      console.log(formData);
-    } else {
-      console.log("Alle Felder sind befüllt:", formData);
+    try {
+      await ArtikelService.getArtikelById(gwId);
+    } catch (error) {
+      if (error.message == ErrorMessages.ARTICLE_NOT_FOUND) {
+        console.log(regalId);
+        await ArtikelService.createArtikel(
+          {
+            gwId,
+            firmenId: firmen_id,
+            kunde,
+            beschreibung,
+            menge: Number(menge),
+            ablaufdatum,
+            mindestMenge: Number(mindestmenge),
+          },
+          String(regalId)
+        );
 
-      try {
-        const existingArtikel = await ArtikelService.getArtikelById(gwId);
-        const existingRegal = await RegalService.getRegalById(String(regalId));
-        console.log(menge);
-        if (existingArtikel) {
-          Toast.show({
-            type: "error",
-            text1: "Artikel",
-            text2: "Existiert bereits",
-            position: "bottom",
-          });
-        } else if (!existingRegal) {
-          Toast.show({
-            type: "error",
-            text1: "Regal",
-            text2: "Existiert nicht",
-            position: "bottom",
-          });
-        } else {
-          console.log(existingRegal);
-          await ArtikelService.createArtikel(
-            {
-              gwId,
-              beschreibung,
-              menge: Number(menge),
-              ablaufdatum,
-              mindestMenge: Number(mindestmenge),
-            },
-            String(regalId)
-          );
-          Toast.show({
-            type: "success",
-            text1: "Artikel: " + formData.beschreibung,
-            text2: "Erfolgreich gespeichert",
-            position: "top",
-          });
-          navigation.navigate("Home");
-        }
-      } catch (error) {
+        Toast.show({
+          type: "success",
+          text1: "Artikel: " + formData.beschreibung,
+          text2: "Erfolgreich gespeichert",
+          position: "top",
+        });
+        navigation.navigate("Home");
+      } else {
         console.error("Fehler beim Speichern:", error);
         Toast.show({
           type: "error",
           text1: "Artikel",
-          text2: "Konnte nicht gespeichert werden.",
+          text2: "Existiert bereits",
           position: "bottom",
         });
       }
@@ -107,26 +99,38 @@ export default function NextScreen() {
         padding: 15,
         backgroundColor: styles.backgroundColor,
       }}
+      contentContainerStyle={{ paddingBottom: 50 }}
     >
       <View>
+        <Text style={styles.subHeader}>Lagerung</Text>
+        <RegalTextInput
+          regalId={regalId}
+          setRegalId={setRegalId}
+          setRegalIdValid={setRegalIdValid}
+          regalIdValid={regalIdValid}
+        />
+      </View>
+
+      <View style={{ marginTop: 10 }}>
         <Text style={styles.subHeader}>Artikel</Text>
         <ArticleMenu formData={formData} setFormData={setFormData} />
       </View>
 
       <View style={{ marginTop: 50, alignItems: "center" }}>
-        <TouchableOpacity
-          style={{
-            backgroundColor: "#dcebf9",
-            padding: 10,
-            borderRadius: 5,
-            height: 50,
-            alignItems: "center",
-            justifyContent: "center",
+        <ActionButton
+          CancelCallBack={() => {
+            if (navigation.canGoBack()) {
+              navigation.goBack();
+            }
           }}
-          onPress={handleSubmit}
-        >
-          <Text style={{ color: "#30A6DE", fontSize: 20 }}>Fertig</Text>
-        </TouchableOpacity>
+          FertigCallBack={handleSubmit}
+          isDone={
+            regalIdValid &&
+            formData.menge &&
+            formData.gwId &&
+            formData.beschreibung
+          }
+        />
       </View>
     </ScrollView>
   );
