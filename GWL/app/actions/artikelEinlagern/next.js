@@ -11,9 +11,14 @@ import RegalService from "../../../database/datamapper/RegalHelper.js";
 import { useNavigation } from "@react-navigation/native";
 import LogService from "../../../database/datamapper/LogHelper.js";
 import Toast from "react-native-toast-message";
+import { useRoute } from "@react-navigation/native";
 
 export default function NextScreen() {
   const navigation = useNavigation();
+  const route = useRoute();
+  const passedGwId = route.params?.gwId;
+  const passedRegalId = route.params?.regalId;
+  const passedMenge = route.params?.menge;
   const [formData, setFormData] = useState({
     gwId: "",
     beschreibung: "",

@@ -29,17 +29,24 @@ export default function IndexScreen() {
           regalId
         );
 
-      if (articleInRegal.length != 0) {
+      if (besitzer.length == 0) {
         await ArtikelBesitzerService.createArtikelOwner(
           { menge: menge },
           gwId,
           regalId
         );
+        Toast.show({
+          type: "success",
+          text1: "Artikel",
+          text2: "Eingelagert",
+          position: "top",
+        });
+        navigation.goBack();
       } else {
         Toast.show({
           type: "error",
           text1: "Error",
-          text2: "Artikel befindet sich nicht im Regal",
+          text2: "Artikel befindet sich im Regal",
           position: "bottom",
         });
       }
@@ -47,7 +54,10 @@ export default function IndexScreen() {
       if (error.message == "Artikel existert nicht") {
         navigation.navigate("Actions", {
           screen: "ArtikelEinlagernNavigator",
-          params: { screen: "Next" },
+          params: {
+            screen: "Next",
+            params: { regalId: regalId, gwId: gwId, menge: menge },
+          },
         });
       } else if (error.message == "Regal existert nicht") {
         Toast.show({
@@ -62,8 +72,6 @@ export default function IndexScreen() {
   };
 
   const handleSubmit = async () => {
-    console.log("Alle Felder sind befüllt:", gwId);
-
     try {
       await checkArticleInRegal();
     } catch (error) {
