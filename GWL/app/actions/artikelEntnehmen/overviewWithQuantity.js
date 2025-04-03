@@ -1,6 +1,6 @@
 import { Text, TouchableOpacity, View } from "react-native";
 import { styles } from "../../../components/styles";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { TextInput } from "react-native-gesture-handler";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import Feather from "@expo/vector-icons/Feather";
@@ -9,6 +9,7 @@ import ArtikelService from "../../../database/datamapper/ArtikelHelper";
 import LogService from "../../../database/datamapper/LogHelper";
 import Toast from "react-native-toast-message";
 import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper";
+import { useEffect } from "react";
 
 export default function OverviewWithQuantity({
   menge,
@@ -17,18 +18,8 @@ export default function OverviewWithQuantity({
   foundArticle,
   foundRegal,
 }) {
-  const [nachfüllmenge, setNachfüllmenge] = useState(0);
-
-  useEffect(() => {}, [foundArticle]);
-
-  const handleMengeShow = () => {
-    if (menge < 0) {
-      return 0;
-    } else {
-      return menge;
-    }
-  };
-
+  const [entnahmeMenge, setEntnahmeMenge] = useState(0);
+  const [ausgabeMenge, setAusgabeMenge] = useState(menge);
   const showLowMenge = () => {
     if (menge === 0) {
       console.log("low");
@@ -57,21 +48,20 @@ export default function OverviewWithQuantity({
     }
   };
 
+  useEffect(() => {
+    setAusgabeMenge(Number(menge) - Number(entnahmeMenge));
+  }, [entnahmeMenge]);
+
   const handleFertig = async () => {
     setShowMengeOverview(false);
-    if (nachfüllmenge == "") {
-      setNachfüllmenge(0);
-    }
-
-    if (menge - Number(nachfüllmenge) < 0) {
-      setMenge(0);
-      setNachfüllmenge(0);
+    if (entnahmeMenge === "") {
+      setEntnahmeMenge(0);
     }
 
     //Regal Id muss hier noch rein gehören also beim nachfüllen und entnehmen braucht man die RegalID
     await ArtikelBesitzerService.updateArtikelBesitzerMengeByGwIdAndRegalId(
       {
-        menge: nachfüllmenge * -1,
+        menge: entnahmeMenge * -1,
       },
       foundRegal.regalId,
       foundArticle.gwId
@@ -80,7 +70,7 @@ export default function OverviewWithQuantity({
     Toast.show({
       type: "success",
       text1: "Artikel: " + foundArticle.beschreibung,
-      text2: "Neue Menge: " + menge,
+      text2: "Neue Menge: " + (Number(menge) - Number(entnahmeMenge)),
       position: "top",
     });
   };
@@ -106,7 +96,7 @@ export default function OverviewWithQuantity({
       >
         <View>
           <Text style={[siteStyles.textStyle, { color: "white" }]}>
-            Aktuelle Menge vom Artikel: {handleMengeShow()}
+            Aktuelle Menge vom Artikel: {ausgabeMenge}
           </Text>
         </View>
 
@@ -131,9 +121,9 @@ export default function OverviewWithQuantity({
         >
           <TouchableOpacity
             onPress={() => {
-              if (Number(nachfüllmenge) != 0) {
-                setNachfüllmenge(nachfüllmenge - 1);
-                setMenge(Number(menge) + 1);
+              if (Number(entnahmeMenge) > 0) {
+                setEntnahmeMenge(Number(entnahmeMenge) - 1);
+                //setMenge(Number(menge) + 1);
               }
             }}
             style={siteStyles.touchableStyle}
@@ -143,22 +133,37 @@ export default function OverviewWithQuantity({
 
           <TextInput
             style={siteStyles.inputStyle}
-            value={String(nachfüllmenge)}
+            value={String(entnahmeMenge)}
             onChangeText={(text) => {
-              if (Number(text) > menge) {
-                setNachfüllmenge(menge);
+              const cleanedText = text.replace(/[^0-9]/g, "");
+
+              if (cleanedText === "") {
+                setEntnahmeMenge("");
+                //setMenge(Number(menge));
+                return;
+              }
+
+              const newValue = Number(cleanedText);
+
+              if (newValue > menge) {
+                setEntnahmeMenge(Number(menge));
+                //setMenge(0);
               } else {
-                setNachfüllmenge(text);
+                setEntnahmeMenge(newValue);
+                //setMenge(Number(menge) - newValue);
               }
             }}
             inputMode={"numeric"}
-          ></TextInput>
+          />
 
           <TouchableOpacity
             onPress={() => {
-              if (handleMengeShow() != 0) {
-                setNachfüllmenge(nachfüllmenge + 1);
-                setMenge(Number(menge) - 1);
+              if (
+                Number(menge) !== 0 &&
+                Number(entnahmeMenge) < Number(menge)
+              ) {
+                setEntnahmeMenge(Number(entnahmeMenge) + 1);
+                //setMenge(Number(menge) - 1);
               }
 
               //setShowValue(nachfüllmenge);

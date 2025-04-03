@@ -9,7 +9,7 @@ import ArtikelService from "../../../database/datamapper/ArtikelHelper";
 import LogService from "../../../database/datamapper/LogHelper";
 import Toast from "react-native-toast-message";
 import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper";
-
+import { useEffect } from "react";
 export default function OverviewWithQuantity({
   menge,
   setMenge,
@@ -18,6 +18,7 @@ export default function OverviewWithQuantity({
   foundRegal,
 }) {
   const [nachfüllmenge, setNachfüllmenge] = useState(0);
+  const [ausgabeMenge, setAusgabeMenge] = useState(menge);
 
   const handleFertig = async () => {
     setShowMengeOverview(false);
@@ -37,10 +38,15 @@ export default function OverviewWithQuantity({
     Toast.show({
       type: "success",
       text1: "Artikel: " + foundArticle.beschreibung,
-      text2: "Neue Menge: " + Number(menge),
+      text2: "Neue Menge: " + (Number(menge) + Number(nachfüllmenge)),
       position: "top",
     });
   };
+
+  useEffect(() => {
+    setAusgabeMenge(Number(menge) + Number(nachfüllmenge));
+  }, [nachfüllmenge]);
+
   return (
     <Pressable
       style={{
@@ -63,7 +69,7 @@ export default function OverviewWithQuantity({
       >
         <View>
           <Text style={[siteStyles.textStyle, { color: "white" }]}>
-            Aktuelle Menge vom Artikel: {menge}
+            Aktuelle Menge vom Artikel: {ausgabeMenge}
           </Text>
         </View>
 
@@ -89,8 +95,7 @@ export default function OverviewWithQuantity({
           <TouchableOpacity
             onPress={() => {
               if (Number(nachfüllmenge) != 0) {
-                setNachfüllmenge(nachfüllmenge - 1);
-                setMenge(Number(menge) - 1);
+                setNachfüllmenge(Number(nachfüllmenge) - 1);
               }
 
               //setShowValue(nachfüllmenge);
@@ -103,14 +108,23 @@ export default function OverviewWithQuantity({
           <TextInput
             style={siteStyles.inputStyle}
             value={String(nachfüllmenge)}
-            onChangeText={(text) => setNachfüllmenge(text)}
+            onChangeText={(text) => {
+              const cleanedText = text.replace(/[^0-9]/g, "");
+
+              if (cleanedText === "") {
+                setNachfüllmenge("");
+                return;
+              }
+
+              const newValue = Number(cleanedText);
+              setNachfüllmenge(newValue);
+            }}
             inputMode={"numeric"}
           ></TextInput>
 
           <TouchableOpacity
             onPress={() => {
-              setNachfüllmenge(nachfüllmenge + 1);
-              setMenge(Number(menge) + 1);
+              setNachfüllmenge(Number(nachfüllmenge) + 1);
             }}
             style={siteStyles.touchableStyle}
           >

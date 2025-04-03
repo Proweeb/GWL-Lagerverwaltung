@@ -50,6 +50,7 @@ export default function IndexScreen() {
       });
       console.log("Artikel existiert nicht");
       setShowMengeOverview(false);
+      setLoading(false);
     } else {
       console.log("Artikel gefunden!");
       //qconsole.log(dbArtikel);
@@ -75,6 +76,7 @@ export default function IndexScreen() {
       });
       console.log("Regal existiert nicht");
       setShowMengeOverview(false);
+      setLoading(false);
     } else {
       console.log("Regal gefunden!");
       //qconsole.log(dbArtikel);
@@ -104,6 +106,7 @@ export default function IndexScreen() {
         text2: "Artikel befindet sich nicht im Regal",
         position: "bottom",
       });
+      setLoading(false);
     }
   };
 
