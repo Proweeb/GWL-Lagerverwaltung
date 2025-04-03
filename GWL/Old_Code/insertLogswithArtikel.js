@@ -92,7 +92,6 @@ export async function testInsertAndFetch() {
     const regal = `${regale[i % regale.length]}.00${Math.floor(
       Math.random() * 9
     )}`;
-
     const artikel = await ArtikelService.createArtikel(
       {
         gwId: `${i + 1}`,
