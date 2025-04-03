@@ -4,6 +4,7 @@ import { Picker } from "@react-native-picker/picker";
 import { database } from "../../database/database";
 import { styles } from "../../components/styles";
 import Toast from "react-native-toast-message";
+import { RFPercentage } from "react-native-responsive-fontsize";
 
 const defaultSettings = {
   TriggerDB: "wöchentlich",
@@ -15,16 +16,16 @@ const defaultSettings = {
 export default function SettingsScreen() {
   const [settings, setSettings] = useState(defaultSettings);
   const triggerOptions = [
-    "dreiwöchentlich",
-    "zweiwöchentlich",
-    "monatlich",
-    "zweimonatlich",
+    "Alle 3 Wochen",
+    "Alle 2 Wochen",
+    "Monatlich",
+    "Alle 2 Monate",
   ];
 
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        console.log(await database.localStorage);
+      
         const storedSettings = await database.localStorage.get("settings");
         let parsedSettings = storedSettings ? JSON.parse(storedSettings) : {};
 
@@ -52,19 +53,18 @@ export default function SettingsScreen() {
     const newSettings = { ...settings, [key]: value, LastSendDB: Date.now() };
     setSettings(newSettings);
     await database.localStorage.set("settings", JSON.stringify(newSettings));
-    Toast.show({
-      text1: "Erfolgreich",
-      text2: "Erfolgreich Einstellungen geändert",
-    });
+  
   };
 
   return (
     <View style={{flex:1,backgroundColor: styles.backgroundColor }}>
       <View style={localStyles.settingsContainer}>
-        <Text style={localStyles.settingsTitle}>Einstellungen</Text>
-
+     
+ 
+    
         <View style={localStyles.settingSection}>
-          <Text style={localStyles.settingLabel}>Trigger DB:</Text>
+    
+        <Text style={{ fontSize: RFPercentage(1.8) }}>Wann soll die Datenbank verschickt werden?</Text>
           <View style={localStyles.pickerContainer}>
             <Picker
               selectedValue={settings.TriggerDB}
@@ -84,10 +84,10 @@ export default function SettingsScreen() {
               ))}
             </Picker>
           </View>
-        </View>
 
-        <View style={localStyles.settingSection}>
-          <Text style={localStyles.settingLabel}>Trigger Track List:</Text>
+          <View style={localStyles.internalDivider} />
+
+          <Text style={{ fontSize: RFPercentage(1.8) }}>Wann soll die Trackliste verschickt werden?</Text>
           <View style={localStyles.pickerContainer}>
             <Picker
               selectedValue={settings.TriggerTrackList}
@@ -107,13 +107,17 @@ export default function SettingsScreen() {
               ))}
             </Picker>
           </View>
-        </View>
-
-        <Button
+       <View style={localStyles.buttonContainer}>
+        <Button  
           title="Auf Standardwerte zurücksetzen"
           onPress={() => updateSetting("TriggerDB", "wöchentlich")}
-          color={localStyles.primaryColor}
+          color={styles.blue}
         />
+       </View>
+        </View>
+
+        
+     
       </View>
     </View>
   );
@@ -125,34 +129,57 @@ const localStyles = StyleSheet.create({
     flex: 1,
   },
   settingsTitle: {
-   
+    fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 20,
+    marginBottom: 10,
     color: styles.textColor,
   },
   settingSection: {
     marginBottom: 20,
+    backgroundColor: styles.backgroundColor,
+    padding: 15,
+    borderRadius: 10,
   },
   settingLabel: {
     fontSize: 16,
     marginBottom: 8,
     color: styles.textColor,
+
   },
   pickerContainer: {
-    borderWidth: 1,
-    borderColor: styles.borderColor,
     borderRadius: 8,
-    backgroundColor: styles.backgroundColor,
     overflow: 'hidden',
+    elevation: 4,
+    backgroundColor: styles.white,
+   
   },
   picker: {
     height: 50,
     width: '100%',
+    backgroundColor: styles.white,
+    color: styles.textColor,
   },
   pickerItem: {
     fontSize: 16,
     padding: 10,
-    backgroundColor: styles.backgroundColor,
+    backgroundColor: styles.white,
     color: styles.textColor,
+  },
+  divider: {
+    height: 2,
+    backgroundColor: styles.primaryColor,
+    marginVertical: 20,
+    opacity: 0.5,
+  },
+  primaryColor: {
+    backgroundColor: styles.primaryColor,
+  },
+  internalDivider: {
+    height: 1,
+    backgroundColor: styles.borderColor,
+    marginVertical: 15,
+  },
+  buttonContainer: {
+    marginTop: 20,
   },
 });
