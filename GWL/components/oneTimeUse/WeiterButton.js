@@ -10,10 +10,10 @@ const WeiterButton = ({ onPress }) => {
         padding: 10,
         borderRadius: 5,
         height: 50,
+        width: 100,
         alignItems: "center",
         justifyContent: "center",
-        marginBottom: 10,
-        width: "auto",
+        opacity: 1,
       }}
     >
       <Text style={{ color: "#30A6DE", fontSize: 20 }}>Weiter</Text>

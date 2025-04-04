@@ -72,13 +72,6 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
 
   const handleResetInventory = async () => {
     try {
-      await LogService.createLog(
-        {
-          beschreibung: "Inventur Abgebrochen",
-        },
-        null,
-        null
-      );
       setChangedMenge({});
       setResetModalVisible(false);
       navigation.navigate("Tabs", {
@@ -102,24 +95,25 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
         alignItems: "center",
       }}
     >
-      <TouchableOpacity
+      <View
         style={{
-          position: "absolute",
-          top: 20,
-          right: 20,
-          zIndex: 1,
-          padding: 10,
-        }}
-        onPress={() => {
-          setResetModalVisible(true);
+          width: "95%",
+          borderRadius: 20,
+          marginTop: 10,
         }}
       >
-        <MaterialIcons name="cancel" size={24} color={"red"} />
-      </TouchableOpacity>
-
-      <View style={{ width: "95%", borderRadius: 20, marginTop: 40 }}>
-        <View style={{ paddingLeft: 20 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            paddingHorizontal: 20,
+          }}
+        >
           <Text style={styles.subHeader}>GWID</Text>
+          <TouchableOpacity onPress={() => setResetModalVisible(true)}>
+            <MaterialIcons name="cancel" size={24} color={styles.textColor} />
+          </TouchableOpacity>
         </View>
         <SearchBar
           gwId={gwId}
@@ -146,7 +140,7 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
         />
       </View>
 
-      <View style={{ alignItems: "center", marginBottom: 20 }}>
+      <View style={{ alignItems: "center", marginBottom: 5 }}>
         <WeiterButton
           onPress={() => {
             navigation.navigate("Tabs", {

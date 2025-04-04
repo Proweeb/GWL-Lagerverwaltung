@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, Modal, TouchableOpacity, Alert } from "react-native";
 import { styles } from "../../../components/styles.js";
 import ArtikelVorschau from "../../../components/oneTimeUse/ArtikelVorschau.js";
+import ActionButton from "../../../components/Buttons/ActionsButton.js";
 import ZurückButton from "../../../components/oneTimeUse/ZurückButton.js";
 import FertigButton from "../../../components/utils/FertigButton.js";
 import * as FileSystem from "expo-file-system";
@@ -15,12 +16,15 @@ import ConfirmPopup from "../../../components/Modals/ConfirmPopUp.js";
 import { database } from "../../../database/database.js";
 import { Q } from "@nozbe/watermelondb/index.js";
 import Toast from "react-native-toast-message";
+import * as Progress from "react-native-progress";
 
 const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
   const [artikelList, setArtikelList] = useState([]);
   const [isScanning, setIsScanning] = useState(false);
+  const [loadingBar, setLoadingBar] = useState();
+  const [loadingVisible, setLoadingVisible] = useState(false);
 
   useEffect(() => {
     const fetchArtikel = async () => {
@@ -157,10 +161,12 @@ const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
   };
 
   const handleConfirm = async () => {
-    setModalVisible(false);
+    setLoadingVisible(true);
     try {
       await handleUpdateMenge();
+      setLoadingBar(0.4);
       await handleGesamtmenge();
+      setLoadingBar(1);
       await handleExportToEmail();
       setChangedMenge({});
 
@@ -205,17 +211,23 @@ const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
           flexDirection: "row",
           justifyContent: "center",
           alignItems: "center",
+          marginBottom: 5,
         }}
       >
-        <ZurückButton
-          onPress={() =>
+        <ActionButton
+          isDone={false}
+          CancelCallBack={() =>
             navigation.navigate("Tabs", {
               screen: "Inventur",
               params: { screen: "inventurscreen" },
             })
           }
         />
-        <FertigButton onPress={() => setModalVisible(true)} />
+        <View style={{ width: 25 }}></View>
+        <ActionButton
+          isDone={true}
+          FertigCallBack={() => setModalVisible(true)}
+        />
       </View>
 
       <Modal
@@ -224,19 +236,37 @@ const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <ConfirmPopup
-          colorCallback={handleConfirm}
-          greyCallback={() => {
-            Toast.show({
-              type: "warning",
-              text1: "Inventur",
-              text2: "Inventur wurde abgebrochen.",
-              position: "bottom",
-            });
-            setModalVisible(false);
-          }}
-          text={"Sind Sie sicher, dass Sie die Inventur abschließen möchten?"}
-        />
+        {loadingVisible ? (
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "rgba(0,0,0,0.5)",
+            }}
+          >
+            <Progress.Bar
+              progress={loadingBar}
+              width={100}
+              height={8}
+              color="#dcebf9"
+            />
+          </View>
+        ) : (
+          <ConfirmPopup
+            colorCallback={handleConfirm}
+            greyCallback={() => {
+              Toast.show({
+                type: "warning",
+                text1: "Inventur",
+                text2: "Inventur wurde abgebrochen.",
+                position: "bottom",
+              });
+              setModalVisible(false);
+            }}
+            text={"Sind Sie sicher, dass Sie die Inventur abschließen möchten?"}
+          />
+        )}
       </Modal>
     </View>
   );

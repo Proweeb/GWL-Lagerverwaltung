@@ -6,15 +6,18 @@ const InventurButton = ({ onPress }) => {
     <TouchableOpacity
       onPress={onPress}
       style={{
-        backgroundColor: "#30A6DE",
-        padding: 15,
-        borderRadius: 10,
+        backgroundColor: "#dcebf9",
+        padding: 10,
+        borderRadius: 5,
+        height: 50,
+        width: "auto",
         alignItems: "center",
         justifyContent: "center",
+        opacity: 1,
         top: "45%",
       }}
     >
-      <Text style={{ color: "white", fontSize: 18 }}>Inventur starten</Text>
+      <Text style={{ color: "#30A6DE", fontSize: 20 }}>Inventur starten</Text>
     </TouchableOpacity>
   );
 };

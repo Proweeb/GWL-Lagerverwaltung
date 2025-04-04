@@ -66,7 +66,7 @@ const InventoryItem = ({ item, changedMenge, setChangedMenge }) => {
             }}
           >
             <TextInput
-              style={[styles.subHeader, { marginBottom: 0, width: "80%" }]}
+              style={[styles.subHeader, { marginBottom: 0, width: "100%" }]}
               keyboardType="numeric"
               value={localmenge}
               onChangeText={(text) => {

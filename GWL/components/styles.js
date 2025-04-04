@@ -123,7 +123,7 @@ export const styles = {
   // Light
   lightLightBlue: "#70BBDF33",
   lightBlue: "#70BBDF",
-  lightGreen: "#D9FFE9",
+  lightGreen: "#CDEEC6",
   lightYellow: "#FFE9C7",
   lightRed: "#FFDADB",
 

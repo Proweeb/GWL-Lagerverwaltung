@@ -6,6 +6,7 @@ import { useNavigation } from "@react-navigation/native";
 import LogService from "../../../database/datamapper/LogHelper";
 import ConfirmPopup from "../../../components/Modals/ConfirmPopUp";
 import Toast from "react-native-toast-message";
+import { logTypes } from "../../../components/enum";
 
 const InventurStartScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -39,7 +40,7 @@ const InventurStartScreen = () => {
               });
               await LogService.createLog(
                 {
-                  beschreibung: "Inventur gestartet",
+                  beschreibung: logTypes.StartInventur,
                 },
                 null,
                 null
