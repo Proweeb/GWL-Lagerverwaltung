@@ -1,20 +1,11 @@
-import { Text, View, ScrollView, Modal } from "react-native";
+import { View, Modal, Keyboard } from "react-native";
 import { styles } from "../../../components/styles";
-import TextInputField from "../../../components/utils/TextInputs/textInputField";
-import ArticleMenu from "../../../components/utils/InputMenus/articleMenu";
 import { useState, useEffect } from "react";
-import { TouchableOpacity } from "react-native-gesture-handler";
-import { RFPercentage } from "react-native-responsive-fontsize";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import Feather from "@expo/vector-icons/Feather";
 import ArticleTextInput from "../artikelNachfüllen/articleTextInput.js";
 import RegalTextInput from "../artikelNachfüllen/regalTextInput.js";
-import { Alert } from "react-native";
 import OverviewWithQuantity from "./overviewWithQuantity.js";
 import ActionButton from "../../../components/Buttons/ActionsButton.js";
-import ArtikelService from "../../../database/datamapper/ArtikelHelper.js";
-import { Keyboard } from "react-native";
-import RegalService from "../../../database/datamapper/RegalHelper.js";
 import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper";
 import Toast from "react-native-toast-message";
 import * as Progress from "react-native-progress";
@@ -26,98 +17,34 @@ export default function IndexScreen() {
   const [regalId, setRegalId] = useState("");
   const [menge, setMenge] = useState(0);
   const [showMengeOverview, setShowMengeOverview] = useState(false);
-  const [foundArticle, setFoundArticle] = useState(null);
-  const [foundRegal, setFoundRegal] = useState(null);
-  const [dbArtikel, setDbArtikel] = useState("-1");
-  const [dbRegal, setDbRegal] = useState("-1");
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (!showMengeOverview) {
-      setLoading(false);
-    }
-  }, [showMengeOverview]);
+  const navigation = useNavigation();
+  const route = useRoute();
+  const passedGwId = route.params?.gwId;
+  const passedRegalId = route.params?.regalId;
 
   useEffect(() => {
-    if (dbArtikel === "-1") {
-      return;
+    if (passedGwId) {
+      setGwId(passedGwId);
     }
-    if (!dbArtikel) {
-      Toast.show({
-        type: "error",
-        text1: "Artikel",
-        text2: "Existiert nicht",
-        position: "bottom",
-      });
-      console.log("Artikel existiert nicht");
-      setShowMengeOverview(false);
-      setLoading(false);
-    } else {
-      console.log("Artikel gefunden!");
-      //qconsole.log(dbArtikel);
-      setFoundArticle(dbArtikel);
-      if (dbRegal && dbArtikel) {
-        checkArticleInRegal();
-      }
-      Keyboard.dismiss();
-      setDbArtikel("-1");
+    if (passedRegalId) {
+      setRegalId(passedRegalId);
+      setRegalIdValid(true);
     }
-  }, [dbArtikel]);
+  }, [passedGwId, passedRegalId]);
 
-  useEffect(() => {
-    if (dbRegal === "-1") {
-      return;
-    }
-    if (!dbRegal) {
-      Toast.show({
-        type: "error",
-        text1: "Regal",
-        text2: "Existiert nicht",
-        position: "bottom",
-      });
-      console.log("Regal existiert nicht");
-      setShowMengeOverview(false);
-      setLoading(false);
-    } else {
-      console.log("Regal gefunden!");
-      //qconsole.log(dbArtikel);
-      setFoundRegal(dbRegal);
-      if (dbRegal && dbArtikel) {
-        checkArticleInRegal();
-      }
-      Keyboard.dismiss();
-      setDbRegal("-1");
-    }
-  }, [dbRegal]);
-
-  const checkArticleInRegal = async () => {
+  const handleSearch = async () => {
     try {
-      articleInRegal =
-        await ArtikelBesitzerService.getArtikelOwnersByGwIdAndRegalId(
-          gwId,
-          regalId
-        );
+      setLoading(true);
+      const articleInRegal = await ArtikelBesitzerService.getArtikelOwnersByGwIdAndRegalId(
+        gwId,
+        regalId
+      );
 
       setMenge(articleInRegal[0].menge);
       setShowMengeOverview(true);
-    } catch (error) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Artikel befindet sich nicht im Regal",
-        position: "bottom",
-      });
-      setLoading(false);
-    }
-  };
-
-  const handleSearch = async () => {
-    console.log("Alle Felder sind befüllt:", gwId);
-
-    try {
-      setLoading(true);
-      setDbArtikel(await ArtikelService.getArtikelById(gwId));
-      setDbRegal(await RegalService.getRegalById(regalId));
+      Keyboard.dismiss();
     } catch (error) {
       if (error.message === ErrorMessages.ARTICLE_NOT_FOUND) {
         Toast.show({
@@ -133,6 +60,13 @@ export default function IndexScreen() {
           text2: "Existiert nicht",
           position: "bottom",
         });
+      } else if (error.message === ErrorMessages.ARTIKELBESITZER_NOT_FOUND) {
+        Toast.show({
+          type: "error",
+          text1: "Error",
+          text2: "Artikel befindet sich nicht im Regal",
+          position: "bottom",
+        });
       } else {
         Toast.show({
           type: "error",
@@ -141,24 +75,11 @@ export default function IndexScreen() {
           position: "bottom",
         });
       }
+    } finally {
       setLoading(false);
     }
   };
 
-  const navigation = useNavigation();
-  const route = useRoute();
-  const passedGwId = route.params?.gwId;
-  const passedRegalId = route.params?.regalId;
-  useEffect(() => {
-    if (passedGwId) {
-      setGwId(passedGwId);
-    }
-
-    if (passedRegalId) {
-      setRegalId(passedRegalId);
-      setRegalIdValid(true);
-    }
-  });
   return (
     <View
       style={{
@@ -206,10 +127,9 @@ export default function IndexScreen() {
       >
         <OverviewWithQuantity
           menge={menge}
-          setMenge={setMenge}
           setShowMengeOverview={setShowMengeOverview}
-          foundArticle={foundArticle}
-          foundRegal={foundRegal}
+          gwId={gwId}
+          regalId={regalId}
           setRegalId={setRegalId}
           setGwId={setGwId}
         />

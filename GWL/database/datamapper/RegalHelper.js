@@ -7,7 +7,7 @@ async function createRegal(regalData) {
   return database.write(async () => {
     const existingRegal = await database
       .get("regale")
-      .query(Q.where("regalId", regalData.regalId))
+      .query(Q.where("regal_id", regalData.regalId))
       .fetch();
 
     if (existingRegal.length > 0) {

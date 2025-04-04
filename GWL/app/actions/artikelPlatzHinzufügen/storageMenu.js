@@ -27,24 +27,7 @@ export default function Storagemenu({
         margin: 10,
       }}
     >
-      <Text style={{ fontSize: RFPercentage(1.8) }}>Regal Name*</Text>
-      <TextInputField
-        value={formData.regalname}
-        onChangeText={(text) =>
-          setFormData((prevData) => ({ ...prevData, regalname: text }))
-        }
-      />
-
-      <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>
-        Fach Name*
-      </Text>
-      <TextInputField
-        value={formData.fachname}
-        onChangeText={(text) =>
-          setFormData((prevData) => ({ ...prevData, fachname: text }))
-        }
-      />
-
+      
       <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>
         Regal-ID*
       </Text>
@@ -118,6 +101,24 @@ export default function Storagemenu({
           />
         </TouchableOpacity>
       </View>
+      <Text style={{ fontSize: RFPercentage(1.8) }}>Regal Name*</Text>
+      <TextInputField
+        value={formData.regalname}
+        onChangeText={(text) =>
+          setFormData((prevData) => ({ ...prevData, regalname: text }))
+        }
+      />
+
+      <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>
+        Fach Name*
+      </Text>
+      <TextInputField
+        value={formData.fachname}
+        onChangeText={(text) =>
+          setFormData((prevData) => ({ ...prevData, fachname: text }))
+        }
+      />
+
     </View>
   );
 }

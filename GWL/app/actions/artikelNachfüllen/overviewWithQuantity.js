@@ -1,54 +1,85 @@
-import { Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View, Pressable } from "react-native";
 import { styles } from "../../../components/styles";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TextInput } from "react-native-gesture-handler";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import Feather from "@expo/vector-icons/Feather";
-import { Pressable } from "react-native";
-import ArtikelService from "../../../database/datamapper/ArtikelHelper";
-import LogService from "../../../database/datamapper/LogHelper";
 import Toast from "react-native-toast-message";
 import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper";
-import { useEffect } from "react";
+import ArtikelService from "../../../database/datamapper/ArtikelHelper";
+
 export default function OverviewWithQuantity({
   menge,
   setShowMengeOverview,
-  foundArticle,
-  foundRegal,
+  gwId,
+  regalId,
   setRegalId,
   setGwId,
 }) {
   const [nachfüllmenge, setNachfüllmenge] = useState(0);
   const [ausgabeMenge, setAusgabeMenge] = useState(menge);
+  const [articleDescription, setArticleDescription] = useState("");
 
-  const handleFertig = async () => {
-    setShowMengeOverview(false);
-    if (nachfüllmenge == "") {
-      setNachfüllmenge(0);
-    }
-
-    //Regal Id muss hier noch rein gehören also beim nachfüllen und entnehmen braucht man die RegalID
-    await ArtikelBesitzerService.updateArtikelBesitzerMengeByGwIdAndRegalId(
-      {
-        menge: nachfüllmenge,
-      },
-      foundRegal.regalId,
-      foundArticle.gwId
-    );
-
-    setRegalId("");
-    setGwId("");
-    Toast.show({
-      type: "success",
-      text1: "Artikel: " + foundArticle.beschreibung,
-      text2: "Neue Menge: " + (Number(menge) + Number(nachfüllmenge)),
-      position: "top",
-    });
-  };
+  useEffect(() => {
+    const fetchArticleDescription = async () => {
+      try {
+        const article = await ArtikelService.getArtikelById(gwId);
+        setArticleDescription(article.beschreibung);
+      } catch (error) {
+        console.error("Error fetching article description:", error);
+      }
+    };
+    fetchArticleDescription();
+  }, [gwId]);
 
   useEffect(() => {
     setAusgabeMenge(Number(menge) + Number(nachfüllmenge));
-  }, [nachfüllmenge]);
+  }, [nachfüllmenge, menge]);
+
+  const handleFertig = async () => {
+    try {
+      setShowMengeOverview(false);
+      
+      if (nachfüllmenge === "") {
+        setNachfüllmenge(0);
+      } else {
+        await ArtikelBesitzerService.updateArtikelBesitzerMengeByGwIdAndRegalId(
+          { menge: nachfüllmenge },
+          regalId,
+          gwId
+        );
+
+        Toast.show({
+          type: "success",
+          text1: `Artikel: ${articleDescription}`,
+          text2: `Neue Menge: ${Number(menge) + Number(nachfüllmenge)}`,
+          position: "top",
+        });
+
+        setRegalId("");
+        setGwId("");
+      }
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Fehler beim Aktualisieren der Menge",
+        position: "bottom",
+      });
+    }
+  };
+
+  const handleMengeChange = (text) => {
+    const cleanedText = text.replace(/[^0-9]/g, "");
+
+    if (cleanedText === "") {
+      setNachfüllmenge("");
+      return;
+    }
+
+    const newValue = Number(cleanedText);
+    setNachfüllmenge(newValue);
+  };
 
   return (
     <Pressable
@@ -59,9 +90,7 @@ export default function OverviewWithQuantity({
         flex: 1,
         opacity: 0.8,
       }}
-      onPress={() => {
-        setShowMengeOverview(false);
-      }}
+      onPress={() => setShowMengeOverview(false)}
     >
       <View
         style={{
@@ -97,11 +126,9 @@ export default function OverviewWithQuantity({
         >
           <TouchableOpacity
             onPress={() => {
-              if (Number(nachfüllmenge) != 0) {
+              if (Number(nachfüllmenge) > 0) {
                 setNachfüllmenge(Number(nachfüllmenge) - 1);
               }
-
-              //setShowValue(nachfüllmenge);
             }}
             style={siteStyles.touchableStyle}
           >
@@ -111,19 +138,9 @@ export default function OverviewWithQuantity({
           <TextInput
             style={siteStyles.inputStyle}
             value={String(nachfüllmenge)}
-            onChangeText={(text) => {
-              const cleanedText = text.replace(/[^0-9]/g, "");
-
-              if (cleanedText === "") {
-                setNachfüllmenge("");
-                return;
-              }
-
-              const newValue = Number(cleanedText);
-              setNachfüllmenge(newValue);
-            }}
-            inputMode={"numeric"}
-          ></TextInput>
+            onChangeText={handleMengeChange}
+            inputMode="numeric"
+          />
 
           <TouchableOpacity
             onPress={() => {

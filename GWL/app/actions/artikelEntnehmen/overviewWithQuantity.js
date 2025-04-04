@@ -1,46 +1,63 @@
-import { Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View, Pressable } from "react-native";
 import { styles } from "../../../components/styles";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TextInput } from "react-native-gesture-handler";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import Feather from "@expo/vector-icons/Feather";
-import { Pressable } from "react-native";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper";
-import LogService from "../../../database/datamapper/LogHelper";
 import Toast from "react-native-toast-message";
 import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper";
-import { useEffect } from "react";
-import { setGenerator } from "@nozbe/watermelondb/utils/common/randomId";
 
 export default function OverviewWithQuantity({
   menge,
   setShowMengeOverview,
-  foundArticle,
-  foundRegal,
+  gwId,
+  regalId,
   setRegalId,
   setGwId,
 }) {
   const [entnahmeMenge, setEntnahmeMenge] = useState(0);
   const [ausgabeMenge, setAusgabeMenge] = useState(menge);
+  const [foundArticle, setFoundArticle] = useState(null);
+
+  useEffect(() => {
+    const fetchArticle = async () => {
+      try {
+        const article = await ArtikelService.getArtikelById(gwId);
+        setFoundArticle(article);
+      } catch (error) {
+        Toast.show({
+          type: "error",
+          text1: "Error",
+          text2: "Fehler beim Laden des Artikels",
+          position: "bottom",
+        });
+      }
+    };
+    fetchArticle();
+  }, [gwId]);
+
+  useEffect(() => {
+    setAusgabeMenge(Number(menge) - Number(entnahmeMenge));
+  }, [entnahmeMenge, menge]);
+
   const showLowMenge = () => {
+    if (!foundArticle) return;
+
     if (menge === 0) {
-      console.log("low");
       Toast.show({
         type: "error",
-        text1: "Artikel: " + foundArticle.beschreibung,
+        text1: `Artikel: ${foundArticle.beschreibung}`,
         text2: "Leer",
         position: "bottom",
         autoHide: false,
         topOffset: 50,
         swipeable: true,
       });
-
-      return 0;
     } else if (menge < foundArticle.mindestMenge) {
-      console.log("low");
       Toast.show({
         type: "warning",
-        text1: "Artikel: " + foundArticle.beschreibung,
+        text1: `Artikel: ${foundArticle.beschreibung}`,
         text2: "Wenig",
         position: "bottom",
         autoHide: false,
@@ -50,33 +67,56 @@ export default function OverviewWithQuantity({
     }
   };
 
-  useEffect(() => {
-    setAusgabeMenge(Number(menge) - Number(entnahmeMenge));
-  }, [entnahmeMenge]);
-
   const handleFertig = async () => {
-    setShowMengeOverview(false);
-    if (entnahmeMenge === "") {
-      setEntnahmeMenge(0);
+    try {
+      setShowMengeOverview(false);
+      
+      if (entnahmeMenge === "") {
+        setEntnahmeMenge(0);
+      } else {
+        await ArtikelBesitzerService.updateArtikelBesitzerMengeByGwIdAndRegalId(
+          { menge: entnahmeMenge * -1 },
+          regalId,
+          gwId
+        );
+
+        Toast.show({
+          type: "success",
+          text1: `Artikel: ${foundArticle.beschreibung}`,
+          text2: `Neue Menge: ${Number(menge) - Number(entnahmeMenge)}`,
+          position: "top",
+        });
+
+        setRegalId("");
+        setGwId("");
+        showLowMenge();
+      }
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Fehler beim Aktualisieren der Menge",
+        position: "bottom",
+      });
+    }
+  };
+
+  const handleMengeChange = (text) => {
+    const cleanedText = text.replace(/[^0-9]/g, "");
+
+    if (cleanedText === "") {
+      setEntnahmeMenge("");
+      return;
     }
 
-    //Regal Id muss hier noch rein gehören also beim nachfüllen und entnehmen braucht man die RegalID
-    await ArtikelBesitzerService.updateArtikelBesitzerMengeByGwIdAndRegalId(
-      {
-        menge: entnahmeMenge * -1,
-      },
-      foundRegal.regalId,
-      foundArticle.gwId
-    );
-    setRegalId("");
-    setGwId("");
-    Toast.show({
-      type: "success",
-      text1: "Artikel: " + foundArticle.beschreibung,
-      text2: "Neue Menge: " + (Number(menge) - Number(entnahmeMenge)),
-      position: "top",
-    });
+    const newValue = Number(cleanedText);
+    if (newValue > menge) {
+      setEntnahmeMenge(Number(menge));
+    } else {
+      setEntnahmeMenge(newValue);
+    }
   };
+
   return (
     <Pressable
       style={{
@@ -86,9 +126,7 @@ export default function OverviewWithQuantity({
         flex: 1,
         opacity: 0.8,
       }}
-      onPress={() => {
-        setShowMengeOverview(false);
-      }}
+      onPress={() => setShowMengeOverview(false)}
     >
       <View
         style={{
@@ -126,7 +164,6 @@ export default function OverviewWithQuantity({
             onPress={() => {
               if (Number(entnahmeMenge) > 0) {
                 setEntnahmeMenge(Number(entnahmeMenge) - 1);
-                //setMenge(Number(menge) + 1);
               }
             }}
             style={siteStyles.touchableStyle}
@@ -137,39 +174,15 @@ export default function OverviewWithQuantity({
           <TextInput
             style={siteStyles.inputStyle}
             value={String(entnahmeMenge)}
-            onChangeText={(text) => {
-              const cleanedText = text.replace(/[^0-9]/g, "");
-
-              if (cleanedText === "") {
-                setEntnahmeMenge("");
-                //setMenge(Number(menge));
-                return;
-              }
-
-              const newValue = Number(cleanedText);
-
-              if (newValue > menge) {
-                setEntnahmeMenge(Number(menge));
-                //setMenge(0);
-              } else {
-                setEntnahmeMenge(newValue);
-                //setMenge(Number(menge) - newValue);
-              }
-            }}
-            inputMode={"numeric"}
+            onChangeText={handleMengeChange}
+            inputMode="numeric"
           />
 
           <TouchableOpacity
             onPress={() => {
-              if (
-                Number(menge) !== 0 &&
-                Number(entnahmeMenge) < Number(menge)
-              ) {
+              if (Number(menge) !== 0 && Number(entnahmeMenge) < Number(menge)) {
                 setEntnahmeMenge(Number(entnahmeMenge) + 1);
-                //setMenge(Number(menge) - 1);
               }
-
-              //setShowValue(nachfüllmenge);
             }}
             style={siteStyles.touchableStyle}
           >
@@ -195,9 +208,7 @@ export default function OverviewWithQuantity({
               justifyContent: "center",
               elevation: 5,
             }}
-            onPress={() => {
-              handleFertig(), showLowMenge();
-            }}
+            onPress={handleFertig}
           >
             <Text style={{ fontSize: RFPercentage(3.5) }}>Fertig</Text>
           </TouchableOpacity>
