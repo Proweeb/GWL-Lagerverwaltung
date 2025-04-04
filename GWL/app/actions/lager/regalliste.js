@@ -2,7 +2,7 @@ import { Text, View, TouchableOpacity, Modal } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { styles } from "../../../components/styles";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
-import { useState, useEffect } from "react";
+import { useState, useEffect, act } from "react";
 import { StyleSheet } from "react-native";
 import RegalService from "../../../database/datamapper/RegalHelper";
 import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper";
@@ -225,11 +225,12 @@ const RegallisteScreen = () => {
           cancelButtonText="Abbrechen"
           greenButtonText="Nachfüllen"
           redButtonText="Löschen"
-          yellowButtonText="Bearbeiten"
+          yellowButtonText="Entnehmen"
           yellowCallback={() => {
-            navigation.navigate("Bearbeiten", {
-              gwId: action.gwId,
-              regalId: action.regalId,
+        
+            navigation.navigate("Actions", {
+              screen: "ArtikelEntnehmenNavigator",
+              params: { screen: "index", params: action },
             });
             setAction(null);
           }}

@@ -191,7 +191,7 @@ const WarenScreen = () => {
       >
         <CustomPopup
           cancelButtonText="Abbrechen"
-          greenButtonText="Nachfüllen"
+    
           redButtonText="Löschen"
           yellowButtonText="Bearbeiten"
           yellowCallback={() => {
@@ -201,13 +201,6 @@ const WarenScreen = () => {
               setAction(null);
           }}
           cancelCallback={() => setAction(null)}
-          greenCallBack={() => {
-            navigation.navigate("Actions", {
-              screen: "ArtikelNachfüllenNavigator",
-              params: { screen: "ArtikelNachfüllen", params: action },
-            });
-            setAction(null);
-          }}
           redCallback={() => {
             setConfirm(action);
             setAction(null);

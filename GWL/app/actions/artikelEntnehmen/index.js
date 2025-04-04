@@ -25,6 +25,7 @@ export default function IndexScreen() {
   const passedRegalId = route.params?.regalId;
 
   useEffect(() => {
+ 
     if (passedGwId) {
       setGwId(passedGwId);
     }
@@ -110,7 +111,9 @@ export default function IndexScreen() {
             isDone={gwId.length > 0 && regalIdValid}
             FertigCallBack={handleSearch}
             CancelCallBack={() => {
-              navigation.navigate("Home");
+              if (navigation.canGoBack()) {
+                navigation.goBack();
+              }
             }}
           />
         )}

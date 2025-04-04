@@ -110,7 +110,9 @@ export default function IndexScreen() {
             isDone={gwId.length > 0 && regalIdValid}
             FertigCallBack={handleSearch}
             CancelCallBack={() => {
-              navigation.navigate("Home");
+              if (navigation.canGoBack()) {
+                navigation.goBack();
+              }
             }}
           />
         )}
