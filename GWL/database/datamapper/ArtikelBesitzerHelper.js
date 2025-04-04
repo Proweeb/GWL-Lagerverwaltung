@@ -3,7 +3,7 @@ import { Q } from "@nozbe/watermelondb";
 import ArtikelService from "./ArtikelHelper";
 import RegalService from "./RegalHelper";
 import LogService from "./LogHelper";
-import { logTypes } from "../../components/enum";
+import { ErrorMessages, logTypes } from "../../components/enum";
 
 async function createArtikelOwner(artikelOwnerData, artikelId, regalId) {
   let artikel = null;
@@ -11,6 +11,10 @@ async function createArtikelOwner(artikelOwnerData, artikelId, regalId) {
 
   if (artikelId !== null) {
     artikel = await ArtikelService.getArtikelById(artikelId);
+
+    if (!artikel) {
+      throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
+    }
     await ArtikelService.updateArtikel(artikelId, {
       menge: Number(artikelOwnerData.menge),
     });
@@ -18,6 +22,10 @@ async function createArtikelOwner(artikelOwnerData, artikelId, regalId) {
 
   if (regalId !== null) {
     regal = await RegalService.getRegalById(regalId);
+
+    if (!regal) {
+      throw new Error(ErrorMessages.REGAL_NOT_FOUND);
+    }
   }
 
   let text;
@@ -55,11 +63,14 @@ async function getAllArtikelOwners() {
 
 async function getArtikelOwnerByGwId(gwId) {
   const artikel = await ArtikelService.getArtikelById(gwId);
+
+  if (!artikel) {
+    throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
+  }
   const artikelOwners = await database
     .get("artikel_besitzer")
     .query(Q.where("gw_id", artikel.id))
     .fetch();
-  console.log(artikelOwners);
   return artikelOwners;
 }
 
@@ -68,6 +79,13 @@ async function deleteArtikelOwner(gwId, regalId) {
     const artikel = await ArtikelService.getArtikelById(gwId);
     const regal = await RegalService.getRegalById(regalId);
 
+    if (!artikel) {
+      throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
+    }
+
+    if (!regal) {
+      throw new Error(ErrorMessages.REGAL_NOT_FOUND);
+    }
     const artikelOwner = await database
       .get("artikel_besitzer")
       .query(Q.where("gw_id", artikel.id), Q.where("regal_id", regal.id))
@@ -80,9 +98,12 @@ async function deleteArtikelOwner(gwId, regalId) {
 }
 
 async function deleteArtikelOwnerByArtikelId(gwId) {
-  return database.write(async () => {
-    const artikel = await ArtikelService.getArtikelById(gwId);
+  const artikel = await ArtikelService.getArtikelById(gwId);
+  if (!artikel) {
+    throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
+  }
 
+  return database.write(async () => {
     const artikelOwner = await database
       .get("artikel_besitzer")
       .query(Q.where("gw_id", artikel.id))
@@ -98,7 +119,15 @@ async function deleteArtikelOwnerByArtikelId(gwId) {
 
 async function deleteArtikelOwnerByArtikelIdAndRegalId(gwId, regalId) {
   const artikel = await ArtikelService.getArtikelById(gwId);
+
   const regal = await RegalService.getRegalById(regalId);
+
+  if (!artikel) {
+    throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
+  }
+  if (!regal) {
+    throw new Error(ErrorMessages.REGAL_NOT_FOUND);
+  }
 
   await database.write(async () => {
     const artikelOwner = await database
@@ -108,6 +137,10 @@ async function deleteArtikelOwnerByArtikelIdAndRegalId(gwId, regalId) {
         Q.where("regal_id", regal.id)
       )
       .fetch();
+
+    if (artikelOwner.length < 1) {
+      throw new Error(ErrorMessages.ARTIKELBESITZER_NOT_FOUND);
+    }
 
     if (artikelOwner[0].menge > 0) {
       await database.get("logs").create((log) => {
@@ -120,7 +153,7 @@ async function deleteArtikelOwnerByArtikelIdAndRegalId(gwId, regalId) {
       });
     }
     await artikel.update((artikel) => {
-      artikel.menge -= artikelOwner.menge;
+      artikel.menge -= artikelOwner[0].menge;
     });
     if (artikelOwner.length > 0) {
       await database.batch(
@@ -131,23 +164,31 @@ async function deleteArtikelOwnerByArtikelIdAndRegalId(gwId, regalId) {
 }
 async function getArtikelOwnersByRegalId(regalId) {
   const regal = await RegalService.getRegalById(regalId);
+  if (!regal) {
+    throw new Error(ErrorMessages.REGAL_NOT_FOUND);
+  }
   return await regal.artikelBesitzer.fetch();
 }
 
-async function updateArtikelBesitzerByGwIdAndRegalId(
+async function inventurUpdateArtikelBesitzerByGwIdAndRegalId(
   updatedArtikelBesitzer,
   regalId,
   gwId
 ) {
   const artikelId = await ArtikelService.getArtikelById(gwId);
   const newRegalId = await RegalService.getRegalById(regalId);
+  if (!artikelId) {
+    throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
+  }
+  if (!newRegalId) {
+    throw new Error(ErrorMessages.REGAL_NOT_FOUND);
+  }
   const artikelBesitzer = await database
     .get("artikel_besitzer")
     .query(Q.where("gw_id", artikelId.id), Q.where("regal_id", newRegalId.id)) // Ensure "gwId" matches your schema
     .fetch();
-  if (!artikelBesitzer.length) {
-    console.error("ArtikelBesitzer not found for gwId:", gwId);
-    return;
+  if (artikelBesitzer.length < 1) {
+    throw new Error(ErrorMessages.ARTIKELBESITZER_NOT_FOUND);
   }
   if (
     updatedArtikelBesitzer.menge !== null &&
@@ -203,20 +244,26 @@ async function updateArtikelBesitzerMengeByGwIdAndRegalId(
   gwId
 ) {
   const artikelId = await ArtikelService.getArtikelById(gwId);
+
+  if (!artikelId) {
+    throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
+  }
   const newRegalId = await RegalService.getRegalById(regalId);
+  if (!newRegalId) {
+    throw new Error(ErrorMessages.REGAL_NOT_FOUND);
+  }
   const artikelBesitzer = await database
     .get("artikel_besitzer")
     .query(Q.where("gw_id", artikelId.id), Q.where("regal_id", newRegalId.id)) // Ensure "gwId" matches your schema
     .fetch();
-  if (!artikelBesitzer.length) {
-    console.error("ArtikelBesitzer not found for gwId:", gwId);
-    return;
+  if (artikelBesitzer.length < 1) {
+    throw new Error(ErrorMessages.ARTIKELBESITZER_NOT_FOUND);
   }
   if (
     updatedArtikelBesitzer.menge !== null &&
     updatedArtikelBesitzer.menge !== undefined
   ) {
-    await ArtikelService.updateInventurArtikel(artikelId.gwId, {
+    await ArtikelService.updateArtikel(artikelId.gwId, {
       menge: Number(updatedArtikelBesitzer.menge),
     });
   }
@@ -230,8 +277,7 @@ async function updateArtikelBesitzerMengeByGwIdAndRegalId(
     await database.get("logs").create((log) => {
       log.beschreibung = text;
       log.menge = Number(updatedArtikelBesitzer.menge);
-      log.gesamtMenge =
-        Number(artikelBesitzer[0].menge) + Number(updatedArtikelBesitzer.menge);
+      log.gesamtMenge = Number(artikelId.menge);
       log.artikel.set(artikelId);
       log.createdAt = Date.now();
     });
@@ -247,7 +293,7 @@ async function updateArtikelBesitzerMengeByGwIdAndRegalId(
         updatedArtikelBesitzer.menge !== null &&
         updatedArtikelBesitzer.menge !== undefined
       ) {
-        art.menge += updatedArtikelBesitzer.menge;
+        art.menge += Number(updatedArtikelBesitzer.menge);
       }
       if (
         updatedArtikelBesitzer.regalId !== null &&
@@ -261,12 +307,29 @@ async function updateArtikelBesitzerMengeByGwIdAndRegalId(
 }
 
 async function getArtikelOwnersByGwIdAndRegalId(artikelId, regalId) {
-  const artikel = await ArtikelService.getArtikelById(artikelId);
-  const regal = await RegalService.getRegalById(regalId);
-  return await database
+  let artikel = null;
+  let regal = null;
+  try {
+    artikel = await ArtikelService.getArtikelById(artikelId);
+  } catch (error) {
+    throw new Error(error.message);
+  }
+
+  try {
+    regal = await RegalService.getRegalById(regalId);
+  } catch (error) {
+    throw new Error(error.message);
+  }
+
+  const ArtikelBesitzer = await database
     .get("artikel_besitzer")
     .query(Q.where("gw_id", artikel.id), Q.where("regal_id", regal.id))
     .fetch();
+
+  if (ArtikelBesitzer.length < 1) {
+    throw new Error(ErrorMessages.ARTIKELBESITZER_NOT_FOUND);
+  }
+  return ArtikelBesitzer;
 }
 
 const ArtikelBesitzerService = {
@@ -278,7 +341,7 @@ const ArtikelBesitzerService = {
   deleteArtikelOwner,
   getArtikelOwnersByRegalId,
   getArtikelOwnersByGwIdAndRegalId,
-  updateArtikelBesitzerByGwIdAndRegalId,
+  inventurUpdateArtikelBesitzerByGwIdAndRegalId,
   updateArtikelBesitzerMengeByGwIdAndRegalId,
 };
 

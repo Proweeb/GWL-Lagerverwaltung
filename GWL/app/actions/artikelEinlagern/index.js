@@ -1,100 +1,96 @@
 import { Text, View, ScrollView } from "react-native";
 import { styles } from "../../../components/styles";
-import { TextInput } from "react-native-gesture-handler";
-import ArticleMenu from "../../../components/utils/InputMenus/articleMenu.js";
-import MiniStorageMenu from "../../../components/utils/InputMenus/miniStorageMenu.js";
-import { TouchableOpacity } from "react-native";
-import { useState } from "react";
-import { Alert } from "react-native";
-import ArtikelService from "../../../database/datamapper/ArtikelHelper.js";
-import RegalService from "../../../database/datamapper/RegalHelper.js";
+import { ErrorMessages } from "../../../components/enum.js";
+import { useState, useEffect } from "react";
+import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper.js";
 import { useNavigation } from "@react-navigation/native";
-import LogService from "../../../database/datamapper/LogHelper.js";
 import Toast from "react-native-toast-message";
+import ActionButton from "../../../components/Buttons/ActionsButton.js";
+import ArticleTextInput from "../artikelNachfüllen/articleTextInput.js";
+import RegalTextInput from "../artikelNachfüllen/regalTextInput.js";
+import TextInputField from "../../../components/utils/TextInputs/textInputField.js";
+import { RFPercentage } from "react-native-responsive-fontsize";
+import * as Progress from "react-native-progress";
 
 export default function IndexScreen() {
   const navigation = useNavigation();
-  const [formData, setFormData] = useState({
-    gwId: "",
-    beschreibung: "",
-    menge: "",
-    ablaufdatum: "",
-    mindestmenge: "",
-    regalId: "",
-  });
+  const [gwId, setGwId] = useState();
+  const [menge, setMenge] = useState();
+  const [regalIdValid, setRegalIdValid] = useState(false);
+  const [regalId, setRegalId] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async () => {
-    const { gwId, beschreibung, menge, ablaufdatum, mindestmenge, regalId } =
-      formData;
+  const checkArticleInRegal = async () => {
+    try {
+      setLoading(true);
+      console.log(gwId, regalId);
+      const besitzer =
+        await ArtikelBesitzerService.getArtikelOwnersByGwIdAndRegalId(
+          gwId,
+          regalId
+        );
 
-    if (
-      !gwId ||
-      !beschreibung ||
-      !menge ||
-      !ablaufdatum ||
-      !mindestmenge ||
-      !regalId
-    ) {
-      Toast.show({
-        type: "warning",
-        text1: "Artikel/Regal",
-        text2: "Bitte füllen Sie alle Felder aus",
-        position: "bottom",
-      });
-      console.log(formData);
-    } else {
-      console.log("Alle Felder sind befüllt:", formData);
-
-      try {
-        const existingArtikel = await ArtikelService.getArtikelById(gwId);
-        const existingRegal = await RegalService.getRegalById(String(regalId));
-        console.log(menge);
-        if (existingArtikel) {
-          Toast.show({
-            type: "error",
-            text1: "Artikel",
-            text2: "Existiert bereits",
-            position: "bottom",
-          });
-        } else if (!existingRegal) {
-          Toast.show({
-            type: "error",
-            text1: "Regal",
-            text2: "Existiert nicht",
-            position: "bottom",
-          });
-        } else {
-          console.log(existingRegal);
-          await ArtikelService.createArtikel(
-            {
-              gwId,
-              beschreibung,
-              menge: Number(menge),
-              ablaufdatum,
-              mindestMenge: Number(mindestmenge),
-            },
-            String(regalId)
-          );
-          Toast.show({
-            type: "success",
-            text1: "Artikel: " + formData.beschreibung,
-            text2: "Erfolgreich gespeichert",
-            position: "top",
-          });
-          navigation.navigate("Home");
-        }
-      } catch (error) {
-        console.error("Fehler beim Speichern:", error);
+      if (besitzer.length == 0) {
+      } else {
         Toast.show({
           type: "error",
-          text1: "Artikel",
-          text2: "Konnte nicht gespeichert werden.",
+          text1: "Error",
+          text2: "Artikel befindet sich im Regal",
           position: "bottom",
         });
+        setLoading(false);
       }
+    } catch (error) {
+      console.log(error);
+      if (error.message == ErrorMessages.ARTICLE_NOT_FOUND) {
+        setLoading(false);
+        navigation.navigate("Actions", {
+          screen: "ArtikelEinlagernNavigator",
+          params: {
+            screen: "Next",
+            params: { regalId: regalId, gwId: gwId, menge: menge },
+          },
+        });
+      } else if (error.message == ErrorMessages.REGAL_NOT_FOUND) {
+        setLoading(false);
+        Toast.show({
+          type: "error",
+          text1: "Error",
+          text2: "Regal existert nicht",
+          position: "bottom",
+        });
+      } else if (error.message == ErrorMessages.ARTIKELBESITZER_NOT_FOUND) {
+        await ArtikelBesitzerService.createArtikelOwner(
+          { menge: menge },
+          gwId,
+          regalId
+        );
+        Toast.show({
+          type: "success",
+          text1: "Artikel: " + gwId,
+          text2: "Eingelagert",
+          position: "top",
+        });
+        setLoading(false);
+        navigation.goBack();
+      }
+    } finally {
     }
   };
 
+  const handleSubmit = async () => {
+    try {
+      await checkArticleInRegal();
+    } catch (error) {
+      console.error("Fehler beim Finden:", error);
+      Toast.show({
+        type: "error",
+        text1: "Artikel",
+        text2: "Fehler beim Finden",
+        position: "bottom",
+      });
+    }
+  };
   return (
     <ScrollView
       style={{
@@ -105,30 +101,49 @@ export default function IndexScreen() {
     >
       <View>
         <Text style={styles.subHeader}>Lagerung</Text>
-        <MiniStorageMenu formData={formData} setFormData={setFormData} />
+        <View style={{ margin: 10 }}>
+          <RegalTextInput
+            regalId={regalId}
+            setRegalId={setRegalId}
+            setRegalIdValid={setRegalIdValid}
+            regalIdValid={regalIdValid}
+          />
+        </View>
       </View>
 
       <View style={[siteStyles.longLine, { marginVertical: 10 }]}></View>
 
       <View>
         <Text style={styles.subHeader}>Artikel</Text>
-        <ArticleMenu formData={formData} setFormData={setFormData} />
+        <View style={{ margin: 10 }}>
+          <ArticleTextInput gwId={gwId} setGwId={setGwId} />
+          <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>
+            Menge*
+          </Text>
+          <TextInputField
+            inputMode={"numeric"}
+            value={menge}
+            onChangeText={(text) => {
+              setMenge(text.replace(/[^0-9]/g, ""));
+            }}
+          />
+        </View>
       </View>
 
       <View style={{ marginTop: 50, alignItems: "center" }}>
-        <TouchableOpacity
-          style={{
-            backgroundColor: "#dcebf9",
-            padding: 10,
-            borderRadius: 5,
-            height: 50,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-          onPress={handleSubmit}
-        >
-          <Text style={{ color: "#30A6DE", fontSize: 20 }}>Fertig</Text>
-        </TouchableOpacity>
+        {loading ? (
+          <Progress.Circle size={50} indeterminate={true} />
+        ) : (
+          <ActionButton
+            CancelCallBack={() => {
+              if (navigation.canGoBack()) {
+                navigation.goBack();
+              }
+            }}
+            FertigCallBack={handleSubmit}
+            isDone={regalIdValid && menge && gwId}
+          />
+        )}
       </View>
     </ScrollView>
   );

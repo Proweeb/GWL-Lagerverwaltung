@@ -10,52 +10,71 @@ import React, { Component, useState } from "react";
 import RegalService from "../../../database/datamapper/RegalHelper";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import { styles } from "../../../components/styles";
-import TextInputField from "../../../components/utils/TextInputs/textInputField";
-import { column } from "@nozbe/watermelondb/QueryDescription";
 import { RFPercentage } from "react-native-responsive-fontsize";
-import { widthPercentageToDP } from "react-native-responsive-screen";
+
 import { useEffect } from "react";
+import ActionButton from "../../../components/Buttons/ActionsButton";
+import { styles } from "../../../components/styles";
+import Toast from "react-native-toast-message";
+import RegalTextInput from "../artikelNachfüllen/regalTextInput";
+import { ErrorMessages } from "../../../components/enum";
 
 export default function IndexScreen() {
   const [name, setName] = useState("");
   const [fach, setFach] = useState("");
   const [code, setCode] = useState("");
+  const [regalIdValid, setRegalIdValid] = useState(false);
   const navigation = useNavigation();
 
   const handleSubmit = async () => {
     try {
       if (!name || !fach || !code) {
-        Alert.alert(
-          "Fehlende Angaben",
-          "Bitte fülle alle Felder aus, bevor du speicherst."
-        );
+        Toast.show({
+          type: "error",
+          text1: "Fehler",
+          text2: "Bitte fülle alle Felder aus, bevor du speicherst.",
+          position: "bottom",
+        });
         return;
       }
 
-      const regalData = {
-        regalId: code,
-        fachName: fach,
-        regalName: name,
-      };
+   
 
+      await RegalService.getRegalById(code);
+     
+      console.log(regal);
+    } catch (error) {
+
+      if (error.message ===ErrorMessages.REGAL_NOT_FOUND) {
+        const regalData = {
+          regalId: code,
+          fachName: fach,
+          regalName: name,
+        };
       await RegalService.createRegal(regalData);
-      Alert.alert(
-        "Erfolgreich gespeichert!",
-        `Das Regal wurde mit folgenden Daten angelegt:\n\n📌 Name: ${name}\n📦 Fach: ${fach}\n🔢 Code: ${code}`
-      );
+      Toast.show({
+        type: "success",
+        text1: "Erfolgreich gespeichert!",
+        text2: `Das Regal ${code} wurde erfolgreich erstellt`,
+        position: "bottom",
+      });
       navigation.navigate("Home");
       console.log("Regal erfolgreich erstellt.");
       const regal = await RegalService.getRegalById(code);
-      console.log(regal);
-    } catch (error) {
-      console.error("Fehler beim Speichern des Regals: ", error);
-      Alert.alert(
-        "Speicherung fehlgeschlagen",
-        "Das Regal konnte nicht gespeichert werden. Bitte überprüfe deine Eingaben und versuche es erneut."
-      );
+      }
+
+      else {
+        Toast.show({
+          type: "error",
+          text1: "Fehler",
+          text2: "Regal existiert bereits",
+          position: "bottom",
+        });
+      }
     }
   };
+    
+  
 
   const inputStyle = {
     height: 40,
@@ -85,74 +104,24 @@ export default function IndexScreen() {
         Lagerung
       </Text>
       <Text style={{ fontSize: RFPercentage(1.8), marginBottom: 5 }}>
-        Regal Name
+        Regal Name*
       </Text>
       <View style={{ marginBottom: 10 }}>
         <TextInput style={inputStyle} value={name} onChangeText={setName} />
       </View>
 
       <Text style={{ fontSize: RFPercentage(1.8), marginBottom: 5 }}>
-        Fach Name
+        Fach Name*
       </Text>
       <View style={{ marginBottom: 10 }}>
         <TextInput style={inputStyle} value={fach} onChangeText={setFach} />
       </View>
 
-      <Text style={{ fontSize: RFPercentage(1.8), marginBottom: 5 }}>
-        RegalID
-      </Text>
-      <View
-        style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}
-      >
-        <View style={{ flex: 1 }}>
-          <TextInput style={inputStyle} value={code} onChangeText={setCode} />
-        </View>
+    <RegalTextInput regalId={code} setRegalId={setCode} setRegalIdValid={setRegalIdValid} regalIdValid={regalIdValid} />
 
-        <TouchableOpacity
-          onPress={() => {
-            navigation.navigate("Scan\\Barcode", {
-              onScan: (code) => {
-                setCode(code);
-              },
-            });
-          }}
-          style={{
-            marginLeft: 10,
-            width: 40,
-            height: 40,
-            borderRadius: 10,
-            backgroundColor: "#ffffff",
-            justifyContent: "center",
-            alignItems: "center",
-            elevation: 5,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.3,
-            shadowRadius: 3,
-          }}
-        >
-          <MaterialCommunityIcons
-            name={"barcode-scan"}
-            size={25}
-            color={"black"}
-          />
-        </TouchableOpacity>
-      </View>
+
       <View style={{ marginTop: 50, alignItems: "center" }}>
-        <TouchableOpacity
-          onPress={handleSubmit}
-          style={{
-            backgroundColor: "#dcebf9",
-            padding: 10,
-            borderRadius: 5,
-            height: 50,
-            width: 100,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Text style={{ color: "#30A6DE", fontSize: 20 }}>Fertig</Text>
-        </TouchableOpacity>
+         <ActionButton FertigCallBack={handleSubmit}  isDone={true} />
       </View>
     </View>
   );

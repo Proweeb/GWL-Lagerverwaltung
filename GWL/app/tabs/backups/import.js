@@ -437,7 +437,7 @@ const ImportScreen = ({ navigation }) => {
         null,
         null
       );
-      
+
       console.log("Daten erfolgreich importiert!");
       Toast.show({
         type: "success",
@@ -762,15 +762,18 @@ const ImportScreen = ({ navigation }) => {
           <TouchableOpacity
             style={[
               styles.buttonBlue,
-              !jsonData && { backgroundColor: '#d9d9d9' }
+              !jsonData && { backgroundColor: "#d9d9d9" },
             ]}
             onPress={handleImport}
             disabled={!jsonData}
           >
-            <Text numberOfLines={1} style={[
-              styles.buttonTextLightBlue,
-              !jsonData && { color: '#AFAFAF' }
-            ]}>
+            <Text
+              numberOfLines={1}
+              style={[
+                styles.buttonTextLightBlue,
+                !jsonData && { color: "#AFAFAF" },
+              ]}
+            >
               Importieren
             </Text>
           </TouchableOpacity>
@@ -823,6 +826,7 @@ const ImportScreen = ({ navigation }) => {
 
               <View style={localStyles.tableContainer}>
                 <FlashList
+                  nestedScrollEnabled={true}
                   data={jsonData.Artikel || []}
                   renderItem={({ item }) => (
                     <View style={[localStyles.row, localStyles.rowBorder]}>
@@ -880,6 +884,7 @@ const ImportScreen = ({ navigation }) => {
 
               <View style={localStyles.tableContainer}>
                 <FlashList
+                  nestedScrollEnabled={true}
                   data={jsonData.Regale || []}
                   renderItem={({ item }) => (
                     <View style={[localStyles.row, localStyles.rowBorder]}>
@@ -932,6 +937,7 @@ const ImportScreen = ({ navigation }) => {
 
               <View style={localStyles.tableContainer}>
                 <FlashList
+                  nestedScrollEnabled={true}
                   data={jsonData.Lagerplan || []}
                   renderItem={({ item }) => (
                     <View style={[localStyles.row, localStyles.rowBorder]}>

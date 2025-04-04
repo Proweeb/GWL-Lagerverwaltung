@@ -25,12 +25,12 @@ export default function NotificationsWidget() {
   const getBackgroundColor = (status) => {
     const colors = {
       Warnung: styles.lightYellow,
-      Abgelaufen: "black",
+      Abgelaufen: styles.lightRed,
       Kritisch: styles.lightRed,
     };
     const borderColors = {
       Warnung: "orange",
-      Abgelaufen: "violet",
+      Abgelaufen: styles.red,
       Kritisch: styles.red,
     };
     return {
@@ -42,7 +42,7 @@ export default function NotificationsWidget() {
   const getTextColor = (status) => {
     const colors = {
       Warnung: "orange",
-      Abgelaufen: "violet",
+      Abgelaufen: styles.darkRed,
       Kritisch: styles.darkRed,
     };
     return { color: colors[status] };
@@ -51,7 +51,7 @@ export default function NotificationsWidget() {
   const getArticleTextColor = (status) => {
     const colors = {
       Warnung: styles.textColor,
-      Abgelaufen: "white",
+      Abgelaufen: styles.textColor,
       Kritisch: styles.textColor,
     };
     return { color: colors[status] };

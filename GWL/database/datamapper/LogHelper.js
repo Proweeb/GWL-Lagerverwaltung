@@ -4,15 +4,22 @@ import Log from "../models/Log";
 import ArtikelService from "./ArtikelHelper";
 import RegalService from "./RegalHelper";
 import { Q } from "@nozbe/watermelondb";
+import { ErrorMessages } from "../../components/enum";
 
 async function createLog(logData, artikelId, regalId) {
   let artikel = null;
   let regal = null;
   if (artikelId !== null) {
     artikel = await ArtikelService.getArtikelById(artikelId);
+    if (!artikel) {
+      throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
+    }
   }
   if (regalId !== null) {
     regal = await RegalService.getRegalById(regalId);
+    if (!regal) {
+      throw new Error(ErrorMessages.REGAL_NOT_FOUND);
+    }
   }
   return await database.write(async () => {
     return database.get("logs").create((log) => {
@@ -34,17 +41,29 @@ async function getAllLogs() {
 
 async function getLogByArtikelId(artikel_id) {
   const artikel = await ArtikelService.getArtikelById(artikel_id);
+  if (!artikel) {
+    throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
+  }
   return await artikel.logs.fetch();
 }
 
 async function getLogByRegalId(regal_id) {
   const regal = await RegalService.getRegalById(regal_id);
+  if (!regal) {
+    throw new Error(ErrorMessages.REGAL_NOT_FOUND);
+  }
   return await regal.logs.fetch();
 }
 
 async function getLogByRegalIdAndArtikelId(regal_id, artikel_id) {
   const regal = await RegalService.getRegalById(regal_id);
+  if (!regal) {
+    throw new Error(ErrorMessages.REGAL_NOT_FOUND);
+  }
   const artikel = await ArtikelService.getArtikelById(artikel_id);
+  if (!artikel) {
+    throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
+  }
 
   const regalLogs = await regal.logs.fetch();
   const artikelLogs = await artikel.logs.fetch();
@@ -54,65 +73,30 @@ async function getLogByRegalIdAndArtikelId(regal_id, artikel_id) {
 
 async function deleteLogByArtikelId(artikel_id) {
   const artikel = await ArtikelService.getArtikelById(artikel_id);
+  if (!artikel) {
+    throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
+  }
   return await database.write(async () => {
     const logs = await artikel.logs.fetch();
+    if (logs.length === 0) {
+      throw new Error(ErrorMessages.LOG_NOT_FOUND);
+    }
     for (let i = 0; i < logs.length; i++) {
       await logs[i].destroyPermanently();
     }
   });
 }
 
-// async function BackupLogByArtikelId(artikelId) {
-//   const artikel = await ArtikelService.getArtikelById(artikelId);
-
-//   await database.write(async () => {
-//     //Fetch logs that are associated with the given artikelId
-//     const logs = await database.get("logs").query().fetch();
-//     //console.log(logs);
-
-//     // Use Promise.all to resolve asynchronous operations for each log
-//     const updates = await Promise.all(
-//       logs.map(async (log) => {
-//         const regal = await log.regal.fetch();
-//         const artikel = await log.artikel.fetch();
-
-//         if (artikel.gwId != artikelId) {
-//           return;
-//         }
-//         console.log(
-//           `Backing up log for artikel ${artikelId}:`,
-//           log.beschreibung
-//         );
-//         return log.prepareUpdate((logRecord) => {
-//           logRecord.isBackup = true;
-//           // Optionally, update regalId and gwId if required (for every log linked to the artikel)
-//           logRecord.regalId = regal.regalId;
-//           logRecord.gwId = artikel.gwId;
-//         });
-//       })
-//     );
-//     // Apply all updates in a batch
-//     await database.batch(...updates);
-//   });
-// }
 async function BackupLogByArtikelId(artikelId) {
   const artikel = await ArtikelService.getArtikelById(artikelId);
-
   if (!artikel) {
-    console.warn(`Artikel with ID ${artikelId} not found`);
-    return;
+    throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
   }
 
   await database.write(async () => {
-    // Fetch logs that are associated with the given artikelId (keeping your original query)
     const logs = await database.get("logs").query().fetch();
+   
 
-    if (logs.length === 0) {
-      console.warn(`No logs found for artikel ${artikelId}`);
-      return;
-    }
-
-    // Use Promise.all to resolve asynchronous operations for each log
     const updates = await Promise.all(
       logs.map(async (log) => {
         try {
@@ -123,19 +107,13 @@ async function BackupLogByArtikelId(artikelId) {
           const regal = log.regal ? await log.regal.fetch() : null;
           const artikel = log.artikel ? await log.artikel.fetch() : null;
 
-          // Skip if the artikel does not match
           if (!artikel || artikel.gwId !== artikelId) {
             return null;
           }
 
-          console.log(
-            `Backing up log for artikel ${artikelId}:`,
-            log.beschreibung
-          );
-
           return log.prepareUpdate((logRecord) => {
             logRecord.isBackup = true;
-            logRecord.regalId = regal ? regal.regalId : null; // Handle possible null values
+            logRecord.regalId = regal ? regal.regalId : null;
             logRecord.gwId = artikel.gwId;
           });
         } catch (error) {
@@ -145,22 +123,20 @@ async function BackupLogByArtikelId(artikelId) {
       })
     );
 
-    // Filter out any null/undefined updates before batching
     const validUpdates = updates.filter(Boolean);
-
-    if (validUpdates.length > 0) {
-      await database.batch(...validUpdates);
-      console.log(
-        `Backed up ${validUpdates.length} logs for artikel ${artikelId}`
-      );
-    }
+   
+    await database.batch(...validUpdates);
   });
 }
 
 async function deleteLogByRegalId(regal_id) {
   const regal = await RegalService.getRegalById(regal_id);
+  if (!regal) {
+    throw new Error(ErrorMessages.REGAL_NOT_FOUND);
+  }
   return await database.write(async () => {
     const logs = await regal.logs.fetch();
+   
     for (let i = 0; i < logs.length; i++) {
       await logs[i].destroyPermanently();
     }
@@ -169,10 +145,17 @@ async function deleteLogByRegalId(regal_id) {
 
 async function deleteLogByRegalIdAndArtikelId(regal_id, artikel_id) {
   const regal = await RegalService.getRegalById(regal_id);
+  if (!regal) {
+    throw new Error(ErrorMessages.REGAL_NOT_FOUND);
+  }
   const artikel = await ArtikelService.getArtikelById(artikel_id);
+  if (!artikel) {
+    throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
+  }
   return await database.write(async () => {
     const artikelLogs = await artikel.logs.fetch();
     const logs = await regal.logs.fetch();
+  
     for (let i = 0; i < logs.length; i++) {
       if (artikelLogs[i] === logs[i]) {
         await logs[i].destroyPermanently();
@@ -180,6 +163,7 @@ async function deleteLogByRegalIdAndArtikelId(regal_id, artikel_id) {
     }
   });
 }
+
 const LogService = {
   createLog,
   getAllLogs,

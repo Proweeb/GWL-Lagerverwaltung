@@ -7,13 +7,13 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Feather from "@expo/vector-icons/Feather";
-import ArticleTextInput from "./articleTextInput";
+import ArticleTextInput from "../artikelNachfüllen/articleTextInput.js";
+import RegalTextInput from "../artikelNachfüllen/regalTextInput.js";
 import { Alert } from "react-native";
 import OverviewWithQuantity from "./overviewWithQuantity.js";
 import ActionButton from "../../../components/Buttons/ActionsButton.js";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper.js";
 import { Keyboard } from "react-native";
-import RegalTextInput from "./regalTextInput.js";
 import RegalService from "../../../database/datamapper/RegalHelper.js";
 import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper";
 import Toast from "react-native-toast-message";
@@ -100,10 +100,11 @@ export default function IndexScreen() {
     } else {
       Toast.show({
         type: "error",
-        text1: "Artikel im Regal",
-        text2: "Existiert nicht",
+        text1: "Error",
+        text2: "Artikel befindet sich nicht im Regal",
         position: "bottom",
       });
+      setLoading(false);
     }
   };
 
@@ -129,10 +130,14 @@ export default function IndexScreen() {
   const route = useRoute();
   const passedGwId = route.params?.gwId;
   const passedRegalId = route.params?.regalId;
-  const handleCancel = () => navigation.navigate("Tabs");
   useEffect(() => {
     if (passedGwId) {
       setGwId(passedGwId);
+    }
+
+    if (passedRegalId) {
+      setRegalId(passedRegalId);
+      setRegalIdValid(true);
     }
   });
   return (

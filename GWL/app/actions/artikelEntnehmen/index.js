@@ -50,6 +50,7 @@ export default function IndexScreen() {
       });
       console.log("Artikel existiert nicht");
       setShowMengeOverview(false);
+      setLoading(false);
     } else {
       console.log("Artikel gefunden!");
       //qconsole.log(dbArtikel);
@@ -75,6 +76,7 @@ export default function IndexScreen() {
       });
       console.log("Regal existiert nicht");
       setShowMengeOverview(false);
+      setLoading(false);
     } else {
       console.log("Regal gefunden!");
       //qconsole.log(dbArtikel);
@@ -100,10 +102,11 @@ export default function IndexScreen() {
     } else {
       Toast.show({
         type: "error",
-        text1: "Artikel im Regal",
-        text2: "Existiert nicht",
+        text1: "Error",
+        text2: "Artikel befindet sich nicht im Regal",
         position: "bottom",
       });
+      setLoading(false);
     }
   };
 
@@ -129,10 +132,14 @@ export default function IndexScreen() {
   const route = useRoute();
   const passedGwId = route.params?.gwId;
   const passedRegalId = route.params?.regalId;
-  const handleCancel = () => navigation.navigate("Tabs");
   useEffect(() => {
     if (passedGwId) {
       setGwId(passedGwId);
+    }
+
+    if (passedRegalId) {
+      setRegalId(passedRegalId);
+      setRegalIdValid(true);
     }
   });
   return (
