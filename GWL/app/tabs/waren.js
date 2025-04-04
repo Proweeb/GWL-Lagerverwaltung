@@ -194,6 +194,12 @@ const WarenScreen = () => {
           greenButtonText="Nachfüllen"
           redButtonText="Löschen"
           yellowButtonText="Bearbeiten"
+          yellowCallback={() => {
+            navigation.navigate("Bearbeiten", {
+              gwId: action,
+            });
+              setAction(null);
+          }}
           cancelCallback={() => setAction(null)}
           greenCallBack={() => {
             navigation.navigate("Actions", {

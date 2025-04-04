@@ -48,7 +48,7 @@ async function createArtikelOwner(artikelOwnerData, artikelId, regalId) {
     await database.get("logs").create((log) => {
       log.beschreibung = text;
       log.menge = Number(artikelOwnerData.menge);
-      log.gesamtMenge = artikel ? Number(artikel.menge) : 0;
+      log.gesamtMenge = Number(artikel.menge);
       log.artikel.set(artikel);
       log.regal.set(regal);
       log.createdAt = Date.now();
@@ -321,15 +321,15 @@ async function getArtikelOwnersByGwIdAndRegalId(artikelId, regalId) {
     throw new Error(error.message);
   }
 
-  const artikelBesitzer = await database
+  const ArtikelBesitzer = await database
     .get("artikel_besitzer")
     .query(Q.where("gw_id", artikel.id), Q.where("regal_id", regal.id))
     .fetch();
 
-  if (artikelBesitzer.length < 1) {
+  if (ArtikelBesitzer.length < 1) {
     throw new Error(ErrorMessages.ARTIKELBESITZER_NOT_FOUND);
   }
-  return artikelBesitzer;
+  return ArtikelBesitzer;
 }
 
 const ArtikelBesitzerService = {

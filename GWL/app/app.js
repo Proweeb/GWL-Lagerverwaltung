@@ -23,6 +23,7 @@ import SettingsScreen from "./other/settings";
 import * as BackgroundFetch from "expo-background-fetch";
 import * as TaskManager from "expo-task-manager";
 import ArtikelService from "../database/datamapper/ArtikelHelper";
+import EditScreen from "./other/edit";
 
 const BACKGROUND_FETCH_TASK = "background-fetch";
 
@@ -48,10 +49,6 @@ async function registerBackgroundFetchAsync() {
       minimumInterval: 1 * 60, // 1 minute
       stopOnTerminate: false, // android only
       startOnBoot: true, // android only
-      notificationTitle: "Läuft...",
-      notificationBody: "Checkt das Ablaufdatum der Artikel.",
-      notificationColor: "#38aae1",
-      notificationChannelId: "background-fetch",
     });
     console.log("Background fetch task registered successfully");
   } catch (err) {
@@ -79,6 +76,7 @@ export default function App() {
     });
 
     const a = async () => {
+      await unregisterBackgroundFetchAsync();
       await registerBackgroundFetchAsync();
       //   await Notifications.setNotificationHandler({
       //     handleNotification: async () => ({
@@ -89,7 +87,7 @@ export default function App() {
       //   });
     };
     a();
-    //testInsertAndFetch();
+    testInsertAndFetch();
   }, []);
 
   return (
@@ -121,6 +119,17 @@ function MainStack() {
         component={SettingsScreen}
         options={{
           title: "Einstellungen",
+          headerShown: true,
+          statusBarBackgroundColor: styles.backgroundColor,
+          statusBarStyle: "dark",
+          headerTitleStyle: styles.header,
+        }}
+      />
+          <Stack.Screen
+        name="Bearbeiten"
+        component={EditScreen}
+        options={{
+          title: "Bearbeiten",
           headerShown: true,
           statusBarBackgroundColor: styles.backgroundColor,
           statusBarStyle: "dark",

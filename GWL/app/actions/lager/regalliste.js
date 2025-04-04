@@ -226,6 +226,13 @@ const RegallisteScreen = () => {
           greenButtonText="Nachfüllen"
           redButtonText="Löschen"
           yellowButtonText="Bearbeiten"
+          yellowCallback={() => {
+            navigation.navigate("Bearbeiten", {
+              gwId: action.gwId,
+              regalId: action.regalId,
+            });
+            setAction(null);
+          }}
           cancelCallback={() => setAction(null)}
           greenCallBack={() => {
             navigation.navigate("Actions", {
@@ -249,6 +256,7 @@ const RegallisteScreen = () => {
       >
         <ConfirmPopup
           greenMode={false}
+       
           greyCallback={() => {
             setAction(confirm);
             setConfirm(null);
