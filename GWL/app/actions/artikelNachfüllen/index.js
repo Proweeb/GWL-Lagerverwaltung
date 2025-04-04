@@ -18,6 +18,7 @@ import RegalService from "../../../database/datamapper/RegalHelper.js";
 import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper";
 import Toast from "react-native-toast-message";
 import * as Progress from "react-native-progress";
+import { ErrorMessages } from "../../../components/enum.js";
 
 export default function IndexScreen() {
   const [gwId, setGwId] = useState("");
@@ -50,6 +51,7 @@ export default function IndexScreen() {
       });
       console.log("Artikel existiert nicht");
       setShowMengeOverview(false);
+      setLoading(false);
     } else {
       console.log("Artikel gefunden!");
       //qconsole.log(dbArtikel);
@@ -75,6 +77,7 @@ export default function IndexScreen() {
       });
       console.log("Regal existiert nicht");
       setShowMengeOverview(false);
+      setLoading(false);
     } else {
       console.log("Regal gefunden!");
       //qconsole.log(dbArtikel);
@@ -88,16 +91,16 @@ export default function IndexScreen() {
   }, [dbRegal]);
 
   const checkArticleInRegal = async () => {
-    articleInRegal =
-      await ArtikelBesitzerService.getArtikelOwnersByGwIdAndRegalId(
-        gwId,
-        regalId
-      );
+    try {
+      articleInRegal =
+        await ArtikelBesitzerService.getArtikelOwnersByGwIdAndRegalId(
+          gwId,
+          regalId
+        );
 
-    if (articleInRegal.length != 0) {
       setMenge(articleInRegal[0].menge);
       setShowMengeOverview(true);
-    } else {
+    } catch (error) {
       Toast.show({
         type: "error",
         text1: "Error",
@@ -116,13 +119,29 @@ export default function IndexScreen() {
       setDbArtikel(await ArtikelService.getArtikelById(gwId));
       setDbRegal(await RegalService.getRegalById(regalId));
     } catch (error) {
-      console.error("Fehler beim Finden:", error);
-      Toast.show({
-        type: "error",
-        text1: "Artikel",
-        text2: "Fehler beim Finden",
-        position: "bottom",
-      });
+      if (error.message === ErrorMessages.ARTICLE_NOT_FOUND) {
+        Toast.show({
+          type: "error",
+          text1: "Artikel",
+          text2: "Existiert nicht",
+          position: "bottom",
+        });
+      } else if (error.message === ErrorMessages.REGAL_NOT_FOUND) {
+        Toast.show({
+          type: "error",
+          text1: "Regal",
+          text2: "Existiert nicht",
+          position: "bottom",
+        });
+      } else {
+        Toast.show({
+          type: "error",
+          text1: "Error",
+          text2: "Fehler beim Finden",
+          position: "bottom",
+        });
+      }
+      setLoading(false);
     }
   };
 
@@ -191,6 +210,8 @@ export default function IndexScreen() {
           setShowMengeOverview={setShowMengeOverview}
           foundArticle={foundArticle}
           foundRegal={foundRegal}
+          setRegalId={setRegalId}
+          setGwId={setGwId}
         />
       </Modal>
     </View>

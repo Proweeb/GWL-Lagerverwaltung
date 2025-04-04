@@ -10,13 +10,15 @@ import LogService from "../../../database/datamapper/LogHelper";
 import Toast from "react-native-toast-message";
 import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper";
 import { useEffect } from "react";
+import { setGenerator } from "@nozbe/watermelondb/utils/common/randomId";
 
 export default function OverviewWithQuantity({
   menge,
-  setMenge,
   setShowMengeOverview,
   foundArticle,
   foundRegal,
+  setRegalId,
+  setGwId,
 }) {
   const [entnahmeMenge, setEntnahmeMenge] = useState(0);
   const [ausgabeMenge, setAusgabeMenge] = useState(menge);
@@ -66,7 +68,8 @@ export default function OverviewWithQuantity({
       foundRegal.regalId,
       foundArticle.gwId
     );
-
+    setRegalId("");
+    setGwId("");
     Toast.show({
       type: "success",
       text1: "Artikel: " + foundArticle.beschreibung,

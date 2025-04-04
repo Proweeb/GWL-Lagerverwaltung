@@ -12,10 +12,11 @@ import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzer
 import { useEffect } from "react";
 export default function OverviewWithQuantity({
   menge,
-  setMenge,
   setShowMengeOverview,
   foundArticle,
   foundRegal,
+  setRegalId,
+  setGwId,
 }) {
   const [nachfüllmenge, setNachfüllmenge] = useState(0);
   const [ausgabeMenge, setAusgabeMenge] = useState(menge);
@@ -35,6 +36,8 @@ export default function OverviewWithQuantity({
       foundArticle.gwId
     );
 
+    setRegalId("");
+    setGwId("");
     Toast.show({
       type: "success",
       text1: "Artikel: " + foundArticle.beschreibung,
