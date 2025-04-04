@@ -29,37 +29,37 @@ const BACKGROUND_FETCH_TASK = "background-fetch";
 
 // 1. Define the task by providing a name and the function that should be executed
 // Note: This needs to be called in the global scope (e.g outside of your React components)
-TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
-  const allArticles = await ArtikelService.getAllArtikel();
-  const filteredArticles = allArticles.filter((article) =>
-    ["Kritisch", "Abgelaufen", "Warnung"].includes(article.isExpired)
-  );
+// TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
+//   const allArticles = await ArtikelService.getAllArtikel();
+//   const filteredArticles = allArticles.filter((article) =>
+//     ["Kritisch", "Abgelaufen", "Warnung"].includes(article.isExpired)
+//   );
 
-  console.log(
-    `[DEBUG] Background fetch task executed at ${new Date().toISOString()}`
-  );
-  //  console.log(filteredArticles);
+//   console.log(
+//     `[DEBUG] Background fetch task executed at ${new Date().toISOString()}`
+//   );
+//   //  console.log(filteredArticles);
 
-  return BackgroundFetch.BackgroundFetchResult.NewData;
-});
+//   return BackgroundFetch.BackgroundFetchResult.NewData;
+// });
 
-async function registerBackgroundFetchAsync() {
-  try {
-    await BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
-      minimumInterval: 1 * 60, // 1 minute
-      stopOnTerminate: false, // android only
-      startOnBoot: true, // android only
-    });
-    console.log("Background fetch task registered successfully");
-  } catch (err) {
-    console.error("Background fetch task registration failed:", err);
-  }
-}
+// async function registerBackgroundFetchAsync() {
+//   try {
+//     await BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
+//       minimumInterval: 1 * 60, // 1 minute
+//       stopOnTerminate: false, // android only
+//       startOnBoot: true, // android only
+//     });
+//     console.log("Background fetch task registered successfully");
+//   } catch (err) {
+//     console.error("Background fetch task registration failed:", err);
+//   }
+// }
 
-async function unregisterBackgroundFetchAsync() {
-  return BackgroundFetch.unregisterTaskAsync(BACKGROUND_FETCH_TASK);
-}
-// Create Stack & Tab Navigators
+// async function unregisterBackgroundFetchAsync() {
+//   return BackgroundFetch.unregisterTaskAsync(BACKGROUND_FETCH_TASK);
+// }
+// // Create Stack & Tab Navigators
 const Stack = createStackNavigator();
 LogBox.ignoreLogs([
   "Non-serializable values were found in the navigation state",
@@ -76,8 +76,8 @@ export default function App() {
     });
 
     const a = async () => {
-      await unregisterBackgroundFetchAsync();
-      await registerBackgroundFetchAsync();
+      //await unregisterBackgroundFetchAsync();
+      //await registerBackgroundFetchAsync();
       //   await Notifications.setNotificationHandler({
       //     handleNotification: async () => ({
       //       shouldShowAlert: true,
