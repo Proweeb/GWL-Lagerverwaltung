@@ -1,72 +1,39 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import { Text, View, StyleSheet } from "react-native";
-import { database } from "../../database/database";
 import { RFPercentage } from "react-native-responsive-fontsize";
-import { Q } from "@nozbe/watermelondb";
 import { styles as theme } from "../styles";
+import useLogStore from "../../store/logStore";
 
 const InventoryWidget = () => {
-  const [logs, setLogs] = useState([]);
+  const { logs, loading, error, fetchLogs } = useLogStore();
 
   useEffect(() => {
-    const fetchLogs = async () => {
-      try {
-        const logsCollection = database.get("logs");
-
-        const subscription = logsCollection
-          .query(
-            Q.sortBy("created_at", "desc"),
-            Q.or(
-              Q.where("beschreibung", "Entnehmen"),
-              Q.where("beschreibung", "Einlagern"),
-              Q.where("beschreibung", "Nachfüllen")
-            ),
-            Q.where("is_backup", false),
-            Q.take(3) // Limit to the latest 3 logs
-          )
-          .observe()
-          .subscribe(async (latestLogs) => {
-            if (latestLogs.length === 0) {
-              setLogs([]);
-              return;
-            }
-
-            const logsData = await Promise.all(
-              latestLogs.map(async (log) => {
-                if (log.isBackup) {
-                  return;
-                }
-                const artikel = await log.artikel.fetch();
-                const regal = await log.regal.fetch();
-
-                return {
-                  id: log.id,
-                  name: artikel.beschreibung,
-                  gwid: artikel.gwId,
-                  menge: log.menge,
-                  status: artikel.status,
-                  // fachName: regal.fachName,
-                  // regalName: regal.regalName,
-                  datum: new Date(log.createdAt).toLocaleString("de-DE", {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                  }),
-                };
-              })
-            );
-
-            setLogs(logsData);
-          });
-
-        return () => subscription.unsubscribe();
-      } catch (error) {
-        console.error("Error fetching logs:", error);
-      }
-    };
-
     fetchLogs();
   }, []);
+
+  const filteredLogs = useMemo(() => {
+    return logs
+      .filter(log => 
+        !log.isBackup && 
+        (log.beschreibung === "Entnehmen" || 
+         log.beschreibung === "Einlagern" || 
+         log.beschreibung === "Nachfüllen")
+      )
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, 3)
+      .map(log => ({
+        id: log.id,
+        name: log.artikelName,
+        gwid: log.gwId,
+        menge: log.menge,
+        status: log.status || "ok",
+        datum: new Date(log.createdAt).toLocaleString("de-DE", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }),
+      }));
+  }, [logs]);
 
   const getTextColor = (status) => {
     switch (status) {
@@ -91,7 +58,24 @@ const InventoryWidget = () => {
       return "green";
     }
   };
-  if (logs.length == 0) {
+
+  if (loading) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>Loading...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={[styles.emptyText, { color: "red" }]}>Error: {error}</Text>
+      </View>
+    );
+  }
+
+  if (filteredLogs.length === 0) {
     return (
       <View style={styles.emptyContainer}>
         <Text style={styles.emptyText}>Keine Lagerbewegung bis jetzt</Text>
@@ -101,7 +85,7 @@ const InventoryWidget = () => {
 
   return (
     <>
-      {logs.map((item) => (
+      {filteredLogs.map((item) => (
         <View key={item.id} style={styles.item}>
           <Text style={[styles.text, styles.name]} numberOfLines={1}>
             {item.name}

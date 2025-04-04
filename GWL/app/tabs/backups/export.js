@@ -11,6 +11,8 @@ import Toast from "react-native-toast-message";
 
 import * as Progress from "react-native-progress";
 import { widthPercentageToDP } from "react-native-responsive-screen";
+import LogService from "../../../database/datamapper/LogHelper";
+import { logTypes } from "../../../components/enum";
 XLSX.set_fs(FileSystem);
 
 const ExportScreen = () => {
@@ -120,7 +122,11 @@ const ExportScreen = () => {
       //   text1: "Export",
       //   text2: "Erfolgreich Exportiert",
       // });
-
+      await LogService.createLog(
+        { beschreibung: logTypes.ExportDB },
+        null,
+        null
+      );
       try {
         await Sharing.shareAsync(fileUri);
       } catch (error) {
@@ -133,6 +139,8 @@ const ExportScreen = () => {
         text1: "Export",
         text2: "Fehler beim Exportieren",
       });
+
+    
     } finally {
       setIsExporting(false);
 

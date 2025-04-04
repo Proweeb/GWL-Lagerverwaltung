@@ -2,6 +2,7 @@ import { database } from "../database";
 import { Q } from "@nozbe/watermelondb";
 import RegalService from "./RegalHelper";
 import { logTypes, ErrorMessages } from "../../components/enum";
+import LogService from "./LogHelper";
 
 async function createArtikel(artikelData, regalId) {
   let regal = null;
@@ -18,20 +19,22 @@ async function createArtikel(artikelData, regalId) {
       artikel.kunde = artikelData.kunde;
       artikel.ablaufdatum = artikelData.ablaufdatum;
     });
-    await database.get("logs").create((log) => {
-      log.beschreibung = logTypes.artikelEinlagern;
-      log.menge = Number(artikelData.menge);
-      log.gesamtMenge = Number(artikelData.menge);
-      log.artikel.set(artikel);
-      log.regal.set(regal);
-      log.createdAt = Date.now();
-    });
+
     await database.get("artikel_besitzer").create((artikelBesitzer) => {
       artikelBesitzer.menge = Number(artikelData.menge);
       artikelBesitzer.regal.set(regal);
       artikelBesitzer.artikel.set(artikel);
       artikelBesitzer.createdAt = Date.now();
     });
+
+    await LogService.createLog({
+      beschreibung: logTypes.artikelEinlagern,
+      menge: Number(artikelData.menge),
+      gesamtMenge: Number(artikelData.menge),
+      regalId: regal.regalId,
+      createdAt: new Date()
+    }, artikelData.gwId, regalId);
+
     return artikel;
   });
 }
@@ -142,14 +145,15 @@ async function updateInventurArtikel(gwid, updatedData) {
     } else {
       text = logTypes.artikelNachfüllen;
     }
-    await database.get("logs").create((log) => {
-      log.beschreibung = text;
-      log.menge = Number(updatedData.menge);
-      log.gesamtMenge = Number(artikel[0].menge) + Number(updatedData.menge);
-      log.artikel.set(artikel[0]);
-      log.createdAt = Date.now();
-    });
 
+    await LogService.createLog({
+      beschreibung: text,
+      menge: Number(updatedData.menge),
+      gesamtMenge: Number(artikel[0].menge) + Number(updatedData.menge),
+      regalId: regal ? regal.regalId : null,
+      createdAt: new Date()
+    }, artikel[0].gwId, null);
+ 
     await artikel[0].update((art) => {
       if (updatedData.gwId !== null && updatedData.gwId !== undefined) {
         art.gwId = updatedData.gwId;
@@ -220,13 +224,14 @@ async function updateArtikelById(id, updatedData) {
     } else {
       text = logTypes.artikelNachfüllen;
     }
-    await database.get("logs").create((log) => {
-      log.beschreibung = text;
-      log.menge = Number(updatedData.menge);
-      log.gesamtMenge = Number(artikel[0].menge) + Number(updatedData.menge);
-      log.artikel.set(artikel[0]);
-      log.createdAt = Date.now();
-    });
+
+    await LogService.createLog({
+      beschreibung: text,
+      menge: Number(updatedData.menge),
+      gesamtMenge: Number(artikel[0].menge) + Number(updatedData.menge),
+      regalId: regal ? regal.regalId : null,
+      createdAt: new Date()
+    }, artikel[0].gwId,null);
 
     await artikel[0].update((art) => {
       if (updatedData.gwId !== null && updatedData.gwId !== undefined) {

@@ -448,6 +448,11 @@ const ImportScreen = ({ navigation }) => {
       });
 
       // Clear the document data after successful import
+      await LogService.createLog(
+        { beschreibung: logTypes.ImportDB },
+        null,
+        null
+      );
       setSelectedFile(null);
       setJsonData(null);
     } catch (error) {

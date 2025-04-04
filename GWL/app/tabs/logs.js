@@ -5,6 +5,7 @@ import {
   TextInput,
   StyleSheet,
   Modal,
+  Alert,
 } from "react-native";
 import { styles } from "../../components/styles";
 import React, { useState, useEffect } from "react";
@@ -23,6 +24,7 @@ import LogService from "../../database/datamapper/LogHelper";
 import Toast from "react-native-toast-message";
 import CustomPopup from "../../components/Modals/CustomPopUp";
 import ConfirmPopup from "../../components/Modals/ConfirmPopUp";
+import { logTypes } from "../../components/enum";
 
 export default function LogsScreen() {
   const [startDate, setStartDate] = useState(new Date());
@@ -34,45 +36,19 @@ export default function LogsScreen() {
 
   useEffect(() => {
     async function getEarliestAndLatestLogs() {
-      const logsCollection = database.get("logs");
-
-      // Query to get the earliest created_at
-      const earliestLog = await logsCollection
-        .query(Q.sortBy("created_at", Q.asc), Q.take(1))
-
-        .fetch();
-
-      // Query to get the latest created_at
-      const latestLog = await logsCollection
-        .query(
-          Q.sortBy("created_at", Q.desc),
-          Q.take(1) // Sort descending (latest)
-        )
-
-        .fetch();
-
-      // Get the earliest and latest logs
-      const earliestCreatedAt = new Date(earliestLog[0].createdAt);
-      const latestCreatedAt = new Date(latestLog[0].createdAt);
-
-      // Adjust dates by creating new Date instances
-      const adjustedStartDate = new Date(earliestCreatedAt);
-      adjustedStartDate.setDate(adjustedStartDate.getDate() - 1);
-
-      const adjustedEndDate = new Date(latestCreatedAt);
-      adjustedEndDate.setDate(adjustedEndDate.getDate() + 1);
-
-      // Update state
-      setStartDate(earliestCreatedAt);
-      setEndDate(latestCreatedAt);
-      setMaxDate(latestCreatedAt);
-      setMinDate(earliestCreatedAt);
-
-      return { earliestCreatedAt, latestCreatedAt };
+      try {
+        const logs = await LogService.getAllLogs();
+        if (logs.length > 0) {
+          const dates = logs.map((log) => new Date(log.createdAt));
+          setStartDate(new Date(Math.min(...dates)));
+          setEndDate(new Date(Math.max(...dates)));
+        }
+      } catch (error) {
+        console.error("Error getting log dates:", error);
+      }
     }
     getEarliestAndLatestLogs();
-    //fetchLogsDateRange();
-  }, [isFocused]);
+  }, []);
 
   const showDatePicker = (currentDate, setDate, isStart) => {
     DateTimePickerAndroid.open({
@@ -103,7 +79,6 @@ export default function LogsScreen() {
 
   const exportLogs = async () => {
     try {
-      // Fetch logs from the database
       const logsQuery = await LogService.getAllLogs();
 
       if (!logsQuery.length) {
@@ -111,31 +86,14 @@ export default function LogsScreen() {
         return;
       }
 
-      // Format logs data with async fetching of related Artikel and Regal
-      const logsData = await Promise.all(
-        logsQuery.map(async (log) => {
-          let artikel, regal;
-
-          if (!log.isBackup) {
-            artikel = await log.artikel.fetch();
-            regal = await log.regal.fetch();
-          }
-
-          return {
-            Beschreibung: log.beschreibung,
-
-            "Gesamt Menge": log.gesamtMenge,
-            "Regal ID": log.isBackup
-              ? log.regal_id
-              : regal
-              ? regal.regalId
-              : "",
-            GWID: log.isBackup ? log.gwId : artikel ? artikel.gwId : "", // Artikel Name
-            Menge: log.menge,
-            "Erstellt am": new Date(log.createdAt).toLocaleDateString(),
-          };
-        })
-      );
+      const logsData = logsQuery.map((log) => ({
+        Beschreibung: log.beschreibung,
+        "Gesamt Menge": log.gesamtMenge,
+        "Regal ID": log.regalName || "",
+        GWID: log.gwId || "",
+        Menge: log.menge,
+        "Erstellt am": new Date(log.createdAt).toLocaleDateString(),
+      }));
 
       // Create worksheet
       const logsSheet = XLSX.utils.json_to_sheet(logsData);
@@ -158,6 +116,11 @@ export default function LogsScreen() {
       await FileSystem.writeAsStringAsync(fileUri, excelBuffer, {
         encoding: FileSystem.EncodingType.Base64,
       });
+      await LogService.createLog(
+        { beschreibung: logTypes.ExportLog },
+        null,
+        null
+      );
 
       // Share the file
       const result = await Sharing.shareAsync(fileUri);

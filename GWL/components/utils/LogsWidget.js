@@ -1,83 +1,31 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet } from "react-native";
-import { Q } from "@nozbe/watermelondb";
-import LogService from "../../database/datamapper/LogHelper";
-import { database } from "../../database/database";
-import { styles } from "../styles";
+import React, { useEffect } from "react";
+import { View, Text, StyleSheet } from "react-native";
 import { FlashList } from "@shopify/flash-list";
+import useLogStore from "../../store/logStore";
+import { styles } from "../styles";
 
-const LogsWidget = ({ startDate, endDate }) => {
-  const [logs, setLogs] = useState([]);
+const LogsWidget = () => {
+  const { logs, loading, error, fetchLogs } = useLogStore();
 
   useEffect(() => {
-    fetchLogsForMonth(startDate, endDate);
-  }, [startDate, endDate]);
-
-  const fetchLogsForMonth = async (startDate, endDate) => {
-    try {
-      const logsCollection = database.get("logs");
-
-      const logsQuery = await logsCollection
-        .query(
-          // Q.and(
-          //   Q.where("created_at", Q.gt(startDate.getTime())),
-          //   Q.where("created_at", Q.lt(endDate.getTime()))
-          // )
-          Q.where(
-            "created_at",
-            Q.between(startDate.getTime(), endDate.getTime())
-          ),
-          Q.sortBy("created_at", Q.desc)
-        )
-        .fetch(); // Fetch instead of observe
-
-      if (logsQuery.length === 0) {
-        setLogs([]);
-        return;
-      }
-
-      const logsData = await Promise.all(
-        logsQuery.map(async (log) => {
-          let artikel, regal;
-
-          if (!log.isBackup) {
-            artikel = await log.artikel.fetch();
-            regal = await log.regal.fetch();
-          }
-
-          return {
-            beschreibung: log.beschreibung,
-            menge: log.menge,
-            gesamtMenge: log.gesamtMenge,
-            regalName: log.isBackup ? log.regal_id : regal ? regal.regalId : "",
-            artikelName: log.isBackup ? log.gwId : artikel ? artikel.gwId : "", // Artikel Name
-            createdAt: log.createdAt,
-            id: log.id,
-          };
-        })
-      );
-
-      setLogs(logsData);
-    } catch (error) {
-      console.error("Error fetching logs:", error);
-    }
-  };
+    fetchLogs();
+  }, []);
 
   const renderLogItem = ({ item }) => {
     const {
       createdAt,
       beschreibung,
-      artikelName,
-      regalName,
+      gwId,
+      regalId,
       menge,
       gesamtMenge
     } = item;
-
+    
     return (
       <View style={customStyles.logItem}>
         {createdAt && (
           <Text style={customStyles.time}>
-            {createdAt.toLocaleString("de-DE", {
+            {new Date(createdAt).toLocaleString("de-DE", {
               year: "numeric",
               month: "2-digit",
               day: "2-digit",
@@ -89,21 +37,45 @@ const LogsWidget = ({ startDate, endDate }) => {
         {beschreibung && (
           <Text style={customStyles.beschreibung}>{beschreibung}</Text>
         )}
-        {artikelName && (
-          <Text style={customStyles.artikel}>GWID: {artikelName}</Text>
+        {gwId && (
+          <Text style={customStyles.artikel}>GWID: {gwId}</Text>
         )}
-        {regalName && (
-          <Text style={customStyles.regal}>Regal: #{regalName}</Text>
+        {regalId && (
+          <Text style={customStyles.regal}>Regal: {regalId}</Text>
         )}
         {menge !== null && menge !== undefined && (
           <Text style={customStyles.menge}>Menge: {menge}</Text>
         )}
         {gesamtMenge !== null && gesamtMenge !== undefined && (
-          <Text style={customStyles.menge}>GesamtMenge: {gesamtMenge}</Text>
+          <Text style={customStyles.menge}>Gesamtmenge: {gesamtMenge}</Text>
         )}
       </View>
     );
   };
+
+  if (loading) {
+    return (
+      <View style={customStyles.container}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={customStyles.container}>
+        <Text style={customStyles.error}>Error: {error}</Text>
+      </View>
+    );
+  }
+
+  if (!logs || logs.length === 0) {
+    return (
+      <View style={customStyles.container}>
+        <Text>Keine Logs vorhanden</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={customStyles.container}>
@@ -137,7 +109,8 @@ const customStyles = StyleSheet.create({
   beschreibung: { fontSize: 16, marginBottom: 5 },
   artikel: { color: "#666" },
   regal: { color: "#666" },
-  menge: { color: "#666", fontWeight: "bold" },
+  menge: { fontWeight: "bold" },
+  error: { color: "red" }
 });
 
 export default LogsWidget;
