@@ -22,11 +22,10 @@ class LogService {
   }
 
   static async createLog(logData, gwId, regalId) {
-
     try {
       let artikel = null;
       let regal = null;
-
+      
       if (gwId !== null) {
         artikel = await ArtikelService.getArtikelById(gwId);
       }
@@ -36,24 +35,22 @@ class LogService {
 
       // Generate a more unique ID using timestamp and random bytes
       const timestamp = Date.now();
-      const randomBytes = new Uint8Array(4);
-      crypto.getRandomValues(randomBytes);
+      const randomBytes = crypto.getRandomValues(new Uint8Array(4));
       const hash = Array.from(randomBytes)
-        .map((b) => b.toString(16).padStart(2, "0"))
-        .join("");
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
       const uniqueId = `${timestamp}-${hash}`;
 
       const newLog = {
         id: uniqueId,
-        artikelName: artikel ? artikel.beschreibung : null,
+        artikelName: artikel ? artikel.beschreibung: null,
         beschreibung: logData.beschreibung,
         menge: logData.menge,
         gesamtMenge: logData.gesamtMenge,
         artikelId: artikel ? artikel.id : null,
         regalId: regal ? regal.regalId : null,
         gwId: artikel ? artikel.gwId : null,
-        createdAt: logData.createdAt || new Date(),
-        isBackup: false,
+        createdAt: logData.createdAt || new Date()
       };
 
       const logs = await this.getAllLogs();
@@ -62,7 +59,7 @@ class LogService {
       this.notifyListeners(logs);
       return newLog;
     } catch (error) {
-      console.error("Error creating log:", error);
+      console.error('Error creating log:', error);
       throw error;
     }
   }

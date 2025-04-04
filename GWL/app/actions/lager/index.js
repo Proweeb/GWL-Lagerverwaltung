@@ -7,10 +7,9 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { FlashList } from "@shopify/flash-list";
-import RegalService from "../../../database/datamapper/RegalHelper";
-import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper";
+
 import { styles } from "../../../components/styles";
-import { useIsFocused, useNavigation } from "@react-navigation/native";
+import {useNavigation } from "@react-navigation/native";
 import { heightPercentageToDP } from "react-native-responsive-screen";
 import { Q } from "@nozbe/watermelondb";
 

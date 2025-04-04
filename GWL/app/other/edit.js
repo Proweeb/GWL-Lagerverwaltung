@@ -115,7 +115,6 @@ export default function EditScreen() {
       await ArtikelService.updateArtikel(passedGwId, {
         gwId: formData.gwId,
         beschreibung: formData.beschreibung,
-        menge: Number(formData.menge),
         mindestMenge: Number(formData.mindestmenge),
         firmenId: formData.firmen_id,
         kunde: formData.kunde,
