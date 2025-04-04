@@ -129,7 +129,7 @@ export default function IndexScreen() {
         <TextInput style={inputStyle} value={fach} onChangeText={setFach} />
       </View>
       <View style={{ marginTop: 50, alignItems: "center" }}>
-         <ActionButton FertigCallBack={handleSubmit}  isDone={regalIdValid&&name&&fach}  cancelCallBack={()=>navigation.navigate("Home")}/>
+         <ActionButton FertigCallBack={handleSubmit}  isDone={regalIdValid&&name&&fach}  CancelCallBack={()=>navigation.goBack()}/>
       </View>
     
     </View>
