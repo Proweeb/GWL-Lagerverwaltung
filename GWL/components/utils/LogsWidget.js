@@ -63,25 +63,47 @@ const LogsWidget = ({ startDate, endDate }) => {
     }
   };
 
-  const renderLogItem = ({ item }) => (
-    <View style={customStyles.logItem}>
-      <Text style={customStyles.time}>
-        {item.createdAt.toLocaleString("de-DE", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          //weekday: "short",
-          hour: "2-digit",
-          minute: "2-digit",
-        })}
-      </Text>
-      <Text style={customStyles.beschreibung}>{item.beschreibung}</Text>
-      <Text style={customStyles.artikel}>GWID: {item.artikelName}</Text>
-      <Text style={customStyles.regal}>Regal: #{item.regalName}</Text>
-      <Text style={customStyles.menge}>Menge: {item.menge}</Text>
-      <Text style={customStyles.menge}>GesamtMenge: {item.gesamtMenge}</Text>
-    </View>
-  );
+  const renderLogItem = ({ item }) => {
+    const {
+      createdAt,
+      beschreibung,
+      artikelName,
+      regalName,
+      menge,
+      gesamtMenge
+    } = item;
+
+    return (
+      <View style={customStyles.logItem}>
+        {createdAt && (
+          <Text style={customStyles.time}>
+            {createdAt.toLocaleString("de-DE", {
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </Text>
+        )}
+        {beschreibung && (
+          <Text style={customStyles.beschreibung}>{beschreibung}</Text>
+        )}
+        {artikelName && (
+          <Text style={customStyles.artikel}>GWID: {artikelName}</Text>
+        )}
+        {regalName && (
+          <Text style={customStyles.regal}>Regal: #{regalName}</Text>
+        )}
+        {menge !== null && menge !== undefined && (
+          <Text style={customStyles.menge}>Menge: {menge}</Text>
+        )}
+        {gesamtMenge !== null && gesamtMenge !== undefined && (
+          <Text style={customStyles.menge}>GesamtMenge: {gesamtMenge}</Text>
+        )}
+      </View>
+    );
+  };
 
   return (
     <View style={customStyles.container}>
