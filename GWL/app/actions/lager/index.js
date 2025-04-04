@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { FlashList } from "@shopify/flash-list";
-
 import { styles } from "../../../components/styles";
 import {useNavigation } from "@react-navigation/native";
 import { heightPercentageToDP } from "react-native-responsive-screen";

@@ -181,8 +181,7 @@ async function inventurUpdateArtikelBesitzerByGwIdAndRegalId(
       menge: Number(updatedArtikelBesitzer.menge),
       gesamtMenge:
         Number(artikelBesitzer[0].menge) + Number(updatedArtikelBesitzer.menge),
-      regalId: newRegalId.regalId,
-      createdAt: new Date()
+
     }, artikelId.gwId, newRegalId.regalId);
 
     await artikelBesitzer[0].update((art) => {

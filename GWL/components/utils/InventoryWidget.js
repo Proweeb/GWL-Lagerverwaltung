@@ -12,14 +12,12 @@ const InventoryWidget = () => {
   }, []);
 
   const filteredLogs = useMemo(() => {
+
+    const validDescriptions = new Set(["Entnehmen", "Einlagern", "Nachfüllen"]);
+
     return logs
-      .filter(log => 
-        !log.isBackup && 
-        (log.beschreibung === "Entnehmen" || 
-         log.beschreibung === "Einlagern" || 
-         log.beschreibung === "Nachfüllen")
-      )
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .filter(log => !log.isBackup && validDescriptions.has(log.beschreibung))
+      .sort((a, b) => b.createdAt - a.createdAt) // Direct timestamp comparison
       .slice(0, 3)
       .map(log => ({
         id: log.id,

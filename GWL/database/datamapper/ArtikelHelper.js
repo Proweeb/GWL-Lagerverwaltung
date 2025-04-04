@@ -150,9 +150,9 @@ async function updateInventurArtikel(gwid, updatedData) {
       beschreibung: text,
       menge: Number(updatedData.menge),
       gesamtMenge: Number(artikel[0].menge) + Number(updatedData.menge),
-      regalId: regal ? regal.regalId : null,
+      regalId:  null,
       createdAt: new Date()
-    }, artikel[0].gwId, null);
+    }, gwid, null);
  
     await artikel[0].update((art) => {
       if (updatedData.gwId !== null && updatedData.gwId !== undefined) {
