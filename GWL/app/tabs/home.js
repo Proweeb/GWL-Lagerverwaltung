@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Dimensions, Keyboard } from "react-native";
+import { View, Text, Dimensions, Keyboard, KeyboardAvoidingView, ScrollView, Platform } from "react-native";
 
 import { styles } from "../../components/styles";
 

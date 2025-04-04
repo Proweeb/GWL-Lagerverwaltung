@@ -2,13 +2,11 @@ import { Text, View, ScrollView, KeyboardAvoidingView, Platform } from "react-na
 import { styles } from "../../../components/styles";
 import { TextInput } from "react-native-gesture-handler";
 import ArticleMenu from "../../../components/utils/InputMenus/articleMenu.js";
-import MiniStorageMenu from "../../../components/utils/InputMenus/miniStorageMenu.js";
 import { TouchableOpacity } from "react-native";
 import { useState } from "react";
 import { Alert } from "react-native";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper.js";
 import RegalService from "../../../database/datamapper/RegalHelper.js";
-import LogService from "../../../database/datamapper/LogHelper.js";
 import { useNavigation } from "@react-navigation/native";
 import Storagemenu from "./storageMenu.js";
 import Toast from "react-native-toast-message";
