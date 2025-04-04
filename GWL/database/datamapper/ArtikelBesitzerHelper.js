@@ -12,9 +12,6 @@ async function createArtikelOwner(artikelOwnerData, artikelId, regalId) {
   if (artikelId !== null) {
     artikel = await ArtikelService.getArtikelById(artikelId);
 
-    if (!artikel) {
-      throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
-    }
     await ArtikelService.updateArtikel(artikelId, {
       menge: Number(artikelOwnerData.menge),
     });
@@ -22,10 +19,6 @@ async function createArtikelOwner(artikelOwnerData, artikelId, regalId) {
 
   if (regalId !== null) {
     regal = await RegalService.getRegalById(regalId);
-
-    if (!regal) {
-      throw new Error(ErrorMessages.REGAL_NOT_FOUND);
-    }
   }
 
   let text;
@@ -64,9 +57,6 @@ async function getAllArtikelOwners() {
 async function getArtikelOwnerByGwId(gwId) {
   const artikel = await ArtikelService.getArtikelById(gwId);
 
-  if (!artikel) {
-    throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
-  }
   const artikelOwners = await database
     .get("artikel_besitzer")
     .query(Q.where("gw_id", artikel.id))
@@ -79,13 +69,6 @@ async function deleteArtikelOwner(gwId, regalId) {
     const artikel = await ArtikelService.getArtikelById(gwId);
     const regal = await RegalService.getRegalById(regalId);
 
-    if (!artikel) {
-      throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
-    }
-
-    if (!regal) {
-      throw new Error(ErrorMessages.REGAL_NOT_FOUND);
-    }
     const artikelOwner = await database
       .get("artikel_besitzer")
       .query(Q.where("gw_id", artikel.id), Q.where("regal_id", regal.id))
@@ -99,9 +82,6 @@ async function deleteArtikelOwner(gwId, regalId) {
 
 async function deleteArtikelOwnerByArtikelId(gwId) {
   const artikel = await ArtikelService.getArtikelById(gwId);
-  if (!artikel) {
-    throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
-  }
 
   return database.write(async () => {
     const artikelOwner = await database
@@ -121,13 +101,6 @@ async function deleteArtikelOwnerByArtikelIdAndRegalId(gwId, regalId) {
   const artikel = await ArtikelService.getArtikelById(gwId);
 
   const regal = await RegalService.getRegalById(regalId);
-
-  if (!artikel) {
-    throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
-  }
-  if (!regal) {
-    throw new Error(ErrorMessages.REGAL_NOT_FOUND);
-  }
 
   await database.write(async () => {
     const artikelOwner = await database
@@ -164,9 +137,7 @@ async function deleteArtikelOwnerByArtikelIdAndRegalId(gwId, regalId) {
 }
 async function getArtikelOwnersByRegalId(regalId) {
   const regal = await RegalService.getRegalById(regalId);
-  if (!regal) {
-    throw new Error(ErrorMessages.REGAL_NOT_FOUND);
-  }
+
   return await regal.artikelBesitzer.fetch();
 }
 
@@ -177,12 +148,7 @@ async function inventurUpdateArtikelBesitzerByGwIdAndRegalId(
 ) {
   const artikelId = await ArtikelService.getArtikelById(gwId);
   const newRegalId = await RegalService.getRegalById(regalId);
-  if (!artikelId) {
-    throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
-  }
-  if (!newRegalId) {
-    throw new Error(ErrorMessages.REGAL_NOT_FOUND);
-  }
+
   const artikelBesitzer = await database
     .get("artikel_besitzer")
     .query(Q.where("gw_id", artikelId.id), Q.where("regal_id", newRegalId.id)) // Ensure "gwId" matches your schema
@@ -245,13 +211,8 @@ async function updateArtikelBesitzerMengeByGwIdAndRegalId(
 ) {
   const artikelId = await ArtikelService.getArtikelById(gwId);
 
-  if (!artikelId) {
-    throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
-  }
   const newRegalId = await RegalService.getRegalById(regalId);
-  if (!newRegalId) {
-    throw new Error(ErrorMessages.REGAL_NOT_FOUND);
-  }
+
   const artikelBesitzer = await database
     .get("artikel_besitzer")
     .query(Q.where("gw_id", artikelId.id), Q.where("regal_id", newRegalId.id)) // Ensure "gwId" matches your schema
@@ -309,17 +270,10 @@ async function updateArtikelBesitzerMengeByGwIdAndRegalId(
 async function getArtikelOwnersByGwIdAndRegalId(artikelId, regalId) {
   let artikel = null;
   let regal = null;
-  try {
-    artikel = await ArtikelService.getArtikelById(artikelId);
-  } catch (error) {
-    throw new Error(error.message);
-  }
 
-  try {
-    regal = await RegalService.getRegalById(regalId);
-  } catch (error) {
-    throw new Error(error.message);
-  }
+  artikel = await ArtikelService.getArtikelById(artikelId);
+
+  regal = await RegalService.getRegalById(regalId);
 
   const ArtikelBesitzer = await database
     .get("artikel_besitzer")

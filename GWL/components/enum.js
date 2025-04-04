@@ -16,4 +16,7 @@ export const ErrorMessages = {
   REGAL_NOT_FOUND: "Regal existiert nicht",
   ARTIKELBESITZER_NOT_FOUND: "ArtikelBesitzer exisitert nicht",
   LOG_NOT_FOUND: "Log existiert nicht",
+  ARTICLE_EXISTS: "Artikel exisitert bereits",
+  REGAL_EXISTS: "Regal exisitert bereits",
+  ARTIKELBESITZER_EXISTS: "ArtikelBesitzer existiert bereits",
 };

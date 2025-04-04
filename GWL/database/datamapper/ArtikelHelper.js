@@ -5,11 +5,8 @@ import { logTypes, ErrorMessages } from "../../components/enum";
 
 async function createArtikel(artikelData, regalId) {
   let regal = null;
-  try {
-    regal = await RegalService.getRegalById(regalId);
-  } catch (error) {
-    throw new Error(error.message);
-  }
+
+  regal = await RegalService.getRegalById(regalId);
 
   return database.write(async () => {
     const artikel = await database.get("artikel").create((artikel) => {

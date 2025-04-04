@@ -11,15 +11,9 @@ async function createLog(logData, artikelId, regalId) {
   let regal = null;
   if (artikelId !== null) {
     artikel = await ArtikelService.getArtikelById(artikelId);
-    if (!artikel) {
-      throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
-    }
   }
   if (regalId !== null) {
     regal = await RegalService.getRegalById(regalId);
-    if (!regal) {
-      throw new Error(ErrorMessages.REGAL_NOT_FOUND);
-    }
   }
   return await database.write(async () => {
     return database.get("logs").create((log) => {
@@ -41,29 +35,20 @@ async function getAllLogs() {
 
 async function getLogByArtikelId(artikel_id) {
   const artikel = await ArtikelService.getArtikelById(artikel_id);
-  if (!artikel) {
-    throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
-  }
+
   return await artikel.logs.fetch();
 }
 
 async function getLogByRegalId(regal_id) {
   const regal = await RegalService.getRegalById(regal_id);
-  if (!regal) {
-    throw new Error(ErrorMessages.REGAL_NOT_FOUND);
-  }
+
   return await regal.logs.fetch();
 }
 
 async function getLogByRegalIdAndArtikelId(regal_id, artikel_id) {
   const regal = await RegalService.getRegalById(regal_id);
-  if (!regal) {
-    throw new Error(ErrorMessages.REGAL_NOT_FOUND);
-  }
+
   const artikel = await ArtikelService.getArtikelById(artikel_id);
-  if (!artikel) {
-    throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
-  }
 
   const regalLogs = await regal.logs.fetch();
   const artikelLogs = await artikel.logs.fetch();
@@ -73,9 +58,7 @@ async function getLogByRegalIdAndArtikelId(regal_id, artikel_id) {
 
 async function deleteLogByArtikelId(artikel_id) {
   const artikel = await ArtikelService.getArtikelById(artikel_id);
-  if (!artikel) {
-    throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
-  }
+
   return await database.write(async () => {
     const logs = await artikel.logs.fetch();
     if (logs.length === 0) {
@@ -89,13 +72,9 @@ async function deleteLogByArtikelId(artikel_id) {
 
 async function BackupLogByArtikelId(artikelId) {
   const artikel = await ArtikelService.getArtikelById(artikelId);
-  if (!artikel) {
-    throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
-  }
 
   await database.write(async () => {
     const logs = await database.get("logs").query().fetch();
-   
 
     const updates = await Promise.all(
       logs.map(async (log) => {
@@ -124,19 +103,17 @@ async function BackupLogByArtikelId(artikelId) {
     );
 
     const validUpdates = updates.filter(Boolean);
-   
+
     await database.batch(...validUpdates);
   });
 }
 
 async function deleteLogByRegalId(regal_id) {
   const regal = await RegalService.getRegalById(regal_id);
-  if (!regal) {
-    throw new Error(ErrorMessages.REGAL_NOT_FOUND);
-  }
+
   return await database.write(async () => {
     const logs = await regal.logs.fetch();
-   
+
     for (let i = 0; i < logs.length; i++) {
       await logs[i].destroyPermanently();
     }
@@ -145,17 +122,13 @@ async function deleteLogByRegalId(regal_id) {
 
 async function deleteLogByRegalIdAndArtikelId(regal_id, artikel_id) {
   const regal = await RegalService.getRegalById(regal_id);
-  if (!regal) {
-    throw new Error(ErrorMessages.REGAL_NOT_FOUND);
-  }
+
   const artikel = await ArtikelService.getArtikelById(artikel_id);
-  if (!artikel) {
-    throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
-  }
+
   return await database.write(async () => {
     const artikelLogs = await artikel.logs.fetch();
     const logs = await regal.logs.fetch();
-  
+
     for (let i = 0; i < logs.length; i++) {
       if (artikelLogs[i] === logs[i]) {
         await logs[i].destroyPermanently();

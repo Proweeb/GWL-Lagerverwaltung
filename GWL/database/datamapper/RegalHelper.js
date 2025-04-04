@@ -5,6 +5,14 @@ import { logTypes, ErrorMessages } from "../../components/enum";
 
 async function createRegal(regalData) {
   return database.write(async () => {
+    const existingRegal = await database
+      .get("regale")
+      .query(Q.where("regalId", regalData.regalId))
+      .fetch();
+
+    if (existingRegal.length > 0) {
+      throw new Error(ErrorMessages.REGAL_EXISTS);
+    }
     const regal = await database.get("regale").create((regal) => {
       regal.regalId = regalData.regalId;
       regal.fachName = regalData.fachName;
@@ -28,8 +36,8 @@ async function getRegalById(regalid) {
     .get("regale")
     .query(Q.where("regal_id", regalid))
     .fetch();
-  
-  if (regal.length<1) {
+
+  if (regal.length < 1) {
     throw new Error(ErrorMessages.REGAL_NOT_FOUND);
   }
   return regal[0];
@@ -67,11 +75,11 @@ async function deleteRegal(regalid) {
       .get("regale")
       .query(Q.where("regal_id", regalid))
       .fetch();
-    
-    if (regal.length<1) {
+
+    if (regal.length < 1) {
       throw new Error(ErrorMessages.REGAL_NOT_FOUND);
     }
-    
+
     await regal[0].destroyPermanently();
   });
 }
