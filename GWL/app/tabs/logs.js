@@ -85,7 +85,7 @@ export default function LogsScreen() {
         Alert.alert("Fehler", "Keine Logs zum Exportieren vorhanden.");
         return;
       }
-      console.log(logsQuery);
+   
       const logsData = logsQuery.map((log) => ({
         Beschreibung: log.beschreibung,
         "Gesamt Menge": log.gesamtMenge,
