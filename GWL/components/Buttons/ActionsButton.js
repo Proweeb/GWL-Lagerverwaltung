@@ -8,7 +8,6 @@ const ActionButton = ({ FertigCallBack, CancelCallBack, isDone }) => {
   return (
     <TouchableOpacity
       onPress={isDone ? FertigCallBack : CancelCallBack}
-      disabled={!isDone}
       style={{
         backgroundColor: isDone ? "#dcebf9" : styles.lightRed,
         padding: 10,
