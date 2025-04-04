@@ -24,7 +24,7 @@ const ConfirmPopup = ({
         >
           <MaterialIcons name="error-outline" size={32} color={accentColor} />
         </View>
-        <ScrollView style={{width: "100%", height: 200}}>
+        <ScrollView style={{width: "100%", height: "auto", maxHeight: 200}}>
         {/* Message */}
         <Text style={styles.message}>
           {text
