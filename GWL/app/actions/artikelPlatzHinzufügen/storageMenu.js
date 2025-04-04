@@ -10,8 +10,14 @@ import Feather from "@expo/vector-icons/Feather";
 import ArticleTextInput from "../artikelNachfüllen/articleTextInput.js";
 import { Alert } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import Toast from "react-native-toast-message";
 
-export default function Storagemenu({ formData, setFormData }) {
+export default function Storagemenu({
+  formData,
+  setFormData,
+  regalIdValid,
+  setRegalIdValid,
+}) {
   const navigation = useNavigation();
 
   return (
@@ -21,7 +27,7 @@ export default function Storagemenu({ formData, setFormData }) {
         margin: 10,
       }}
     >
-      <Text style={{ fontSize: RFPercentage(1.8) }}>Regal Name</Text>
+      <Text style={{ fontSize: RFPercentage(1.8) }}>Regal Name*</Text>
       <TextInputField
         value={formData.regalname}
         onChangeText={(text) =>
@@ -30,7 +36,7 @@ export default function Storagemenu({ formData, setFormData }) {
       />
 
       <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>
-        Fach Name
+        Fach Name*
       </Text>
       <TextInputField
         value={formData.fachname}
@@ -39,7 +45,9 @@ export default function Storagemenu({ formData, setFormData }) {
         }
       />
 
-      <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>RegalID</Text>
+      <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>
+        Regal-ID*
+      </Text>
       <View
         style={{
           flexDirection: "row",
@@ -50,9 +58,31 @@ export default function Storagemenu({ formData, setFormData }) {
         <View style={{ flex: 1 }}>
           <TextInputField
             value={formData.regalId}
-            onChangeText={(text) =>
-              setFormData((prevData) => ({ ...prevData, regalId: text }))
-            }
+            onChangeText={(text) => {
+              const regex = /^[a-zA-Z0-9]+\.[a-zA-Z0-9]+$/;
+
+              // Überprüfen, ob das Format gültig ist
+              if (regex.test(text)) {
+                setRegalIdValid(true); // Gültig
+              } else {
+                setRegalIdValid(false); // Ungültig
+                Toast.show({
+                  type: "warning",
+                  text1: "Regal",
+                  text2: "RegalID hat das falsche Format",
+                  position: "bottom",
+                });
+              }
+
+              setFormData((prevData) => ({ ...prevData, regalId: text })); // Text setzen
+              const split = text.split(".");
+              setFormData((prevData) => ({
+                ...prevData,
+                regalname: split[0],
+                fachname: split[1],
+              }));
+            }}
+            textColor={regalIdValid ? "black" : "red"} // Textfarbe ändern, wenn ungültig
           />
         </View>
 
@@ -61,6 +91,12 @@ export default function Storagemenu({ formData, setFormData }) {
             navigation.navigate("Scan\\Barcode", {
               onScan: (code) => {
                 setFormData((prevData) => ({ ...prevData, regalId: code }));
+                const split = code.split(".");
+                setFormData((prevData) => ({
+                  ...prevData,
+                  regalname: split[0],
+                  fachname: split[1],
+                }));
               },
             });
           }}

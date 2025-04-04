@@ -10,6 +10,7 @@ import ArticleTextInput from "../artikelNachfüllen/articleTextInput.js";
 import RegalTextInput from "../artikelNachfüllen/regalTextInput.js";
 import TextInputField from "../../../components/utils/TextInputs/textInputField.js";
 import { RFPercentage } from "react-native-responsive-fontsize";
+import * as Progress from "react-native-progress";
 
 export default function IndexScreen() {
   const navigation = useNavigation();
@@ -17,9 +18,12 @@ export default function IndexScreen() {
   const [menge, setMenge] = useState();
   const [regalIdValid, setRegalIdValid] = useState(false);
   const [regalId, setRegalId] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const checkArticleInRegal = async () => {
     try {
+      setLoading(true);
+      console.log(gwId, regalId);
       const besitzer =
         await ArtikelBesitzerService.getArtikelOwnersByGwIdAndRegalId(
           gwId,
@@ -27,18 +31,6 @@ export default function IndexScreen() {
         );
 
       if (besitzer.length == 0) {
-        await ArtikelBesitzerService.createArtikelOwner(
-          { menge: menge },
-          gwId,
-          regalId
-        );
-        Toast.show({
-          type: "success",
-          text1: "Artikel",
-          text2: "Eingelagert",
-          position: "top",
-        });
-        navigation.goBack();
       } else {
         Toast.show({
           type: "error",
@@ -46,9 +38,12 @@ export default function IndexScreen() {
           text2: "Artikel befindet sich im Regal",
           position: "bottom",
         });
+        setLoading(false);
       }
     } catch (error) {
+      console.log(error);
       if (error.message == ErrorMessages.ARTICLE_NOT_FOUND) {
+        setLoading(false);
         navigation.navigate("Actions", {
           screen: "ArtikelEinlagernNavigator",
           params: {
@@ -57,12 +52,27 @@ export default function IndexScreen() {
           },
         });
       } else if (error.message == ErrorMessages.REGAL_NOT_FOUND) {
+        setLoading(false);
         Toast.show({
           type: "error",
           text1: "Error",
           text2: "Regal existert nicht",
           position: "bottom",
         });
+      } else if (error.message == ErrorMessages.ARTIKELBESITZER_NOT_FOUND) {
+        await ArtikelBesitzerService.createArtikelOwner(
+          { menge: menge },
+          gwId,
+          regalId
+        );
+        Toast.show({
+          type: "success",
+          text1: "Artikel: " + gwId,
+          text2: "Eingelagert",
+          position: "top",
+        });
+        setLoading(false);
+        navigation.goBack();
       }
     } finally {
     }
@@ -91,12 +101,14 @@ export default function IndexScreen() {
     >
       <View>
         <Text style={styles.subHeader}>Lagerung</Text>
-        <RegalTextInput
-          regalId={regalId}
-          setRegalId={setRegalId}
-          setRegalIdValid={setRegalIdValid}
-          regalIdValid={regalIdValid}
-        />
+        <View style={{ margin: 10 }}>
+          <RegalTextInput
+            regalId={regalId}
+            setRegalId={setRegalId}
+            setRegalIdValid={setRegalIdValid}
+            regalIdValid={regalIdValid}
+          />
+        </View>
       </View>
 
       <View style={[siteStyles.longLine, { marginVertical: 10 }]}></View>
@@ -106,7 +118,7 @@ export default function IndexScreen() {
         <View style={{ margin: 10 }}>
           <ArticleTextInput gwId={gwId} setGwId={setGwId} />
           <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>
-            Menge
+            Menge*
           </Text>
           <TextInputField
             inputMode={"numeric"}
@@ -119,15 +131,19 @@ export default function IndexScreen() {
       </View>
 
       <View style={{ marginTop: 50, alignItems: "center" }}>
-        <ActionButton
-          CancelCallBack={() => {
-            if (navigation.canGoBack()) {
-              navigation.goBack();
-            }
-          }}
-          FertigCallBack={handleSubmit}
-          isDone={regalIdValid && menge && gwId}
-        />
+        {loading ? (
+          <Progress.Circle size={50} indeterminate={true} />
+        ) : (
+          <ActionButton
+            CancelCallBack={() => {
+              if (navigation.canGoBack()) {
+                navigation.goBack();
+              }
+            }}
+            FertigCallBack={handleSubmit}
+            isDone={regalIdValid && menge && gwId}
+          />
+        )}
       </View>
     </ScrollView>
   );

@@ -4,7 +4,13 @@ import RegalService from "./RegalHelper";
 import { logTypes, ErrorMessages } from "../../components/enum";
 
 async function createArtikel(artikelData, regalId) {
-  const regal = await RegalService.getRegalById(regalId);
+  let regal = null;
+  try {
+    regal = await RegalService.getRegalById(regalId);
+  } catch (error) {
+    throw new Error(error.message);
+  }
+
   return database.write(async () => {
     const artikel = await database.get("artikel").create((artikel) => {
       artikel.gwId = artikelData.gwId;

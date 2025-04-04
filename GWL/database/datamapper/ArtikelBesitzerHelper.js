@@ -307,14 +307,20 @@ async function updateArtikelBesitzerMengeByGwIdAndRegalId(
 }
 
 async function getArtikelOwnersByGwIdAndRegalId(artikelId, regalId) {
-  const artikel = await ArtikelService.getArtikelById(artikelId);
-  if (!artikel) {
-    throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
+  let artikel = null;
+  let regal = null;
+  try {
+    artikel = await ArtikelService.getArtikelById(artikelId);
+  } catch (error) {
+    throw new Error(error.message);
   }
-  const regal = await RegalService.getRegalById(regalId);
-  if (!regal) {
-    throw new Error(ErrorMessages.REGAL_NOT_FOUND);
+
+  try {
+    regal = await RegalService.getRegalById(regalId);
+  } catch (error) {
+    throw new Error(error.message);
   }
+
   const artikelBesitzer = await database
     .get("artikel_besitzer")
     .query(Q.where("gw_id", artikel.id), Q.where("regal_id", regal.id))

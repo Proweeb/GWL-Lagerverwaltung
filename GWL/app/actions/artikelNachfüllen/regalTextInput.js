@@ -22,7 +22,7 @@ export default function RegalTextInput({
   const navigation = useNavigation();
 
   return (
-    <View style={{ margin: 10 }}>
+    <View>
       <Text style={{ fontSize: RFPercentage(1.8) }}>Regal-ID*</Text>
       <View
         style={{

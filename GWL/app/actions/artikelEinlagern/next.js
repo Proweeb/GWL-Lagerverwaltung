@@ -17,15 +17,18 @@ import { ErrorMessages } from "../../../components/enum.js";
 import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper.js";
 import RegalTextInput from "../artikelNachfüllen/regalTextInput.js";
 import ActionButton from "../../../components/Buttons/ActionsButton.js";
+import * as Progress from "react-native-progress";
 
 export default function NextScreen() {
   const navigation = useNavigation();
   const route = useRoute();
+  const [loading, setLoading] = useState(false);
   const passedGwId = route.params?.gwId;
   const passedRegalId = route.params?.regalId;
   const passedMenge = route.params?.menge;
   const [regalIdValid, setRegalIdValid] = useState(true);
   const [regalId, setRegalId] = useState("");
+
   const [formData, setFormData] = useState({
     gwId: "",
     beschreibung: "",
@@ -45,6 +48,7 @@ export default function NextScreen() {
   }, [passedGwId, passedMenge, passedRegalId]);
 
   const handleSubmit = async () => {
+    setLoading(true);
     const {
       gwId,
       beschreibung,
@@ -56,38 +60,50 @@ export default function NextScreen() {
     } = formData;
 
     try {
-      await ArtikelService.getArtikelById(gwId);
-    } catch (error) {
-      if (error.message == ErrorMessages.ARTICLE_NOT_FOUND) {
-        console.log(regalId);
-        await ArtikelService.createArtikel(
-          {
-            gwId,
-            firmenId: firmen_id,
-            kunde,
-            beschreibung,
-            menge: Number(menge),
-            ablaufdatum,
-            mindestMenge: Number(mindestmenge),
-          },
-          String(regalId)
-        );
-
-        Toast.show({
-          type: "success",
-          text1: "Artikel: " + formData.beschreibung,
-          text2: "Erfolgreich gespeichert",
-          position: "top",
-        });
-        navigation.navigate("Home");
-      } else {
-        console.error("Fehler beim Speichern:", error);
+      const article = await ArtikelService.getArtikelById(gwId);
+      if (article) {
         Toast.show({
           type: "error",
           text1: "Artikel",
           text2: "Existiert bereits",
           position: "bottom",
         });
+        setLoading(false);
+      }
+    } catch (error) {
+      if (error.message == ErrorMessages.ARTICLE_NOT_FOUND) {
+        try {
+          await ArtikelService.createArtikel(
+            {
+              gwId,
+              firmenId: firmen_id,
+              kunde,
+              beschreibung,
+              menge: Number(menge),
+              ablaufdatum,
+              mindestMenge: Number(mindestmenge),
+            },
+            String(regalId)
+          );
+          Toast.show({
+            type: "success",
+            text1: "Artikel: " + gwId,
+            text2: "Eingelagert",
+            position: "top",
+          });
+          setLoading(false);
+          navigation.navigate("Home");
+        } catch (error) {
+          if (error.message == ErrorMessages.REGAL_NOT_FOUND) {
+            setLoading(false);
+            Toast.show({
+              type: "error",
+              text1: "Regal",
+              text2: "Existiert nicht",
+              position: "bottom",
+            });
+          }
+        }
       }
     }
   };
@@ -103,12 +119,14 @@ export default function NextScreen() {
     >
       <View>
         <Text style={styles.subHeader}>Lagerung</Text>
-        <RegalTextInput
-          regalId={regalId}
-          setRegalId={setRegalId}
-          setRegalIdValid={setRegalIdValid}
-          regalIdValid={regalIdValid}
-        />
+        <View style={{ margin: 10 }}>
+          <RegalTextInput
+            regalId={regalId}
+            setRegalId={setRegalId}
+            setRegalIdValid={setRegalIdValid}
+            regalIdValid={regalIdValid}
+          />
+        </View>
       </View>
 
       <View style={{ marginTop: 10 }}>
@@ -117,20 +135,24 @@ export default function NextScreen() {
       </View>
 
       <View style={{ marginTop: 50, alignItems: "center" }}>
-        <ActionButton
-          CancelCallBack={() => {
-            if (navigation.canGoBack()) {
-              navigation.goBack();
+        {loading ? (
+          <Progress.Circle size={50} indeterminate={true} />
+        ) : (
+          <ActionButton
+            CancelCallBack={() => {
+              if (navigation.canGoBack()) {
+                navigation.goBack();
+              }
+            }}
+            FertigCallBack={handleSubmit}
+            isDone={
+              regalIdValid &&
+              formData.menge &&
+              formData.gwId &&
+              formData.beschreibung
             }
-          }}
-          FertigCallBack={handleSubmit}
-          isDone={
-            regalIdValid &&
-            formData.menge &&
-            formData.gwId &&
-            formData.beschreibung
-          }
-        />
+          />
+        )}
       </View>
     </ScrollView>
   );
