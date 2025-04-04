@@ -1,13 +1,9 @@
-import { Text, View, ScrollView } from "react-native";
+import { Text, View } from "react-native";
 import { styles } from "../../../components/styles";
 import TextInputField from "../../../components/utils/TextInputs/textInputField";
-import { useState, useEffect } from "react";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useNavigation } from "@react-navigation/native";
-import Feather from "@expo/vector-icons/Feather";
-import ArticleTextInput from "../artikelNachfüllen/articleTextInput.js";
-import { Alert } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
 
