@@ -6,13 +6,12 @@ import {
   Alert,
   TouchableOpacity,
 } from "react-native";
-import React, { Component, useState } from "react";
+import React, { Component, useState, useEffect } from "react";
 import RegalService from "../../../database/datamapper/RegalHelper";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { RFPercentage } from "react-native-responsive-fontsize";
 
-import { useEffect } from "react";
 import ActionButton from "../../../components/Buttons/ActionsButton";
 import { styles } from "../../../components/styles";
 import Toast from "react-native-toast-message";
@@ -25,6 +24,16 @@ export default function IndexScreen() {
   const [code, setCode] = useState("");
   const [regalIdValid, setRegalIdValid] = useState(false);
   const navigation = useNavigation();
+
+  useEffect(() => {
+    if (regalIdValid && code) {
+      const parts = code.split('.');
+      if (parts.length === 2) {
+        setFach(parts[1]);
+        setName(parts[0]);
+      }
+    }
+  }, [regalIdValid, code]);
 
   const handleSubmit = async () => {
     try {
@@ -103,6 +112,9 @@ export default function IndexScreen() {
       <Text style={{ fontSize: 16, marginBottom: 30, fontWeight: "bold" }}>
         Lagerung
       </Text>
+      <RegalTextInput regalId={code} setRegalId={setCode} setRegalIdValid={setRegalIdValid} regalIdValid={regalIdValid} />
+     
+
       <Text style={{ fontSize: RFPercentage(1.8), marginBottom: 5 }}>
         Regal Name*
       </Text>
@@ -116,13 +128,10 @@ export default function IndexScreen() {
       <View style={{ marginBottom: 10 }}>
         <TextInput style={inputStyle} value={fach} onChangeText={setFach} />
       </View>
-
-    <RegalTextInput regalId={code} setRegalId={setCode} setRegalIdValid={setRegalIdValid} regalIdValid={regalIdValid} />
-
-
       <View style={{ marginTop: 50, alignItems: "center" }}>
-         <ActionButton FertigCallBack={handleSubmit}  isDone={true} />
+         <ActionButton FertigCallBack={handleSubmit}  isDone={regalIdValid&&name&&fach}  cancelCallBack={()=>navigation.navigate("Home")}/>
       </View>
+    
     </View>
   );
 }
