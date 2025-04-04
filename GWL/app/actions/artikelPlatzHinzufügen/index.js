@@ -57,6 +57,7 @@ export default function IndexScreen() {
           text2: "Existiert bereits",
           position: "bottom",
         });
+        setLoading(false);
         return;
       }
     } catch (error) {
@@ -65,6 +66,7 @@ export default function IndexScreen() {
       } else {
         console.error("Fehler beim RegalSpeichern:", error);
       }
+      setLoading(false);
     }
 
     try {
@@ -76,6 +78,7 @@ export default function IndexScreen() {
           text2: "Existiert bereits",
           position: "bottom",
         });
+        setLoading(false);
         return;
       }
     } catch (error) {
@@ -104,12 +107,14 @@ export default function IndexScreen() {
           text2: "Erfolgreich gespeichert",
           position: "top",
         });
+
         navigation.navigate("Home");
         setLoading(false);
       } else {
         console.error("Fehler beim ArtikelSpeichern:", error);
       }
     }
+    setLoading(false);
   };
 
   return (
