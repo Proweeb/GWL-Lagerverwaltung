@@ -85,11 +85,11 @@ export default function LogsScreen() {
         Alert.alert("Fehler", "Keine Logs zum Exportieren vorhanden.");
         return;
       }
-
+      console.log(logsQuery);
       const logsData = logsQuery.map((log) => ({
         Beschreibung: log.beschreibung,
         "Gesamt Menge": log.gesamtMenge,
-        "Regal ID": log.regalName || "",
+        "Regal ID": log.regalId || "",
         GWID: log.gwId || "",
         Menge: log.menge,
         "Erstellt am": new Date(log.createdAt).toLocaleDateString(),
