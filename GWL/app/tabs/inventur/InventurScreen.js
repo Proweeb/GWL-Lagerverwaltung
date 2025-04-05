@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Alert, TouchableOpacity, Modal } from "react-native";
+import {
+  View,
+  Text,
+  Alert,
+  TouchableOpacity,
+  Modal,
+  ActivityIndicator,
+} from "react-native";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper.js";
 import { styles } from "../../../components/styles.js";
 import InventoryItem from "../../../components/oneTimeUse/InventoryItem.js";
@@ -13,6 +20,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Toast from "react-native-toast-message";
 import { ToastMessages } from "../../../components/enum.js";
 import ConfirmPopup from "../../../components/Modals/ConfirmPopUp.js";
+import * as Progress from "react-native-progress"; // Add this import
 
 const InventurScreen = ({ setChangedMenge, changedMenge }) => {
   const navigation = useNavigation();
@@ -20,6 +28,8 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
   const [artikelList, setArtikelList] = useState([]);
   const [isScanning, setIsScanning] = useState(false);
   const [resetModalVisible, setResetModalVisible] = useState(false);
+  const [loadingState, setLoadingState] = useState(true);
+  const [searchLoading, setSearchLoading] = useState(false); // New state for search loading
 
   useFocusEffect(
     React.useCallback(() => {
@@ -29,11 +39,13 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
 
   const fetchArtikel = async () => {
     try {
+      setLoadingState(true);
       const artikelData = await ArtikelBesitzerService.getAllArtikelOwners();
-
+      setLoadingState(false);
       setArtikelList(artikelData);
     } catch (error) {
       console.error("Fehler beim Laden der Artikel:", error);
+      setLoadingState(false);
     }
   };
 
@@ -50,6 +62,7 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
   const handleSearch = async () => {
     if (!gwId) {
       try {
+        setSearchLoading(true);
         const artikelData = await ArtikelBesitzerService.getAllArtikelOwners();
         setArtikelList(artikelData);
       } catch (error) {
@@ -59,11 +72,14 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
           text2: ToastMessages.ARTICLE_NOT_FOUND,
           position: "bottom",
         });
+      } finally {
+        setSearchLoading(false);
       }
       return;
     }
 
     try {
+      setSearchLoading(true);
       const artikel = await ArtikelBesitzerService.getArtikelOwnerByGwId(gwId);
       if (!artikel) {
         Alert.alert("Fehler", "Artikel nicht gefunden.");
@@ -77,6 +93,8 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
         text2: ToastMessages.ARTICLE_NOT_FOUND,
         position: "bottom",
       });
+    } finally {
+      setSearchLoading(false);
     }
   };
 
@@ -96,6 +114,28 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
       );
     }
   };
+
+  if (loadingState) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: styles.backgroundColor,
+        }}
+      >
+        <Progress.Circle
+          size={50}
+          indeterminate={true}
+          color={styles.textColor}
+        />
+        <Text style={{ marginTop: 10, color: styles.textColor }}>
+          Lade Artikel...
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View
@@ -133,22 +173,37 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
         />
       </View>
 
-      <View style={{ flex: 1, width: "100%" }}>
-        <FlashList
-          data={artikelList}
-          keyExtractor={(item) => String(item.id)}
-          estimatedItemSize={30}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          renderItem={({ item }) => (
-            <InventoryItem
-              item={item}
-              changedMenge={changedMenge}
-              setChangedMenge={setChangedMenge}
-            />
-          )}
-        />
-      </View>
+      {searchLoading ? (
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <Progress.Circle
+            size={50}
+            indeterminate={true}
+            color={styles.textColor}
+          />
+          <Text style={{ marginTop: 10, color: styles.textColor }}>
+            Suche Artikel...
+          </Text>
+        </View>
+      ) : (
+        <View style={{ flex: 1, width: "100%" }}>
+          <FlashList
+            data={artikelList}
+            keyExtractor={(item) => String(item.id)}
+            estimatedItemSize={30}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            renderItem={({ item }) => (
+              <InventoryItem
+                item={item}
+                changedMenge={changedMenge}
+                setChangedMenge={setChangedMenge}
+              />
+            )}
+          />
+        </View>
+      )}
 
       <View style={{ alignItems: "center", marginBottom: 5 }}>
         <WeiterButton
