@@ -1,7 +1,7 @@
 import { appSchema, tableSchema } from "@nozbe/watermelondb";
 
 export const lagerSchema = appSchema({
-  version: 5, // Incremented version due to schema changes
+  version: 6, // Incremented version due to schema changes
   tables: [
     tableSchema({
       name: "regale",
@@ -27,19 +27,19 @@ export const lagerSchema = appSchema({
         { name: "updated_at", type: "number" },
       ],
     }),
-    tableSchema({
-      name: "logs",
-      columns: [
-        { name: "beschreibung", type: "string" },
-        { name: "regal_id", type: "string", isOptional: true }, // Foreign key to regale
-        { name: "gw_id", type: "string", isOptional: true }, // Foreign key to artikel
-        { name: "menge", type: "number", isOptional: true },
-        { name: "gesamt_menge", type: "number", isOptional: true },
-        { name: "is_backup", type: "boolean" },
-        { name: "created_at", type: "number" },
-        { name: "updated_at", type: "number" },
-      ],
-    }),
+    // tableSchema({
+    //   name: "logs",
+    //   columns: [
+    //     { name: "beschreibung", type: "string" },
+    //     { name: "regal_id", type: "string", isOptional: true }, // Foreign key to regale
+    //     { name: "gw_id", type: "string", isOptional: true }, // Foreign key to artikel
+    //     { name: "menge", type: "number", isOptional: true },
+    //     { name: "gesamt_menge", type: "number", isOptional: true },
+    //     { name: "is_backup", type: "boolean" },
+    //     { name: "created_at", type: "number" },
+    //     { name: "updated_at", type: "number" },
+    //   ],
+    // }),
     tableSchema({
       name: "artikel_besitzer",
       columns: [

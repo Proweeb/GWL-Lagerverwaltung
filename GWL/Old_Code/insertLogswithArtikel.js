@@ -1,11 +1,14 @@
 import { database } from "../database/database";
 import ArtikelBesitzerService from "../database/datamapper/ArtikelBesitzerHelper";
 import ArtikelService from "../database/datamapper/ArtikelHelper";
+import LogService from "../database/datamapper/LogHelper";
 
 export async function testInsertAndFetch() {
+  await LogService.deleteAllLogs();
+  
   await database.write(async () => {
     // Delete all existing records from tables
-    const tables = ["artikel", "logs", "regale", "artikel_besitzer"];
+    const tables = ["artikel", "regale", "artikel_besitzer"];
     const allRecords = await Promise.all(
       tables.map((table) => database.get(table).query().fetch())
     );
@@ -13,19 +16,20 @@ export async function testInsertAndFetch() {
     await database.batch([
       ...allRecords.flat().map((record) => record.prepareDestroyPermanently()),
     ]);
-
-    // Create Regale (shelves)
-    const regaleNames = ["A00", "B00", "C00"];
-    for (const regalName of regaleNames) {
-      for (let index = 0; index < 9; index++) {
-        await database.get("regale").create((regal) => {
-          regal.fachName = "00" + index;
-          regal.regalName = regalName;
-          regal.regalId = regal.regalName + "." + regal.fachName;
-        });
-      }
+      // Create Regale (shelves)
+  const regaleNames = ["A00", "B00", "C00"];
+  for (const regalName of regaleNames) {
+    for (let index = 0; index < 9; index++) {
+      await database.get("regale").create((regal) => {
+        regal.fachName = "00" + index;
+        regal.regalName = regalName;
+        regal.regalId = regal.regalName + "." + regal.fachName;
+      });
     }
+  }
+
   });
+
 
   // List of 50 unique item names
   const artikelNamen = [
@@ -83,7 +87,7 @@ export async function testInsertAndFetch() {
 
   const regale = ["A00", "B00", "C00"];
 
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i <10; i++) {
     const artikelName = artikelNamen[i];
     const menge = Math.floor(Math.random() * 20) + 1; // Menge between 1 and 20
     const mindestMenge = Math.floor(Math.random() * 5) + 5; // MindestMenge 5-10
@@ -121,6 +125,40 @@ export async function testInsertAndFetch() {
       );
     }
   }
+
+  // Create test logs
+  await LogService.createLog(
+    {
+      beschreibung: "Test Log 1",
+      menge: 10,
+      gesamtMenge: 10,
+      createdAt: new Date(2025, 3, 1) // April 1, 2025 (month is 0-based)
+    },
+    "1", // gwId
+    "A00.001" // regalId
+  );
+
+  await LogService.createLog(
+    {
+      beschreibung: "Test Log 2",
+      menge: 5,
+      gesamtMenge: 15,
+      createdAt: new Date(2025, 4, 1) // May 1, 2025
+    },
+    "2", // gwId
+    "B00.002" // regalId
+  );
+
+  await LogService.createLog(
+    {
+      beschreibung: "Test Log 3",
+      menge: -3,
+      gesamtMenge: 12,
+      createdAt: new Date(2025, 3, 4) // April 4, 2025
+    },
+    "3", // gwId
+    "C00.003" // regalId
+  );
 }
 
 // import { database } from "../database/database";

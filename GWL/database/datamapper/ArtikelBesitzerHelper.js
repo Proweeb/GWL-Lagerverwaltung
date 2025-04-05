@@ -164,11 +164,7 @@ async function inventurUpdateArtikelBesitzerByGwIdAndRegalId(
   if (
     updatedArtikelBesitzer.menge !== null &&
     updatedArtikelBesitzer.menge !== undefined
-  ) {
-    await ArtikelService.updateInventurArtikel(artikelId.gwId, {
-      menge: Number(updatedArtikelBesitzer.menge),
-    });
-  }
+  ) 
   return await database.write(async () => {
     let text;
     if (updatedArtikelBesitzer.menge < 0) {

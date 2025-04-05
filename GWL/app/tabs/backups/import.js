@@ -356,37 +356,7 @@ const ImportScreen = ({ navigation }) => {
   //     await database.batch(...updates);
   //   });
   // }
-  async function backupLogsBeforeImport() {
-    await database.write(async () => {
-      const logs = await database.get("logs").query().fetch();
-      const acceptedBoth = {
-        /* your config */
-      };
 
-      // Collect ALL update operations (including potential `undefined` for non-updated logs)
-      const updateOperations = await Promise.all(
-        logs.map(async (log) => {
-          if (!log.isBackup) {
-            const regal = await log.regal.fetch();
-            const artikel = await log.artikel.fetch();
-
-            // 👇 Return the prepared update operation
-            return log.prepareUpdate((logRecord) => {
-              logRecord.isBackup = true;
-              // ... your update logic ...
-            });
-          }
-          return null; // No update for this log
-        })
-      );
-
-      // Filter out null entries (logs that didn't need updates)
-      const validUpdates = updateOperations.filter((op) => op !== null);
-
-      // Execute batch with valid updates
-      await database.batch(...validUpdates);
-    });
-  }
   // Handle the import of data into the database
   const handleImport = async () => {
     if (!jsonData) {
@@ -414,13 +384,8 @@ const ImportScreen = ({ navigation }) => {
       setImportProgress(5);
       const backup = await backupDatabase();
 
-      console.log("Backup der Trackingliste");
       setImportProgress(10);
-      try {
-        await backupLogsBeforeImport();
-      } catch (error) {
-        console.log("damn");
-      }
+   
 
       console.log("Bestehende Datenbank wird gelöscht...");
       setImportProgress(15);

@@ -23,7 +23,9 @@ const useLogStore = create((set) => ({
   setLogs: (newLogs) => {
     const sortedLogs = newLogs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     set({ logs: sortedLogs });
-  }
+  },
+
+
 }));
 
 // Subscribe to LogService updates

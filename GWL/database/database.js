@@ -6,7 +6,7 @@ import SQLiteAdapter from "@nozbe/watermelondb/adapters/sqlite";
 import { lagerSchema } from "./schema";
 import Regal from "./models/Regal";
 import Artikel from "./models/Artikel";
-import Log from "./models/Log";
+//import Log from "./models/Log";
 import ArtikelBesitzer from "./models/ArtikelBesitzer.js";
 
 // First, create the adapter to the underlying database:
@@ -25,7 +25,7 @@ export const database = new Database({
   modelClasses: [
     Artikel, // Your model classes here
     Regal,
-    Log,
+    //Log,
     ArtikelBesitzer,
   ],
 });

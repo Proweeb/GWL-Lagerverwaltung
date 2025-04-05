@@ -40,8 +40,12 @@ export default function LogsScreen() {
         const logs = await LogService.getAllLogs();
         if (logs.length > 0) {
           const dates = logs.map((log) => new Date(log.createdAt));
-          setStartDate(new Date(Math.min(...dates)));
-          setEndDate(new Date(Math.max(...dates)));
+          const minDateValue = new Date(Math.min(...dates));
+          const maxDateValue = new Date(Math.max(...dates));
+          setMinDate(minDateValue);
+          setMaxDate(maxDateValue);
+          setStartDate(minDateValue);
+          setEndDate(maxDateValue);
         }
       } catch (error) {
         console.error("Error getting log dates:", error);
@@ -60,9 +64,19 @@ export default function LogsScreen() {
           if (isStart) {
             // Set time to 00:00:00 for start date
             adjustedDate.setHours(0, 0, 0, 0);
+            // Ensure start date is not after end date
+            if (adjustedDate > endDate) {
+              adjustedDate = new Date(endDate);
+              adjustedDate.setHours(0, 0, 0, 0);
+            }
           } else {
             // Set time to 23:59:59 for end date
             adjustedDate.setHours(23, 59, 59, 999);
+            // Ensure end date is not before start date
+            if (adjustedDate < startDate) {
+              adjustedDate = new Date(startDate);
+              adjustedDate.setHours(23, 59, 59, 999);
+            }
           }
 
           setDate(adjustedDate);
@@ -71,8 +85,8 @@ export default function LogsScreen() {
       },
       mode: "date",
       display: "calendar",
-      maximumDate: maxDate,
-      minimumDate: minDate,
+      maximumDate: isStart ? endDate : maxDate,
+      minimumDate: isStart ? minDate : startDate,
       backgroundColor: "black",
     });
   };
@@ -80,13 +94,19 @@ export default function LogsScreen() {
   const exportLogs = async () => {
     try {
       const logsQuery = await LogService.getAllLogs();
+      
+      // Filter logs based on date range
+      const filteredLogs = logsQuery.filter(log => {
+        const logDate = new Date(log.createdAt);
+        return logDate >= startDate && logDate <= endDate;
+      });
 
-      if (!logsQuery.length) {
-        Alert.alert("Fehler", "Keine Logs zum Exportieren vorhanden.");
+      if (!filteredLogs.length) {
+        Alert.alert("Fehler", "Keine Logs im ausgewählten Zeitraum vorhanden.");
         return;
       }
    
-      const logsData = logsQuery.map((log) => ({
+      const logsData = filteredLogs.map((log) => ({
         Beschreibung: log.beschreibung,
         "Gesamt Menge": log.gesamtMenge,
         "Regal ID": log.regalId || "",
@@ -102,10 +122,8 @@ export default function LogsScreen() {
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, logsSheet, "Trackingliste");
 
-      // Define export file name
-      const exportFileName = `trackingliste_${new Date()
-        .toISOString()
-        .slice(0, 10)}.xlsx`;
+      // Define export file name with date range
+      const exportFileName = `trackingliste_${startDate.toLocaleDateString("de-DE")}_bis_${endDate.toLocaleDateString("de-DE")}.xlsx`;
       const fileUri = FileSystem.documentDirectory + exportFileName;
 
       // Convert workbook to base64 and save

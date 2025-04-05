@@ -222,7 +222,6 @@ const WarenScreen = () => {
           }}
           colorCallback={async () => {
             await ArtikelBesitzerService.deleteArtikelOwnerByArtikelId(confirm);
-            await LogService.BackupLogByArtikelId(confirm);
             await ArtikelService.deleteArtikel(confirm);
 
             Toast.show({

@@ -1,15 +1,24 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import useLogStore from "../../store/logStore";
 import { styles } from "../styles";
 
-const LogsWidget = () => {
+const LogsWidget = ({startDate, endDate}) => {
   const { logs, loading, error, fetchLogs } = useLogStore();
+  const [filteredLogs, setFilteredLogs] = useState([]);
 
   useEffect(() => {
-    fetchLogs();
-  }, []);
+    const filterLogs = () => {
+      const filtered = logs.filter(log => {
+        const logDate = new Date(log.createdAt);
+        return logDate >= startDate && logDate <= endDate;
+      });
+      setFilteredLogs(filtered);
+    };
+
+    filterLogs();
+  }, [logs, startDate, endDate]);
 
   const renderLogItem = ({ item }) => {
     const {
@@ -69,10 +78,10 @@ const LogsWidget = () => {
     );
   }
 
-  if (!logs || logs.length === 0) {
+  if (!filteredLogs || filteredLogs.length === 0) {
     return (
       <View style={customStyles.container}>
-        <Text>Keine Logs vorhanden</Text>
+        <Text>Keine Logs im ausgewählten Zeitraum vorhanden</Text>
       </View>
     );
   }
@@ -80,7 +89,7 @@ const LogsWidget = () => {
   return (
     <View style={customStyles.container}>
       <FlashList
-        data={logs}
+        data={filteredLogs}
         renderItem={renderLogItem}
         keyExtractor={(item) => item.id}
         estimatedItemSize={130}
