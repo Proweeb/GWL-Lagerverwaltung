@@ -29,7 +29,7 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
   const fetchArtikel = async () => {
     try {
       const artikelData = await ArtikelBesitzerService.getAllArtikelOwners();
- 
+
       setArtikelList(artikelData);
     } catch (error) {
       console.error("Fehler beim Laden der Artikel:", error);
@@ -52,7 +52,12 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
         const artikelData = await ArtikelBesitzerService.getAllArtikelOwners();
         setArtikelList(artikelData);
       } catch (error) {
-        console.error("Fehler beim Laden der Artikel:", error);
+        Toast.show({
+          type: "error",
+          text1: "Artikel",
+          text2: "Artikel nicht gefunden.",
+          position: "bottom",
+        });
       }
       return;
     }
@@ -65,8 +70,12 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
         setArtikelList(artikel);
       }
     } catch (error) {
-      console.error("Fehler beim Finden des Artikels:", error);
-      Alert.alert("Fehler", "Fehler bei der Artikelsuche.");
+      Toast.show({
+        type: "error",
+        text1: "Artikel",
+        text2: "Artikel nicht gefunden.",
+        position: "bottom",
+      });
     }
   };
 

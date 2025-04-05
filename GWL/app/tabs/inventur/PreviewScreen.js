@@ -259,7 +259,7 @@ const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
               Toast.show({
                 type: "warning",
                 text1: "Inventur",
-                text2: "Inventur wurde abgebrochen.",
+                text2: "Inventurliste wurde nicht gesendet.",
                 position: "bottom",
               });
               setModalVisible(false);
