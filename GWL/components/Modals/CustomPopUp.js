@@ -7,13 +7,23 @@ const CustomPopup = ({
   redButtonText,
   cancelButtonText, // New prop for cancel button text
   yellowCallback,
-  greenCallBack,
+  greenCallback,
   redCallback,
   cancelCallback, // New prop for cancel button callback
 }) => {
+
+
   return (
     <View style={styles.container}>
       <View style={styles.popup}>
+      {greenButtonText && (
+          <TouchableOpacity
+            style={[styles.button, styles.addButton]}
+            onPress={greenCallback}
+          >
+            <Text style={styles.addText}>{greenButtonText } </Text>
+          </TouchableOpacity>
+        )}
         {yellowButtonText && (
           <TouchableOpacity
             style={[styles.button, styles.editButton]}
@@ -23,14 +33,7 @@ const CustomPopup = ({
           </TouchableOpacity>
         )}
 
-        {greenButtonText && (
-          <TouchableOpacity
-            style={[styles.button, styles.addButton]}
-            onPress={greenCallBack}
-          >
-            <Text style={styles.addText}>{greenButtonText}</Text>
-          </TouchableOpacity>
-        )}
+      
 
         {redButtonText && (
           <TouchableOpacity

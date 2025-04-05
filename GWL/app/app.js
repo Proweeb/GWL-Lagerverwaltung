@@ -24,6 +24,7 @@ import * as BackgroundFetch from "expo-background-fetch";
 import * as TaskManager from "expo-task-manager";
 import ArtikelService from "../database/datamapper/ArtikelHelper";
 import EditScreen from "./other/edit";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const BACKGROUND_FETCH_TASK = "background-fetch";
 
@@ -87,7 +88,21 @@ export default function App() {
       //   });
     };
     a();
-    testInsertAndFetch();
+    const checkFirstTimeAppOpen = async () => {
+      try {
+        const isFirstTime = await AsyncStorage.getItem('isFirstTimeAppOpen');
+        
+        if (isFirstTime === null) {
+          // This is the first time the app is opened
+          await testInsertAndFetch();
+          await AsyncStorage.setItem('isFirstTimeAppOpen', 'false');
+        }
+      } catch (error) {
+        console.error('Error checking first time app open:', error);
+      }
+    };
+
+    checkFirstTimeAppOpen();
   }, []);
 
   return (

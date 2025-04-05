@@ -251,7 +251,7 @@ export default function LogsScreen() {
           cancelCallback={() => setModalVisible(false)}
           greenButtonText={"Exportieren"}
           cancelButtonText={"Abbrechen"}
-          greenCallBack={exportLogs}
+          greenCallback={exportLogs}
         ></CustomPopup>
       </Modal>
     </View>

@@ -194,6 +194,9 @@ const WarenScreen = () => {
           cancelButtonText="Abbrechen"
           redButtonText="Löschen"
           yellowButtonText="Bearbeiten"
+          greenButtonText="Lagerplätze"
+          
+       
           yellowCallback={() => {
             navigation.navigate("Bearbeiten", {
               gwId: action,
@@ -203,6 +206,13 @@ const WarenScreen = () => {
           cancelCallback={() => setAction(null)}
           redCallback={() => {
             setConfirm(action);
+            setAction(null);
+          }}
+          greenCallback={() => {
+            navigation.navigate("Actions", {
+              screen: "LagerNavigator",
+              params: { screen: "Lager", params: { gwId: action } },
+            });
             setAction(null);
           }}
         />

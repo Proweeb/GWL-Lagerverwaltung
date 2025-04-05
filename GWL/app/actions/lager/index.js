@@ -6,68 +6,143 @@ import { useNavigation } from "@react-navigation/native";
 import { heightPercentageToDP } from "react-native-responsive-screen";
 import { Q } from "@nozbe/watermelondb";
 import * as Progress from "react-native-progress";
+import { useRoute } from "@react-navigation/native";
 
 import { database } from "../../../database/database";
+import ArtikelService from "../../../database/datamapper/ArtikelHelper";
 const LagerScreen = () => {
   const navigation = useNavigation();
   const [groupedRegale, setGroupedRegale] = useState([]);
   const [loading, setLoading] = useState(true);
+  const route = useRoute();
+  const gwId = route.params?.gwId;
 
   useEffect(() => {
-    const subscription = database
-      .get("regale") // Assuming your table is called "regale"
-      .query() // Query all "Regal" items
-      .observe()
-      .subscribe(async (regaleData) => {
+    let regaleSubscription;
+    let artikelBesitzerSubscription;
+
+    const setupSubscriptions = async () => {
+      if (gwId) {
         try {
-          // Fetch articles for each regal reactively
-          const regaleWithArtikel = await Promise.all(
-            regaleData.map(async (regal) => {
-              const artikelList = await database
-                .get("artikel_besitzer") // Assuming table name is "artikel_besitzer"
-                .query(Q.where("regal_id", regal.id))
-                .fetch();
+          // First get the artikel by gwId
+          const artikel = await ArtikelService.getArtikelById(gwId);
+          if (!artikel) {
+            setLoading(false);
+            return;
+          }
 
-              return {
-                id: regal.id,
-                regalId: regal.regalId, // Each Regal has a unique regalId
-                regalName: regal.regalName,
-                fachName: regal.fachName,
-                artikelMenge: artikelList.length, // Number of articles in this Regal
-              };
-            })
-          );
+          // Then subscribe to artikel_besitzer changes for this specific article
+          artikelBesitzerSubscription = database
+            .get("artikel_besitzer")
+            .query(Q.where("gw_id", artikel.id))
+            .observe()
+            .subscribe(async (artikelBesitzerData) => {
+              try {
+                // Get all regale that have this article
+                const regaleWithArtikel = await Promise.all(
+                  artikelBesitzerData.map(async (besitzer) => {
+                    const regal = await besitzer.regal.fetch()
+                    
+                    return {
+                      id: regal.id,
+                      regalId: regal.regalId,
+                      regalName: regal.regalName,
+                      fachName: regal.fachName,
+                      artikelMenge: 1,
+                      hasTargetArticle: true,
+                    };
+                  })
+                );
 
-          // Group by regalName but preserve individual regalId for each fach
-          const grouped = regaleWithArtikel.reduce((acc, regal) => {
-            if (!acc[regal.regalName]) {
-              acc[regal.regalName] = {
-                regalName: regal.regalName,
-                fachList: [],
-              };
-            }
-            // Each fach gets its own regalId, even though they are in the same regalName group
-            acc[regal.regalName].fachList.push({
-              id: regal.id, // Unique ID for the fach
-              regalId: regal.regalId, // Unique regalId for this fach
-              fachName: regal.fachName, // Name of the fach
-              artikelMenge: regal.artikelMenge, // Number of articles in this fach
+                // Group by regalName
+                const grouped = regaleWithArtikel.reduce((acc, regal) => {
+                  if (!acc[regal.regalName]) {
+                    acc[regal.regalName] = {
+                      regalName: regal.regalName,
+                      fachList: [],
+                    };
+                  }
+                  acc[regal.regalName].fachList.push({
+                    id: regal.id,
+                    regalId: regal.regalId,
+                    fachName: regal.fachName,
+                    artikelMenge: regal.artikelMenge,
+                    hasTargetArticle: regal.hasTargetArticle,
+                  });
+                  return acc;
+                }, {});
+
+                setGroupedRegale(Object.values(grouped));
+                setLoading(false);
+              } catch (error) {
+                console.error("Error fetching observed data:", error);
+                setLoading(false);
+              }
             });
-
-            return acc;
-          }, {});
-
-          // Convert object to array for rendering
-          setGroupedRegale(Object.values(grouped));
-
-          setLoading(false);
         } catch (error) {
-          console.error("Error fetching observed data:", error);
+          console.error("Error fetching artikel:", error);
+          setLoading(false);
         }
-      });
+      } else {
+        // Original subscription for all regale
+        regaleSubscription = database
+          .get("regale")
+          .query()
+          .observe()
+          .subscribe(async (regaleData) => {
+            try {
+              const regaleWithArtikel = await Promise.all(
+                regaleData.map(async (regal) => {
+                  const artikelList = await database
+                    .get("artikel_besitzer")
+                    .query(Q.where("regal_id", regal.id))
+                    .fetch();
 
-    return () => subscription.unsubscribe(); // Cleanup subscription on unmount
-  }, []);
+                  return {
+                    id: regal.id,
+                    regalId: regal.regalId,
+                    regalName: regal.regalName,
+                    fachName: regal.fachName,
+                    artikelMenge: artikelList.length,
+                    hasTargetArticle: false,
+                  };
+                })
+              );
+
+              const grouped = regaleWithArtikel.reduce((acc, regal) => {
+                if (!acc[regal.regalName]) {
+                  acc[regal.regalName] = {
+                    regalName: regal.regalName,
+                    fachList: [],
+                  };
+                }
+                acc[regal.regalName].fachList.push({
+                  id: regal.id,
+                  regalId: regal.regalId,
+                  fachName: regal.fachName,
+                  artikelMenge: regal.artikelMenge,
+                  hasTargetArticle: regal.hasTargetArticle,
+                });
+                return acc;
+              }, {});
+
+              setGroupedRegale(Object.values(grouped));
+              setLoading(false);
+            } catch (error) {
+              console.error("Error fetching observed data:", error);
+              setLoading(false);
+            }
+          });
+      }
+    };
+
+    setupSubscriptions();
+
+    return () => {
+      if (regaleSubscription) regaleSubscription.unsubscribe();
+      if (artikelBesitzerSubscription) artikelBesitzerSubscription.unsubscribe();
+    };
+  }, [gwId]);
 
   if (loading) {
     return (

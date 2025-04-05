@@ -87,7 +87,7 @@ export async function testInsertAndFetch() {
 
   const regale = ["A00", "B00", "C00"];
 
-  for (let i = 0; i <10; i++) {
+  for (let i = 0; i <50; i++) {
     const artikelName = artikelNamen[i];
     const menge = Math.floor(Math.random() * 20) + 1; // Menge between 1 and 20
     const mindestMenge = Math.floor(Math.random() * 5) + 5; // MindestMenge 5-10

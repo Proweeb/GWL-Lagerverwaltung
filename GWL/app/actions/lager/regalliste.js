@@ -235,7 +235,7 @@ const RegallisteScreen = () => {
             setAction(null);
           }}
           cancelCallback={() => setAction(null)}
-          greenCallBack={() => {
+          greenCallback={() => {
             navigation.navigate("Actions", {
               screen: "ArtikelNachfüllenNavigator",
               params: { screen: "ArtikelNachfüllen", params: action },

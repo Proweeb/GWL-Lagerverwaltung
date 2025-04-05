@@ -2,10 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import {
   Text,
   View,
-  TouchableOpacity,
-  TextInput,
   KeyboardAvoidingView,
-  Keyboard,
 } from "react-native";
 import {
   Camera,
@@ -14,58 +11,29 @@ import {
   useCodeScanner,
 } from "react-native-vision-camera";
 import { request, PERMISSIONS } from "react-native-permissions";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import ScannerFrame from "../../components/utils/ViewFinder/ScannerFrame";
-import { styles } from "../../components/styles";
 import { Audio } from "expo-av";
 import { heightPercentageToDP } from "react-native-responsive-screen";
 import { useNavigation, useRoute } from "@react-navigation/native";
- 
+
 export default function BarcodeScreen() {
   const route = useRoute();
   const navigation = useNavigation();
-  const inputRef = useRef(null);
   const device = useCameraDevice("back");
   const { hasPermission, requestPermission } = useCameraPermission();
-  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
-  const [showClearButton, setShowClearButton] = useState(false);
-
   const [startanimation, setAnimation] = useState(false);
-  const [codes, setCodes] = useState({
-    saveQrCode: false,
-    qrCode: "",
-  });
   const scannedCodes = useRef(new Set());
   const [sound, setSound] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const onScan = route.params?.onScan;
 
-  // useEffect(() => {
-  //   if (codes.saveQrCode) {
-  //     onScan(codes.qrCode);
-  //     navigation.goBack();
-  //   }
-  // }, [codes]);
-
   useEffect(() => {
     request(PERMISSIONS.ANDROID.CAMERA).then((status) => {});
-    const keyboardDidShowListener = Keyboard.addListener(
-      "keyboardDidShow",
-      () => {
-        setKeyboardVisible(true);
-      }
-    );
-    const keyboardDidHideListener = Keyboard.addListener(
-      "keyboardDidHide",
-      () => {
-        setKeyboardVisible(false);
-      }
-    );
 
     // Set up audio mode and load sound
     const setUpAudio = async () => {
       try {
-        // Set audio mode to play even in silent mode
         await Audio.setAudioModeAsync({
           playsInSilentModeIOS: true,
           staysActiveInBackground: true,
@@ -73,7 +41,6 @@ export default function BarcodeScreen() {
           playThroughEarpieceAndroid: false,
         });
 
-        // Load the sound
         const { sound } = await Audio.Sound.createAsync(
           require("../../assets/scanned.mp3"),
           { shouldPlay: false }
@@ -87,9 +54,6 @@ export default function BarcodeScreen() {
     setUpAudio();
 
     return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
-      // Clean up sound
       if (sound) {
         sound.unloadAsync();
       }
@@ -99,7 +63,6 @@ export default function BarcodeScreen() {
   const playSound = async () => {
     try {
       if (sound) {
-        // Reset position and play
         await sound.setPositionAsync(0);
         await sound.playAsync();
       }
@@ -107,8 +70,6 @@ export default function BarcodeScreen() {
       console.error("Error playing sound:", error);
     }
   };
-
-  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleCodeScanned = async (codeValue) => {
     if (!scannedCodes.current.has(codeValue)) {
@@ -127,7 +88,7 @@ export default function BarcodeScreen() {
   const codeScanner = useCodeScanner({
     codeTypes: ["qr"],
     onCodeScanned: (codes) => {
-      if (!isKeyboardVisible && !showClearButton && !isProcessing) {
+      if (!isProcessing) {
         setIsProcessing(true);
         for (const code of codes) {
           handleCodeScanned(code.value);
@@ -136,17 +97,6 @@ export default function BarcodeScreen() {
       }
     },
   });
-
-  const handleClearCode = () => {
-    setCodes({ saveQrCode: false, qrCode: "" });
-    setShowClearButton(false);
-  };
-
-  const handleConfirmCode = () => {
-    if (!codes.saveQrCode) {
-      setCodes((prev) => ({ ...prev, saveQrCode: true }));
-    }
-  };
 
   if (!hasPermission) {
     return (
@@ -179,44 +129,13 @@ export default function BarcodeScreen() {
         </View>
         <View style={screenStyles.scannerFrameContainer}>
           <ScannerFrame
-            heightMultiplier={isKeyboardVisible ? 0.5 : 1}
+            heightMultiplier={1}
             borderColor="white"
             animationStart={startanimation}
             setAnimation={setAnimation}
           />
         </View>
       </KeyboardAvoidingView>
-
-      {/* <View style={screenStyles.inputContainer}>
-        <View style={screenStyles.textInputWrapper}>
-          {showClearButton && (
-            <TouchableOpacity onPress={handleClearCode}>
-              <MaterialCommunityIcons
-                name="close-circle"
-                size={24}
-                color="red"
-              />
-            </TouchableOpacity>
-          )}
-          <TextInput
-            ref={inputRef}
-            style={screenStyles.textInput}
-            editable={!codes.saveQrCode}
-            value={codes.qrCode}
-            onChangeText={(text) => {
-              setCodes((prev) => ({ ...prev, qrCode: text }));
-              setShowClearButton(text !== "");
-            }}
-          />
-        </View>
-
-        <TouchableOpacity
-          style={screenStyles.confirmButton}
-          onPress={handleConfirmCode}
-        >
-          <MaterialCommunityIcons name="checkbox-marked" size={20} />
-        </TouchableOpacity>
-      </View> */}
     </View>
   );
 }
@@ -251,37 +170,6 @@ const screenStyles = {
     height: "100%",
     width: "100%",
     borderRadius: 13,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  inputContainer: {
-    flex: 0.2,
-    justifyContent: "center",
-    flexDirection: "row",
-    paddingTop: 20,
-  },
-  textInputWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "white",
-    width: "75%",
-    height: 40,
-    elevation: 2,
-    borderRadius: 10,
-    paddingHorizontal: 10,
-  },
-  textInput: {
-    flex: 1,
-    textAlign: "center",
-    fontSize: 20,
-  },
-  confirmButton: {
-    marginLeft: 10,
-    width: 40,
-    height: 40,
-    elevation: 2,
-    borderRadius: 10,
-    backgroundColor: "lightgreen",
     justifyContent: "center",
     alignItems: "center",
   },
