@@ -1,8 +1,5 @@
 import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 import { database } from "../database";
-import Log from "../models/Log";
-import ArtikelService from "./ArtikelHelper";
-import RegalService from "./RegalHelper";
 import { Q } from "@nozbe/watermelondb";
 import { ErrorMessages } from "../../components/enum";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -27,10 +24,29 @@ class LogService {
       let regal = null;
       
       if (gwId !== null) {
-        artikel = await ArtikelService.getArtikelById(gwId);
+        // Direct database query instead of using ArtikelService
+        const artikelResults = await database
+          .get("artikel")
+          .query(Q.where("gw_id", gwId))
+          .fetch();
+
+        if (artikelResults.length === 0) {
+          throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
+        }
+        artikel = artikelResults[0];
       }
+
       if (regalId !== null) {
-        regal = await RegalService.getRegalById(regalId);
+        // Direct database query instead of using RegalService
+        const regalResults = await database
+          .get("regale")
+          .query(Q.where("regal_id", regalId))
+          .fetch();
+
+        if (regalResults.length === 0) {
+          throw new Error(ErrorMessages.REGAL_NOT_FOUND);
+        }
+        regal = regalResults[0];
       }
 
       // Generate a more unique ID using timestamp and random bytes

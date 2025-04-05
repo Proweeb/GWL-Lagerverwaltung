@@ -2,6 +2,7 @@ import { database } from "../database";
 import { Q } from "@nozbe/watermelondb";
 import Regal from "../models/Regal";
 import { logTypes, ErrorMessages } from "../../components/enum";
+import LogService from "./LogHelper";
 
 async function createRegal(regalData) {
   return database.write(async () => {
@@ -18,13 +19,15 @@ async function createRegal(regalData) {
       regal.fachName = regalData.fachName;
       regal.regalName = regalData.regalName;
     });
-    await database.get("logs").create((log) => {
-      log.beschreibung = logTypes.LagerplatzHinzufügen;
-      log.regal.set(regal);
-      log.createdAt = Date.now();
-    });
+    await LogService.createLog({
+      beschreibung: logTypes.LagerplatzHinzufügen,
+      regalId: regal.regalId,
+      createdAt: new Date()
+    }, null,  regalData.regalId);
+    
     return regal;
   });
+  
 }
 
 async function getAllRegal() {
