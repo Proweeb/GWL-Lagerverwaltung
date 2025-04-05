@@ -66,6 +66,7 @@ class LogService {
         artikelId: artikel ? artikel.id : null,
         regalId: regal ? regal.regalId : null,
         gwId: artikel ? artikel.gwId : null,
+        status: artikel ? artikel.status : null,
         createdAt: logData.createdAt || new Date()
       };
 

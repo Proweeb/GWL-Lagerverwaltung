@@ -24,7 +24,7 @@ const InventoryWidget = () => {
         name: log.artikelName,
         gwid: log.gwId,
         menge: log.menge,
-        status: log.status || "ok",
+        status: log.status || "None",
         datum: new Date(log.createdAt).toLocaleString("de-DE", {
           year: "numeric",
           month: "2-digit",
