@@ -61,6 +61,7 @@ export default function RegalTextInput({
             navigation.navigate("Scan\\Barcode", {
               onScan: (code) => {
                 setRegalId(code);
+                setRegalIdValid(true);
               },
             });
           }}
