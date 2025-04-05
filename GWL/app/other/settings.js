@@ -111,7 +111,7 @@ export default function SettingsScreen() {
 
   return (
     <View style={localStyles.container}>
-      <Text style={localStyles.title}>Einstellungen</Text>
+
       
       <View style={localStyles.section}>
         <Text style={localStyles.sectionTitle}>Allgemein</Text>
