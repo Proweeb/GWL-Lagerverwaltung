@@ -1,16 +1,11 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  ActivityIndicator,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { styles } from "../../../components/styles";
-import {useNavigation } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { heightPercentageToDP } from "react-native-responsive-screen";
 import { Q } from "@nozbe/watermelondb";
+import * as Progress from "react-native-progress";
 
 import { database } from "../../../database/database";
 const LagerScreen = () => {
@@ -64,6 +59,7 @@ const LagerScreen = () => {
 
           // Convert object to array for rendering
           setGroupedRegale(Object.values(grouped));
+
           setLoading(false);
         } catch (error) {
           console.error("Error fetching observed data:", error);
@@ -75,11 +71,20 @@ const LagerScreen = () => {
 
   if (loading) {
     return (
-      <ActivityIndicator
-        size={"large"}
-        color={styles.lightBlue}
-        style={{ backgroundColor: styles.backgroundColor, flex: 1 }}
-      />
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: styles.backgroundColor,
+        }}
+      >
+        <Progress.Circle
+          size={50}
+          indeterminate={true}
+          color={styles.lightBlue}
+        />
+      </View>
     );
   }
   const RenderFach = ({ item }) => {

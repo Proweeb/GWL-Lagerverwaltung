@@ -187,6 +187,11 @@ async function deleteArtikel(gwid) {
     if (artikel.length < 1) {
       throw new Error(ErrorMessages.ARTICLE_NOT_FOUND);
     }
+    await LogService.createLog({
+      beschreibung: logTypes.artikelGeloescht,
+      menge: Number(artikel[0].menge)*-1,
+      gesamtMenge:0,
+    }, gwid,null);
 
     await database.batch(
       ...artikel.map((artikel) => artikel.prepareDestroyPermanently())

@@ -9,6 +9,7 @@ export const logTypes = {
   ExportDB: "Lagerliste  gesendet",
   ExportLog: "Backup Trackingliste gesendet",
   BackupDB: "Backup Lagerliste gesendet",
+  artikelGeloescht: "Gelöscht",
 };
 
 export const ErrorMessages = {
