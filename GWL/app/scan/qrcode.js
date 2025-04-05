@@ -20,7 +20,7 @@ import { styles } from "../../components/styles";
 import { Audio } from "expo-av";
 import { heightPercentageToDP } from "react-native-responsive-screen";
 import { useNavigation, useRoute } from "@react-navigation/native";
-
+ 
 export default function BarcodeScreen() {
   const route = useRoute();
   const navigation = useNavigation();
@@ -35,15 +35,17 @@ export default function BarcodeScreen() {
     saveQrCode: false,
     qrCode: "",
   });
+  const scannedCodes = useRef(new Set());
+  const [sound, setSound] = useState(null);
 
   const onScan = route.params?.onScan;
 
-  useEffect(() => {
-    if (codes.saveQrCode) {
-      onScan(codes.qrCode);
-      navigation.goBack();
-    }
-  }, [codes]);
+  // useEffect(() => {
+  //   if (codes.saveQrCode) {
+  //     onScan(codes.qrCode);
+  //     navigation.goBack();
+  //   }
+  // }, [codes]);
 
   useEffect(() => {
     request(PERMISSIONS.ANDROID.CAMERA).then((status) => {});
@@ -60,31 +62,77 @@ export default function BarcodeScreen() {
       }
     );
 
+    // Set up audio mode and load sound
+    const setUpAudio = async () => {
+      try {
+        // Set audio mode to play even in silent mode
+        await Audio.setAudioModeAsync({
+          playsInSilentModeIOS: true,
+          staysActiveInBackground: true,
+          shouldDuckAndroid: true,
+          playThroughEarpieceAndroid: false,
+        });
+
+        // Load the sound
+        const { sound } = await Audio.Sound.createAsync(
+          require("../../assets/scanned.mp3"),
+          { shouldPlay: false }
+        );
+        setSound(sound);
+      } catch (error) {
+        console.error("Error setting up audio:", error);
+      }
+    };
+
+    setUpAudio();
+
     return () => {
       keyboardDidShowListener.remove();
       keyboardDidHideListener.remove();
+      // Clean up sound
+      if (sound) {
+        sound.unloadAsync();
+      }
     };
   }, []);
 
   const playSound = async () => {
-    const { sound } = await Audio.Sound.createAsync(
-      require("../../assets/scanned.mp3")
-    );
-    await sound.playAsync();
+    try {
+      if (sound) {
+        // Reset position and play
+        await sound.setPositionAsync(0);
+        await sound.playAsync();
+      }
+    } catch (error) {
+      console.error("Error playing sound:", error);
+    }
+  };
+
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleCodeScanned = async (codeValue) => {
+    if (!scannedCodes.current.has(codeValue)) {
+      scannedCodes.current.add(codeValue);
+      setAnimation(true);
+      await playSound();
+      onScan(codeValue);
+      const currentRoute = navigation.getState().routes[navigation.getState().index].name;
+      if (currentRoute === 'Scan\\Qrcode') {
+        navigation.goBack();
+        scannedCodes.current.clear();
+      }
+    }
   };
 
   const codeScanner = useCodeScanner({
     codeTypes: ["qr"],
     onCodeScanned: (codes) => {
-      if (!isKeyboardVisible) {
-        if (!showClearButton) {
-          for (const code of codes) {
-            setShowClearButton(true);
-            setCodes((prev) => ({ ...prev, qrCode: code.value }));
-            setAnimation(true);
-            playSound();
-          }
+      if (!isKeyboardVisible && !showClearButton && !isProcessing) {
+        setIsProcessing(true);
+        for (const code of codes) {
+          handleCodeScanned(code.value);
         }
+        setIsProcessing(false);
       }
     },
   });
@@ -139,7 +187,7 @@ export default function BarcodeScreen() {
         </View>
       </KeyboardAvoidingView>
 
-      <View style={screenStyles.inputContainer}>
+      {/* <View style={screenStyles.inputContainer}>
         <View style={screenStyles.textInputWrapper}>
           {showClearButton && (
             <TouchableOpacity onPress={handleClearCode}>
@@ -168,7 +216,7 @@ export default function BarcodeScreen() {
         >
           <MaterialCommunityIcons name="checkbox-marked" size={20} />
         </TouchableOpacity>
-      </View>
+      </View> */}
     </View>
   );
 }
@@ -181,7 +229,7 @@ const screenStyles = {
     flexDirection: "column",
   },
   scannerContainer: {
-    flex: 0.8,
+    flex: 1,
     margin: 10,
     padding: 8,
     backgroundColor: "white",
