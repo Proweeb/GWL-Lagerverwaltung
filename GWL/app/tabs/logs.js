@@ -24,7 +24,8 @@ import LogService from "../../database/datamapper/LogHelper";
 import Toast from "react-native-toast-message";
 import CustomPopup from "../../components/Modals/CustomPopUp";
 import ConfirmPopup from "../../components/Modals/ConfirmPopUp";
-import { logTypes, ToastMessages } from "../../components/enum";
+import { logTypes, ToastMessages, EmailBodies } from "../../components/enum";
+import { composeEmailWithDefault } from "../../components/utils/Functions/emailUtils";
 
 export default function LogsScreen() {
   const [startDate, setStartDate] = useState(new Date());
@@ -142,14 +143,25 @@ export default function LogsScreen() {
         null
       );
 
-      // Share the file
-      const result = await Sharing.shareAsync(fileUri);
+      try {
+        await composeEmailWithDefault({
+          subject: `Trackingliste Export ${startDate.toLocaleDateString('de-DE')} - ${endDate.toLocaleDateString('de-DE')}`,
+          body: EmailBodies.TRACKING_LIST + EmailBodies.SIGNATURE,
+          attachments: [fileUri]
+        });
 
-      if (result) {
         Toast.show({
           type: "success",
           text1: ToastMessages.ERFOLG,
           text2: ToastMessages.LOGS_EXPORT,
+          position: "bottom",
+        });
+      } catch (error) {
+        console.error("Error sending email:", error);
+        Toast.show({
+          type: "error",
+          text1: ToastMessages.ERROR,
+          text2: ToastMessages.SEND_EMAIL_ERROR
         });
       }
     } catch (error) {
@@ -158,6 +170,7 @@ export default function LogsScreen() {
         type: "error",
         text1: ToastMessages.ERROR,
         text2: ToastMessages.LOGS_EXPORT_ERROR,
+        position: "bottom",
       });
     }
   };

@@ -16,8 +16,10 @@ import ConfirmPopup from "../../../components/Modals/ConfirmPopUp.js";
 import { database } from "../../../database/database.js";
 import { Q } from "@nozbe/watermelondb/index.js";
 import Toast from "react-native-toast-message";
-import { ToastMessages } from "../../../components/enum.js";
+import { ToastMessages, EmailBodies } from "../../../components/enum.js";
 import * as Progress from "react-native-progress";
+import { widthPercentageToDP } from "react-native-responsive-screen";
+import { composeEmailWithDefault } from '../../../components/utils/Functions/emailUtils';
 
 const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
   const navigation = useNavigation();
@@ -87,20 +89,35 @@ const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
         encoding: FileSystem.EncodingType.Base64,
       });
 
-      const isAvailable = await MailComposer.isAvailableAsync();
-      if (!isAvailable) {
-        Alert.alert("Fehler", "E-Mail kann nicht gesendet werden.");
-        return;
-      }
-
-      await MailComposer.composeAsync({
-        subject: "Inventur Export",
-        body: "Hier ist die exportierte Inventur-Datei.",
-        attachments: [fileUri],
-      });
+      await handleSendEmail(fileUri);
     } catch (error) {
       console.error("Fehler beim Exportieren per E-Mail:", error);
-      Alert.alert("Fehler", "Beim Export ist ein Problem aufgetreten.");
+     Toast.show({
+        type: "error",
+        text1: ToastMessages.ERROR,
+        text2: ToastMessages.EXPORT_ERROR
+      });
+    }
+  };
+
+  const handleSendEmail = async (fileUri) => {
+    try {
+      await composeEmailWithDefault({
+        subject: "Inventur Export",
+        body: EmailBodies.INVENTUR_EXPORT,
+        attachments: [fileUri]
+      });
+      Toast.show({
+        type: "success",
+        text1: "Email wurde gesendet",
+      });
+    } catch (error) {
+      console.error("Error sending email:", error);
+      Toast.show({
+        type: "error",
+        text1: ToastMessages.ERROR,
+        text2: ToastMessages.SEND_EMAIL_ERROR
+      });
     }
   };
 
@@ -248,7 +265,7 @@ const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
           >
             <Progress.Bar
               progress={loadingBar}
-              width={100}
+              width={widthPercentageToDP(80)}
               height={8}
               color="#dcebf9"
             />

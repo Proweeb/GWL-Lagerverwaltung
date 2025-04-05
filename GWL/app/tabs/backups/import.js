@@ -9,6 +9,8 @@ import {
 } from "react-native";
 import * as XLSX from "xlsx";
 import * as DocumentPicker from "expo-document-picker";
+import * as FileSystem from "expo-file-system";
+import * as MailComposer from 'expo-mail-composer';
 import { styles } from "../../../components/styles";
 import RegalService from "../../../database/datamapper/RegalHelper";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper";
@@ -26,7 +28,9 @@ import ConfirmPopup from "../../../components/Modals/ConfirmPopUp";
 import Toast from "react-native-toast-message";
 import * as Progress from "react-native-progress";
 import { widthPercentageToDP } from "react-native-responsive-screen";
-import { ToastMessages } from "../../../components/enum";
+import { ToastMessages, EmailBodies } from "../../../components/enum";
+import { composeEmailWithDefault } from "../../../components/utils/Functions/emailUtils";
+
 const ImportScreen = ({ navigation }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [jsonData, setJsonData] = useState(null);
@@ -34,6 +38,7 @@ const ImportScreen = ({ navigation }) => {
   const [validationErrors, setValidationErrors] = useState([]);
   const [importProgress, setImportProgress] = useState(0);
   const [isImporting, setIsImporting] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   // Handle file picker for Excel files
   const pickFile = async () => {
@@ -319,45 +324,106 @@ const ImportScreen = ({ navigation }) => {
     }
   };
 
-  // async function backupLogsBeforeImport() {
-  //   await database.write(async () => {
-  //     const logs = await database.get("logs").query().fetch();
-  //     const acceptedBoth = {
-  //       Entnehmen: true,
-  //       Einlagern: true,
-  //       Nachfüllen: true,
-  //     };
+  const createBackupFile = async () => {
+    try {
+      const regale = await RegalService.getAllRegal();
+      const artikel = await ArtikelService.getAllArtikel();
+      const artikelBesitzer = await ArtikelBesitzerService.getAllArtikelOwners();
 
-  //     // Use Promise.all to resolve asynchronous map operations
-  //     const updates = await Promise.all(
-  //       logs.map(async (log) => {
-  //         if (!log.isBackup) {
-  //           const regal = await log.regal.fetch();
-  //           const artikel = await log.artikel.fetch();
-  //           console.log(log.isBackup);
+      if (!regale.length && !artikel.length && !artikelBesitzer.length) {
+        throw new Error("Keine Daten zum Exportieren vorhanden.");
+      }
 
-  //           await log.prepareUpdate((logRecord) => {
-  //             logRecord.isBackup = true;
-  //             // Only update regalId and gwId if the log.beschreibung is accepted
-  //             if (acceptedBoth[log.beschreibung]) {
-  //               logRecord.regalId = regal.regalId;
-  //               logRecord.gwId = artikel.gwId;
-  //             }
+      // Format "Regale" sheet data
+      const regalSheetData = regale.map((r) => ({
+        "Regal ID": r.regalId,
+        "Regal Name": r.regalName,
+        "Fach Name": r.fachName,
+        "Erstellt am": new Date(r.createdAt).toLocaleDateString("de-DE"),
+      }));
+      const regalSheet = XLSX.utils.json_to_sheet(regalSheetData);
 
-  //             if (log.beschreibung == logTypes.LagerplatzHinzufügen) {
-  //               logRecord.regalId = regal.regalId;
-  //             }
-  //           });
-  //           console.log(log.isBackup);
-  //         }
-  //       })
-  //     );
+      // Format "Artikel" sheet data
+      const artikelSheetData = artikel.map((a) => ({
+        GWID: a.gwId,
+        "Firmen ID": a.firmenId,
+        Beschreibung: a.beschreibung,
+        Gesamtmenge: a.menge,
+        Mindestmenge: a.mindestMenge,
+        Kunde: a.kunde,
+        Ablaufdatum: a.ablaufdatum
+          ? new Date(a.ablaufdatum).toLocaleDateString("de-DE")
+          : "",
+      }));
+      const artikelSheet = XLSX.utils.json_to_sheet(artikelSheetData);
 
-  //     await database.batch(...updates);
-  //   });
-  // }
+      // Format "Lagerplan" sheet data
+      const lagerplanSheetData = await Promise.all(
+        artikelBesitzer.map(async (ab) => {
+          const artikel = await ab.artikel.fetch();
+          const regal = await ab.regal.fetch();
+          return {
+            Beschreibung: artikel.beschreibung,
+            GWID: artikel.gwId,
+            "Regal ID": regal.regalId,
+            "Regal Name": regal.regalName,
+            Menge: ab.menge,
+            "Zuletzt aktualisiert": new Date(ab.updatedAt).toLocaleDateString("de-DE"),
+          };
+        })
+      );
+      const lagerplanSheet = XLSX.utils.json_to_sheet(lagerplanSheetData);
 
-  // Handle the import of data into the database
+      // Create workbook and append sheets
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, regalSheet, "Regale");
+      XLSX.utils.book_append_sheet(workbook, artikelSheet, "Artikel");
+      XLSX.utils.book_append_sheet(workbook, lagerplanSheet, "Lagerplan");
+
+      // Define backup file name with timestamp
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const backupFileName = `backup_${timestamp}.xlsx`;
+      const fileUri = FileSystem.documentDirectory + backupFileName;
+
+      // Convert workbook to base64 and save
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "base64",
+      });
+      
+      await FileSystem.writeAsStringAsync(fileUri, excelBuffer, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      return fileUri;
+    } catch (error) {
+      console.error("Fehler beim Erstellen des Backups:", error);
+      throw error;
+    }
+  };
+
+  const sendBackupEmail = async () => {
+    try {
+      const backupFileUri = await createBackupFile();
+      
+      await composeEmailWithDefault({
+        subject: `Datenbank Backup ${new Date().toLocaleDateString('de-DE')}`,
+        body: EmailBodies.DATABASE_BACKUP + EmailBodies.SIGNATURE,
+        attachments: [backupFileUri]
+      });
+
+      return true;
+    } catch (error) {
+      console.error("Error sending email:", error);
+      Toast.show({
+        type: "error",
+        text1: ToastMessages.ERROR,
+        text2: ToastMessages.SEND_EMAIL_ERROR
+      });
+      return false;
+    }
+  };
+
   const handleImport = async () => {
     if (!jsonData) {
       Toast.show({
@@ -369,11 +435,19 @@ const ImportScreen = ({ navigation }) => {
       });
       return;
     }
+    setShowConfirm(true);
+  };
+
+  const handleConfirmImport = async () => {
     try {
+      setShowConfirm(false); // Close the confirmation popup
       setIsImporting(true);
       setImportProgress(0);
-
-      // Debug logging
+      
+      // First try to send backup email
+      await sendBackupEmail();
+      
+      // Then proceed with import
       console.log("=== DEBUG: Full JSON Data Structure ===");
       console.log("Available sheets:", Object.keys(jsonData));
       console.log("Regale data:", JSON.stringify(jsonData.Regale, null, 2));
@@ -385,11 +459,17 @@ const ImportScreen = ({ navigation }) => {
       const backup = await backupDatabase();
 
       setImportProgress(10);
-   
 
       console.log("Bestehende Datenbank wird gelöscht...");
       setImportProgress(15);
+
+      console.log("Log erstellt für Import");
       await DBdeleteAllData();
+      await LogService.createLog(
+        { beschreibung: logTypes.StartImportDB },
+        null,
+        null
+      );
 
       console.log("Neue Datenbank wird erstellt und Daten importiert...");
       setImportProgress(20);
@@ -402,6 +482,7 @@ const ImportScreen = ({ navigation }) => {
         null,
         null
       );
+    
 
       console.log("Daten erfolgreich importiert!");
       Toast.show({
@@ -929,6 +1010,22 @@ const ImportScreen = ({ navigation }) => {
           </View>
         </ScrollView>
       )}
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showConfirm}
+        statusBarTranslucent={true}
+        onRequestClose={() => setShowConfirm(false)}
+      >
+        <ConfirmPopup
+          greenMode={true}
+          text={"Achtung: \nBeim Importieren werden alle aktuellen Daten gelöscht und ersetzt.\n Möchten Sie fortfahren?"}
+          greyCallback={() => setShowConfirm(false)}
+          colorCallback={handleConfirmImport}
+          
+        />
+      </Modal>
 
       <Modal
         animationType="fade"

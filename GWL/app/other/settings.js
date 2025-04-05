@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Text, View, StyleSheet, TouchableOpacity, TextInput, Modal, TouchableWithoutFeedback } from "react-native";
-import { database } from "../../database/database";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { styles } from "../../components/styles";
 import Toast from "react-native-toast-message";
 import Options from "../../components/Modals/Options";
 import { ToastMessages } from "../../components/enum"
-
+import { useIsFocused } from "@react-navigation/native";
 const defaultSettings = {
   email: "",
   backUpDBReminder: "Alle 3 Wochen",
@@ -19,6 +19,7 @@ export default function SettingsScreen() {
   const [showOptions, setShowOptions] = useState(false);
   const [currentSetting, setCurrentSetting] = useState(null);
   const [isValidEmail, setIsValidEmail] = useState(true);
+  const isFocused = useIsFocused();
   const reminderOptions = [
     "Täglich",
     "Alle 2 Wochen",
@@ -26,35 +27,46 @@ export default function SettingsScreen() {
     "Monatlich",
     "Alle 3 Monate",
     "Nie",
-
   ];
 
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const storedSettings = await database.localStorage.get("settings");
+        const storedSettings = await AsyncStorage.getItem("settings");
         let parsedSettings = storedSettings ? JSON.parse(storedSettings) : {};
-        const updatedSettings = { ...defaultSettings, ...parsedSettings };
-        setSettings(updatedSettings);
-
-        if (JSON.stringify(updatedSettings) !== JSON.stringify(parsedSettings)) {
-          await database.localStorage.set("settings", JSON.stringify(updatedSettings));
+        
+        // Initialize last backup dates if they're null
+        if (!parsedSettings.lastBackupDB) {
+          parsedSettings.lastBackupDB = new Date().toISOString();
         }
+        if (!parsedSettings.lastBackupLogs) {
+          parsedSettings.lastBackupLogs = new Date().toISOString();
+        }
+     
+        // Create updated settings with initialized dates
+        const updatedSettings = { ...defaultSettings, ...parsedSettings };
+        
+        // Save to AsyncStorage if dates were initialized
+        if (!storedSettings || !storedSettings.lastBackupDB || !storedSettings.lastBackupLogs) {
+          await AsyncStorage.setItem("settings", JSON.stringify(updatedSettings));
+        }
+        
+        setSettings(updatedSettings);
       } catch (error) {
         console.error("Error loading settings:", error);
       }
     };
     fetchSettings();
-  }, []);
+  }, [isFocused]);
 
   const updateSetting = async (key, value) => {
     const newSettings = { ...settings, [key]: value };
     setSettings(newSettings);
-    await database.localStorage.set("settings", JSON.stringify(newSettings));
+    await AsyncStorage.setItem("settings", JSON.stringify(newSettings));
   };
 
   const handleReset = async () => {
-    await database.localStorage.set("settings", JSON.stringify(defaultSettings));
+    await AsyncStorage.setItem("settings", JSON.stringify(defaultSettings));
     setSettings(defaultSettings);
     Toast.show({
       type:"success",
@@ -66,7 +78,7 @@ export default function SettingsScreen() {
 
   const handleSave = async () => {
     try {
-      await database.localStorage.set("settings", JSON.stringify(settings));
+      await AsyncStorage.setItem("settings", JSON.stringify(settings));
       Toast.show({
         type: 'success',
         text1:ToastMessages.ERFOLG,

@@ -8,11 +8,12 @@ import RegalService from "../../../database/datamapper/RegalHelper";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper";
 import { styles } from "../../../components/styles";
 import Toast from "react-native-toast-message";
-import { ToastMessages } from "../../../components/enum";
+import { ToastMessages, EmailBodies } from "../../../components/enum";
 import * as Progress from "react-native-progress";
 import { widthPercentageToDP } from "react-native-responsive-screen";
 import LogService from "../../../database/datamapper/LogHelper";
 import { logTypes } from "../../../components/enum";
+import { composeEmailWithDefault } from "../../../components/utils/Functions/emailUtils";
 XLSX.set_fs(FileSystem);
 
 const ExportScreen = () => {
@@ -21,6 +22,11 @@ const ExportScreen = () => {
   const [isExporting, setIsExporting] = useState(false);
 
   const getDefaultFileName = () => {
+
+    if(fileName!=""){
+      return fileName +".xlsx"
+    }
+
     const now = new Date();
     return `export_${now.getFullYear()}${(now.getMonth() + 1)
       .toString()
@@ -100,9 +106,7 @@ const ExportScreen = () => {
       XLSX.utils.book_append_sheet(workbook, lagerplanSheet, "Lagerplan");
       setExportProgress(85);
       // Define export file name
-      const exportFileName = `export_${new Date()
-        .toISOString()
-        .slice(0, 10)}.xlsx`;
+      const exportFileName = getDefaultFileName();
       const fileUri = FileSystem.documentDirectory + exportFileName;
 
       // Convert workbook to base64 and save
@@ -128,9 +132,18 @@ const ExportScreen = () => {
         null
       );
       try {
-        await Sharing.shareAsync(fileUri);
+        await composeEmailWithDefault({
+          subject: `Datenbank Export ${new Date().toLocaleDateString('de-DE')}`,
+          body: EmailBodies.DATABASE_EXPORT + EmailBodies.SIGNATURE,
+          attachments: [fileUri]
+        });
       } catch (error) {
-        console.log(error);
+        console.error("Error sending email:", error);
+        Toast.show({
+          type: "error",
+          text1: ToastMessages.ERROR,
+          text2: ToastMessages.SEND_EMAIL_ERROR
+        });
       }
     } catch (error) {
       console.error("Fehler beim Export:", error);
@@ -141,7 +154,6 @@ const ExportScreen = () => {
       });
     } finally {
       setIsExporting(false);
-
       setExportProgress(0);
     }
   };

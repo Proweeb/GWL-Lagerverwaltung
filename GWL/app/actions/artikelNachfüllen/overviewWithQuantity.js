@@ -7,7 +7,8 @@ import Feather from "@expo/vector-icons/Feather";
 import Toast from "react-native-toast-message";
 import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper";
-import { ToastMessages } from "../../../components/enum";
+import { ToastMessages, EmailBodies } from "../../../components/enum";
+import { composeEmailWithDefault } from "../../../components/utils/Functions/emailUtils";
 
 export default function OverviewWithQuantity({
   menge,
@@ -19,23 +20,66 @@ export default function OverviewWithQuantity({
 }) {
   const [nachfüllmenge, setNachfüllmenge] = useState(0);
   const [ausgabeMenge, setAusgabeMenge] = useState(menge);
-  const [articleDescription, setArticleDescription] = useState("");
+  const [foundArticle, setFoundArticle] = useState(null);
 
   useEffect(() => {
-    const fetchArticleDescription = async () => {
+    const fetchArticle = async () => {
       try {
         const article = await ArtikelService.getArtikelById(gwId);
-        setArticleDescription(article.beschreibung);
+        setFoundArticle(article);
       } catch (error) {
-        console.error("Error fetching article description:", error);
+        console.error("Error fetching article:", error);
       }
     };
-    fetchArticleDescription();
+    fetchArticle();
   }, [gwId]);
 
   useEffect(() => {
     setAusgabeMenge(Number(menge) + Number(nachfüllmenge));
   }, [nachfüllmenge, menge]);
+
+  const showLowMenge = async () => {
+    if (!foundArticle) return;
+
+    const newMenge = Number(menge) + Number(nachfüllmenge);
+    if (newMenge < foundArticle.mindestMenge) {
+      Toast.show({
+        type: "warning",
+        text1: ToastMessages.WARNING,
+        text2: ToastMessages.ARTICLE_ALMOST_EMPTY + " " + foundArticle.beschreibung,
+        position: "bottom",
+        autoHide: false,
+        topOffset: 50,
+        swipeable: true,
+      });
+
+      // Wait for 1 second before sending email
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Send email notification for low stock
+      try {
+        let body = EmailBodies.SINGLE_LOW_STOCK
+          .replace('{beschreibung}', foundArticle.beschreibung)
+          .replace('{gwId}', gwId)
+          .replace('{menge}', newMenge)
+          .replace('{mindestMenge}', foundArticle.mindestMenge);
+        
+        body += EmailBodies.SIGNATURE;
+
+        await composeEmailWithDefault({
+          subject: `Niedriger Lagerbestand: ${foundArticle.beschreibung}`,
+          body
+        });
+      } catch (error) {
+        console.error("Error sending email:", error);
+        Toast.show({
+          type: "error",
+          text1: ToastMessages.ERROR,
+          text2: ToastMessages.SEND_EMAIL_ERROR
+        });
+      }
+    }
+  };
 
   const handleFertig = async () => {
     try {
@@ -56,11 +100,14 @@ export default function OverviewWithQuantity({
           text2:
             ToastMessages.ARTICLE_UPDATED +
             " " +
-            articleDescription +
+            foundArticle.beschreibung +
             ": " +
             (Number(menge) + Number(nachfüllmenge)),
           position: "bottom",
         });
+
+        // Check if stock is still low after refill
+        await showLowMenge();
 
         setRegalId("");
         setGwId("");
