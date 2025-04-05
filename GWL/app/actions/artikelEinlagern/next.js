@@ -13,7 +13,7 @@ import LogService from "../../../database/datamapper/LogHelper.js";
 import Toast from "react-native-toast-message";
 import { useRoute } from "@react-navigation/native";
 import { useEffect } from "react";
-import { ErrorMessages } from "../../../components/enum.js";
+import { ErrorMessages, ToastMessages } from "../../../components/enum.js";
 import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper.js";
 import RegalTextInput from "../artikelNachfüllen/regalTextInput.js";
 import ActionButton from "../../../components/Buttons/ActionsButton.js";
@@ -64,8 +64,8 @@ export default function NextScreen() {
       if (article) {
         Toast.show({
           type: "error",
-          text1: "Artikel",
-          text2: "Existiert bereits",
+          text1: ToastMessages.ERROR,
+          text2: ToastMessages.ARTICLE_EXISTS,
           position: "bottom",
         });
         setLoading(false);
@@ -87,9 +87,9 @@ export default function NextScreen() {
           );
           Toast.show({
             type: "success",
-            text1: "Artikel: " + gwId,
-            text2: "Eingelagert",
-            position: "top",
+            text1: ToastMessages.ERFOLG,
+            text2: ToastMessages.ARTICLE_EINGELAGERT,
+            position: "bottom",
           });
           setLoading(false);
           navigation.navigate("Home");
@@ -98,8 +98,8 @@ export default function NextScreen() {
             setLoading(false);
             Toast.show({
               type: "error",
-              text1: "Regal",
-              text2: "Existiert nicht",
+              text1: ToastMessages.ERROR,
+              text2: ToastMessages.REGAL_NOT_FOUND,
               position: "bottom",
             });
           }

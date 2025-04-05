@@ -11,7 +11,7 @@ import RegalService from "../../../database/datamapper/RegalHelper";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { RFPercentage } from "react-native-responsive-fontsize";
-
+import { ToastMessages } from "../../../components/enum";
 import ActionButton from "../../../components/Buttons/ActionsButton";
 import { styles } from "../../../components/styles";
 import Toast from "react-native-toast-message";
@@ -27,7 +27,7 @@ export default function IndexScreen() {
 
   useEffect(() => {
     if (regalIdValid && code) {
-      const parts = code.split('.');
+      const parts = code.split(".");
       if (parts.length === 2) {
         setFach(parts[1]);
         setName(parts[0]);
@@ -40,50 +40,43 @@ export default function IndexScreen() {
       if (!name || !fach || !code) {
         Toast.show({
           type: "error",
-          text1: "Fehler",
-          text2: "Bitte fülle alle Felder aus, bevor du speicherst.",
+          text1: ToastMessages.ERROR,
+          text2: ToastMessages.EMPTY_FIELDS,
           position: "bottom",
         });
         return;
       }
 
-   
-
       await RegalService.getRegalById(code);
-     
+
       console.log(regal);
     } catch (error) {
-
-      if (error.message ===ErrorMessages.REGAL_NOT_FOUND) {
+      if (error.message === ErrorMessages.REGAL_NOT_FOUND) {
         const regalData = {
           regalId: code,
           fachName: fach,
           regalName: name,
         };
-      await RegalService.createRegal(regalData);
-      Toast.show({
-        type: "success",
-        text1: "Erfolgreich gespeichert!",
-        text2: `Das Regal ${code} wurde erfolgreich erstellt`,
-        position: "bottom",
-      });
-      navigation.navigate("Home");
-      console.log("Regal erfolgreich erstellt.");
-      const regal = await RegalService.getRegalById(code);
-      }
-
-      else {
+        await RegalService.createRegal(regalData);
+        Toast.show({
+          type: "success",
+          text1: ToastMessages.ERFOLG,
+          text2: ToastMessages.REGAL_CREATE + ": " + code,
+          position: "bottom",
+        });
+        navigation.navigate("Home");
+        console.log("Regal erfolgreich erstellt.");
+        const regal = await RegalService.getRegalById(code);
+      } else {
         Toast.show({
           type: "error",
-          text1: "Fehler",
-          text2: "Regal existiert bereits",
+          text1: ToastMessages.ERROR,
+          text2: ToastMessages.REGAL_ALREADY_EXISTS,
           position: "bottom",
         });
       }
     }
   };
-    
-  
 
   const inputStyle = {
     height: 40,
@@ -112,8 +105,12 @@ export default function IndexScreen() {
       <Text style={{ fontSize: 16, marginBottom: 30, fontWeight: "bold" }}>
         Lagerung
       </Text>
-      <RegalTextInput regalId={code} setRegalId={setCode} setRegalIdValid={setRegalIdValid} regalIdValid={regalIdValid} />
-     
+      <RegalTextInput
+        regalId={code}
+        setRegalId={setCode}
+        setRegalIdValid={setRegalIdValid}
+        regalIdValid={regalIdValid}
+      />
 
       <Text style={{ fontSize: RFPercentage(1.8), marginBottom: 5 }}>
         Regal Name*
@@ -129,11 +126,16 @@ export default function IndexScreen() {
         <TextInput style={inputStyle} value={fach} onChangeText={setFach} />
       </View>
       <View style={{ marginTop: 50, alignItems: "center" }}>
-         <ActionButton FertigCallBack={handleSubmit}  isDone={regalIdValid&&name&&fach}  CancelCallBack={()=>{ if (navigation.canGoBack()) {
-                navigation.goBack();
-              }}}/>
+        <ActionButton
+          FertigCallBack={handleSubmit}
+          isDone={regalIdValid && name && fach}
+          CancelCallBack={() => {
+            if (navigation.canGoBack()) {
+              navigation.goBack();
+            }
+          }}
+        />
       </View>
-    
     </View>
   );
 }

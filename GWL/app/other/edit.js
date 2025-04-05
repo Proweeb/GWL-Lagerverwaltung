@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  Text,
+  View,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 import { styles } from "../../components/styles";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import TextInputField from "../../components/utils/TextInputs/textInputField";
@@ -11,8 +17,9 @@ import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import ArtikelService from "../../database/datamapper/ArtikelHelper";
 import ArtikelBesitzerService from "../../database/datamapper/ArtikelBesitzerHelper";
 import Toast from "react-native-toast-message";
-import * as Progress from 'react-native-progress';
+import * as Progress from "react-native-progress";
 import YellowFertigButton from "../../components/Buttons/YellowFertigButton";
+import { ToastMessages } from "../../components/enum";
 
 export default function EditScreen() {
   const navigation = useNavigation();
@@ -45,9 +52,9 @@ export default function EditScreen() {
               formattedDate = new Date(artikel.ablaufdatum);
               setAblaufDatum(formattedDate);
             }
-            
+
             // Set all form data from Artikel
-            setFormData(prev => ({
+            setFormData((prev) => ({
               ...prev,
               gwId: passedGwId || "",
               beschreibung: artikel.beschreibung || "",
@@ -60,9 +67,13 @@ export default function EditScreen() {
 
             // If passedRegalId is present, update the menge from ArtikelBesitzer
             if (passedRegalId) {
-              const besitzer = await ArtikelBesitzerService.getArtikelOwnersByGwIdAndRegalId(passedGwId, passedRegalId);
+              const besitzer =
+                await ArtikelBesitzerService.getArtikelOwnersByGwIdAndRegalId(
+                  passedGwId,
+                  passedRegalId
+                );
               if (besitzer) {
-                setFormData(prev => ({
+                setFormData((prev) => ({
                   ...prev,
                   menge: besitzer[0]?.menge?.toString() || "0",
                 }));
@@ -73,8 +84,8 @@ export default function EditScreen() {
           console.error("Error fetching data:", error);
           Toast.show({
             type: "error",
-            text1: "Fehler",
-            text2: "Daten konnten nicht geladen werden",
+            text1: ToastMessages.ERROR,
+            text2: ToastMessages.NO_DATA,
             position: "bottom",
           });
         } finally {
@@ -123,8 +134,8 @@ export default function EditScreen() {
 
       Toast.show({
         type: "success",
-        text1: "Erfolgreich",
-        text2: "Artikel wurde aktualisiert",
+        text1: ToastMessages.ERFOLG,
+        text2: ToastMessages.ARTICLE_UPDATED,
         position: "bottom",
       });
 
@@ -133,8 +144,8 @@ export default function EditScreen() {
       console.error("Error updating article:", error);
       Toast.show({
         type: "error",
-        text1: "Fehler",
-        text2: "Artikel konnte nicht aktualisiert werden",
+        text1: ToastMessages.ERROR,
+        text2: ToastMessages.ARTICLE_UPDATED_ERROR,
         position: "bottom",
       });
     }
@@ -143,8 +154,8 @@ export default function EditScreen() {
   if (isLoading) {
     return (
       <View style={[localStyles.container, localStyles.centerContent]}>
-        <Progress.CircleSnail 
-          color={styles.primaryColor} 
+        <Progress.CircleSnail
+          color={styles.primaryColor}
           size={60}
           thickness={4}
         />
@@ -160,16 +171,13 @@ export default function EditScreen() {
         backgroundColor: styles.backgroundColor,
       }}
     >
-        
       <View style={{ margin: 10 }}>
-      {passedRegalId && (
+        {passedRegalId && (
           <>
             <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>
               Regal ID
             </Text>
-            <DisabledInputField
-              value={passedRegalId}
-            />
+            <DisabledInputField value={passedRegalId} />
           </>
         )}
         <Text style={{ fontSize: RFPercentage(1.8) }}>GWID*</Text>
@@ -181,11 +189,7 @@ export default function EditScreen() {
           }}
         >
           <View style={{ flex: 1 }}>
-      
-              <DisabledInputField
-                value={passedGwId}
-              />
-             
+            <DisabledInputField value={passedGwId} />
           </View>
         </View>
 
@@ -199,11 +203,10 @@ export default function EditScreen() {
           }
         />
 
-        <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>Menge*</Text>
-        <DisabledInputField
-          inputMode={"numeric"}
-          value={formData.menge}
-        />
+        <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>
+          Menge*
+        </Text>
+        <DisabledInputField inputMode={"numeric"} value={formData.menge} />
 
         <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>
           Ablaufdatum
@@ -261,11 +264,9 @@ export default function EditScreen() {
           }
         />
 
-      
-
-        <YellowFertigButton 
-          onPress={handleSubmit} 
-          disabled={!formData.beschreibung} 
+        <YellowFertigButton
+          onPress={handleSubmit}
+          disabled={!formData.beschreibung}
         />
       </View>
     </ScrollView>
@@ -278,8 +279,7 @@ const localStyles = StyleSheet.create({
     backgroundColor: styles.backgroundColor,
   },
   centerContent: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
-

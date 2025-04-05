@@ -12,6 +12,7 @@ import ArtikelService from "../../../database/datamapper/ArtikelHelper.js";
 import RegalService from "../../../database/datamapper/RegalHelper.js";
 import Toast from "react-native-toast-message";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { ToastMessages } from "../../../components/enum.js";
 
 export default function RegalTextInput({
   regalId,
@@ -23,7 +24,7 @@ export default function RegalTextInput({
 
   return (
     <View>
-      <Text style={{ fontSize: RFPercentage(1.8) }}>Regal-ID*</Text>
+      <Text style={{ fontSize: RFPercentage(1.8) }}>RegalID*</Text>
       <View
         style={{
           flexDirection: "row",
@@ -44,8 +45,8 @@ export default function RegalTextInput({
                 setRegalIdValid(false); // Ungültig
                 Toast.show({
                   type: "warning",
-                  text1: "Regal",
-                  text2: "RegalID hat das falsche Format",
+                  text1: ToastMessages.WARNING,
+                  text2: ToastMessages.REGALFORMAT_FALSCH,
                   position: "bottom",
                 });
               }

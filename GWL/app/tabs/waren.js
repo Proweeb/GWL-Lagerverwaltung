@@ -13,6 +13,7 @@ import Toast from "react-native-toast-message";
 import { database } from "../../database/database"; // Import your WatermelonDB database instance
 import ConfirmPopup from "../../components/Modals/ConfirmPopUp";
 import LogService from "../../database/datamapper/LogHelper";
+import { ToastMessages } from "../../components/enum";
 
 const WarenScreen = () => {
   const navigation = useNavigation();
@@ -191,14 +192,13 @@ const WarenScreen = () => {
       >
         <CustomPopup
           cancelButtonText="Abbrechen"
-    
           redButtonText="Löschen"
           yellowButtonText="Bearbeiten"
           yellowCallback={() => {
             navigation.navigate("Bearbeiten", {
               gwId: action,
             });
-              setAction(null);
+            setAction(null);
           }}
           cancelCallback={() => setAction(null)}
           redCallback={() => {
@@ -226,8 +226,8 @@ const WarenScreen = () => {
 
             Toast.show({
               type: "success",
-              text1: "Erfolgreich",
-              text2: `Artikel mit GWID ${confirm} gelöscht`,
+              text1: ToastMessages.ERFOLG,
+              text2: ToastMessages.ARTICLE_DELETED + " " + confirm,
               visibilityTime: 1000,
             });
 

@@ -9,7 +9,7 @@ import ActionButton from "../../../components/Buttons/ActionsButton.js";
 import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper";
 import Toast from "react-native-toast-message";
 import * as Progress from "react-native-progress";
-import { ErrorMessages } from "../../../components/enum.js";
+import { ErrorMessages, ToastMessages } from "../../../components/enum.js";
 
 export default function IndexScreen() {
   const [gwId, setGwId] = useState("");
@@ -37,10 +37,11 @@ export default function IndexScreen() {
   const handleSearch = async () => {
     try {
       setLoading(true);
-      const articleInRegal = await ArtikelBesitzerService.getArtikelOwnersByGwIdAndRegalId(
-        gwId,
-        regalId
-      );
+      const articleInRegal =
+        await ArtikelBesitzerService.getArtikelOwnersByGwIdAndRegalId(
+          gwId,
+          regalId
+        );
 
       setMenge(articleInRegal[0].menge);
       setShowMengeOverview(true);
@@ -49,29 +50,29 @@ export default function IndexScreen() {
       if (error.message === ErrorMessages.ARTICLE_NOT_FOUND) {
         Toast.show({
           type: "error",
-          text1: "Artikel",
-          text2: "Existiert nicht",
+          text1: ToastMessages.ERROR,
+          text2: ToastMessages.ARTICLE_NOT_FOUND,
           position: "bottom",
         });
       } else if (error.message === ErrorMessages.REGAL_NOT_FOUND) {
         Toast.show({
           type: "error",
-          text1: "Regal",
-          text2: "Existiert nicht",
+          text1: ToastMessages.ERROR,
+          text2: ToastMessages.REGAL_NOT_FOUND,
           position: "bottom",
         });
       } else if (error.message === ErrorMessages.ARTIKELBESITZER_NOT_FOUND) {
         Toast.show({
           type: "error",
-          text1: "Error",
-          text2: "Artikel befindet sich nicht im Regal",
+          text1: ToastMessages.ERROR,
+          text2: ToastMessages.ARTICLE_NOT_IN_REGALs,
           position: "bottom",
         });
       } else {
         Toast.show({
           type: "error",
-          text1: "Error",
-          text2: "Fehler beim Finden",
+          text1: ToastMessages.ERROR,
+          text2: ToastMessages.FEHLER_BEIM_FINDEN,
           position: "bottom",
         });
       }

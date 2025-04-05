@@ -11,6 +11,7 @@ import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzer
 import LogService from "../../../database/datamapper/LogHelper.js";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Toast from "react-native-toast-message";
+import { ToastMessages } from "../../../components/enum.js";
 import ConfirmPopup from "../../../components/Modals/ConfirmPopUp.js";
 
 const InventurScreen = ({ setChangedMenge, changedMenge }) => {
@@ -54,8 +55,8 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
       } catch (error) {
         Toast.show({
           type: "error",
-          text1: "Artikel",
-          text2: "Artikel nicht gefunden.",
+          text1: ToastMessages.ERFOLG,
+          text2: ToastMessages.ARTICLE_NOT_FOUND,
           position: "bottom",
         });
       }
@@ -72,8 +73,8 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
     } catch (error) {
       Toast.show({
         type: "error",
-        text1: "Artikel",
-        text2: "Artikel nicht gefunden.",
+        text1: ToastMessages.ERROR,
+        text2: ToastMessages.ARTICLE_NOT_FOUND,
         position: "bottom",
       });
     }
@@ -169,8 +170,8 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
           colorCallback={() => {
             Toast.show({
               type: "success",
-              text1: "Inventur",
-              text2: "Inventur wurde abgebrochen.",
+              text1: ToastMessages.ERFOLG,
+              text2: ToastMessages.INVENTUR_ABGEBROCHEN,
               position: "bottom",
             });
             handleResetInventory();
@@ -178,8 +179,8 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
           greyCallback={() => {
             Toast.show({
               type: "success",
-              text1: "Inventur",
-              text2: "Inventur nicht abgebrochen.",
+              text1: ToastMessages.ERFOLG,
+              text2: ToastMessages.INVENTUR_NICHT_ABGEBROCHEN,
               position: "bottom",
             });
             setResetModalVisible(false);

@@ -7,6 +7,7 @@ import Feather from "@expo/vector-icons/Feather";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper";
 import Toast from "react-native-toast-message";
 import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper";
+import { ToastMessages } from "../../../components/enum";
 
 export default function OverviewWithQuantity({
   menge,
@@ -28,8 +29,8 @@ export default function OverviewWithQuantity({
       } catch (error) {
         Toast.show({
           type: "error",
-          text1: "Error",
-          text2: "Fehler beim Laden des Artikels",
+          text1: ToastMessages.ERROR,
+          text2: ToastMessages.ARTICLE_NOT_FOUND,
           position: "bottom",
         });
       }
@@ -47,8 +48,8 @@ export default function OverviewWithQuantity({
     if (menge === 0) {
       Toast.show({
         type: "error",
-        text1: `Artikel: ${foundArticle.beschreibung}`,
-        text2: "Leer",
+        text1: ToastMessages.ERROR,
+        text2: ToastMessages.ARTICLE_EMPTY + " " + foundArticle.beschreibung,
         position: "bottom",
         autoHide: false,
         topOffset: 50,
@@ -57,8 +58,9 @@ export default function OverviewWithQuantity({
     } else if (menge < foundArticle.mindestMenge) {
       Toast.show({
         type: "warning",
-        text1: `Artikel: ${foundArticle.beschreibung}`,
-        text2: "Wenig",
+        text1: ToastMessages.WARNING,
+        text2:
+          ToastMessages.ARTICLE_ALMOST_EMPTY + " " + foundArticle.beschreibung,
         position: "bottom",
         autoHide: false,
         topOffset: 50,
@@ -70,7 +72,7 @@ export default function OverviewWithQuantity({
   const handleFertig = async () => {
     try {
       setShowMengeOverview(false);
-      
+
       if (entnahmeMenge === "") {
         setEntnahmeMenge(0);
       } else {
@@ -82,9 +84,14 @@ export default function OverviewWithQuantity({
 
         Toast.show({
           type: "success",
-          text1: `Artikel: ${foundArticle.beschreibung}`,
-          text2: `Neue Menge: ${Number(menge) - Number(entnahmeMenge)}`,
-          position: "top",
+          text1: ToastMessages.ERFOLG,
+          text2:
+            ToastMessages.ARTICLE_UPDATED +
+            " " +
+            foundArticle.beschreibung +
+            ": " +
+            (Number(menge) - Number(entnahmeMenge)),
+          position: "bottom",
         });
 
         setRegalId("");
@@ -94,8 +101,8 @@ export default function OverviewWithQuantity({
     } catch (error) {
       Toast.show({
         type: "error",
-        text1: "Error",
-        text2: "Fehler beim Aktualisieren der Menge",
+        text1: ToastMessages.ERROR,
+        text2: ToastMessages.ARTICLE_UPDATED_ERROR,
         position: "bottom",
       });
     }
@@ -180,7 +187,10 @@ export default function OverviewWithQuantity({
 
           <TouchableOpacity
             onPress={() => {
-              if (Number(menge) !== 0 && Number(entnahmeMenge) < Number(menge)) {
+              if (
+                Number(menge) !== 0 &&
+                Number(entnahmeMenge) < Number(menge)
+              ) {
                 setEntnahmeMenge(Number(entnahmeMenge) + 1);
               }
             }}

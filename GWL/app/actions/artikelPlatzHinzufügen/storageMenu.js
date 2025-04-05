@@ -6,7 +6,7 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
-
+import { ToastMessages } from "../../../components/enum";
 export default function Storagemenu({
   formData,
   setFormData,
@@ -22,9 +22,8 @@ export default function Storagemenu({
         margin: 10,
       }}
     >
-      
       <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>
-        Regal-ID*
+        RegalID*
       </Text>
       <View
         style={{
@@ -46,8 +45,8 @@ export default function Storagemenu({
                 setRegalIdValid(false); // Ungültig
                 Toast.show({
                   type: "warning",
-                  text1: "Regal",
-                  text2: "RegalID hat das falsche Format",
+                  text1: ToastMessages.WARNING,
+                  text2: ToastMessages.REGALFORMAT_FALSCH,
                   position: "bottom",
                 });
               }
@@ -113,7 +112,6 @@ export default function Storagemenu({
           setFormData((prevData) => ({ ...prevData, fachname: text }))
         }
       />
-
     </View>
   );
 }

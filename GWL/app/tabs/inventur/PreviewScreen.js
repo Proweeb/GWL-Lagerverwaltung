@@ -16,6 +16,7 @@ import ConfirmPopup from "../../../components/Modals/ConfirmPopUp.js";
 import { database } from "../../../database/database.js";
 import { Q } from "@nozbe/watermelondb/index.js";
 import Toast from "react-native-toast-message";
+import { ToastMessages } from "../../../components/enum.js";
 import * as Progress from "react-native-progress";
 
 const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
@@ -172,8 +173,8 @@ const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
 
       Toast.show({
         type: "success",
-        text1: "Inventur",
-        text2: "Inventur erfolgreich abgeschlossen.",
+        text1: ToastMessages.ERFOLG,
+        text2: ToastMessages.INVENTUR_ABGESCHLOSSEN,
         position: "bottom",
       });
 
@@ -184,8 +185,8 @@ const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
     } catch (error) {
       Toast.show({
         type: "error",
-        text1: "Inventur",
-        text2: "Fehler beim Abschließen der Inventur: " + error,
+        text1: ToastMessages.ERROR,
+        text2: ToastMessages.INVENTUR_NICHT_ABGESCHLOSSEN + " " + error,
         position: "bottom",
       });
     }
@@ -258,8 +259,8 @@ const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
             greyCallback={() => {
               Toast.show({
                 type: "warning",
-                text1: "Inventur",
-                text2: "Inventurliste wurde nicht gesendet.",
+                text1: ToastMessages.WARNING,
+                text2: ToastMessages.INVENTURLISTE_NICHT_GESENDET,
                 position: "bottom",
               });
               setModalVisible(false);

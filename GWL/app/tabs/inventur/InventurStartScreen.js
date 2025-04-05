@@ -7,6 +7,7 @@ import LogService from "../../../database/datamapper/LogHelper";
 import ConfirmPopup from "../../../components/Modals/ConfirmPopUp";
 import Toast from "react-native-toast-message";
 import { logTypes } from "../../../components/enum";
+import { ToastMessages } from "../../../components/enum";
 
 const InventurStartScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -47,16 +48,16 @@ const InventurStartScreen = () => {
               );
               Toast.show({
                 type: "success",
-                text1: "Inventur",
-                text2: "Inventur gestartet.",
+                text1: ToastMessages.ERFOLG,
+                text2: ToastMessages.INVENTUR_START,
                 position: "bottom",
               });
               setModalVisible(false);
             } catch (error) {
               Toast.show({
                 type: "error",
-                text1: "Inventur",
-                text2: "Inventur konnte nicht gestartet werden." + error,
+                text1: ToastMessages.ERROR,
+                text2: ToastMessages.INVENTUR_NICHT_START + " " + error,
                 position: "bottom",
               });
             }
@@ -64,8 +65,8 @@ const InventurStartScreen = () => {
           greyCallback={() => {
             Toast.show({
               type: "warning",
-              text1: "Inventur",
-              text2: "Inventur wurde abgebrochen.",
+              text1: ToastMessages.WARNING,
+              text2: ToastMessages.INVENTUR_ABGEBROCHEN,
               position: "bottom",
             });
             setModalVisible(false);

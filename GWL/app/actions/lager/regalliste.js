@@ -14,6 +14,7 @@ import ConfirmPopup from "../../../components/Modals/ConfirmPopUp";
 import LogService from "../../../database/datamapper/LogHelper";
 import { useRoute } from "@react-navigation/native";
 import { Q } from "@nozbe/watermelondb";
+import { ToastMessages } from "../../../components/enum";
 
 const RegallisteScreen = () => {
   const navigation = useNavigation();
@@ -227,7 +228,6 @@ const RegallisteScreen = () => {
           redButtonText="Löschen"
           yellowButtonText="Entnehmen"
           yellowCallback={() => {
-        
             navigation.navigate("Actions", {
               screen: "ArtikelEntnehmenNavigator",
               params: { screen: "index", params: action },
@@ -257,7 +257,6 @@ const RegallisteScreen = () => {
       >
         <ConfirmPopup
           greenMode={false}
-       
           greyCallback={() => {
             setAction(confirm);
             setConfirm(null);
@@ -270,8 +269,13 @@ const RegallisteScreen = () => {
 
             Toast.show({
               type: "success",
-              text1: "Erfolgreich",
-              text2: `Artikel ${confirm.gwId} aus dem Regal ${confirm.regalId} gelöscht`,
+              text1: ToastMessages.ERFOLG,
+              text2:
+                ToastMessages.ARTICLE_DELETED +
+                " " +
+                confirm.gwId +
+                ";" +
+                confirm.regalId,
               visibilityTime: 1000,
             });
 

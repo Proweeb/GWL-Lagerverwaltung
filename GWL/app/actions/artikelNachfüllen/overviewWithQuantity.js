@@ -7,6 +7,7 @@ import Feather from "@expo/vector-icons/Feather";
 import Toast from "react-native-toast-message";
 import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper";
+import { ToastMessages } from "../../../components/enum";
 
 export default function OverviewWithQuantity({
   menge,
@@ -39,7 +40,7 @@ export default function OverviewWithQuantity({
   const handleFertig = async () => {
     try {
       setShowMengeOverview(false);
-      
+
       if (nachfüllmenge === "") {
         setNachfüllmenge(0);
       } else {
@@ -51,9 +52,14 @@ export default function OverviewWithQuantity({
 
         Toast.show({
           type: "success",
-          text1: `Artikel: ${articleDescription}`,
-          text2: `Neue Menge: ${Number(menge) + Number(nachfüllmenge)}`,
-          position: "top",
+          text1: ToastMessages.ERFOLG,
+          text2:
+            ToastMessages.ARTICLE_UPDATED +
+            " " +
+            articleDescription +
+            ": " +
+            (Number(menge) + Number(nachfüllmenge)),
+          position: "bottom",
         });
 
         setRegalId("");
@@ -62,8 +68,8 @@ export default function OverviewWithQuantity({
     } catch (error) {
       Toast.show({
         type: "error",
-        text1: "Error",
-        text2: "Fehler beim Aktualisieren der Menge",
+        text1: ToastMessages.ERROR,
+        text2: ToastMessages.ARTICLE_UPDATED_ERROR,
         position: "bottom",
       });
     }

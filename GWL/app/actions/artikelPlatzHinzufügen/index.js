@@ -1,4 +1,10 @@
-import { Text, View, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+import {
+  Text,
+  View,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { styles } from "../../../components/styles";
 import { TextInput } from "react-native-gesture-handler";
 import ArticleMenu from "../../../components/utils/InputMenus/articleMenu.js";
@@ -11,7 +17,7 @@ import { useNavigation } from "@react-navigation/native";
 import Storagemenu from "./storageMenu.js";
 import Toast from "react-native-toast-message";
 import ActionButton from "../../../components/Buttons/ActionsButton.js";
-import { ErrorMessages } from "../../../components/enum.js";
+import { ErrorMessages, ToastMessages } from "../../../components/enum.js";
 import * as Progress from "react-native-progress";
 
 export default function IndexScreen() {
@@ -54,8 +60,8 @@ export default function IndexScreen() {
         // If we get here, regal exists
         Toast.show({
           type: "error",
-          text1: "Regal",
-          text2: "Existiert bereits",
+          text1: ToastMessages.ERROR,
+          text2: ToastMessages.REGAL_ALREADY_EXISTS,
           position: "bottom",
         });
         return;
@@ -72,8 +78,8 @@ export default function IndexScreen() {
         // If we get here, article exists
         Toast.show({
           type: "error",
-          text1: "Artikel",
-          text2: "Existiert bereits",
+          text1: ToastMessages.ERROR,
+          text2: ToastMessages.ARTICLE_EXISTS,
           position: "bottom",
         });
         return;
@@ -106,9 +112,14 @@ export default function IndexScreen() {
 
       Toast.show({
         type: "success",
-        text1: "Artikel: " + beschreibung + " & Regal: " + regalId,
-        text2: "Erfolgreich gespeichert",
-        position: "top",
+        text1: ToastMessages.ERFOLG,
+        text2:
+          ToastMessages.ARTICLE_REGAL_GESPEICHERT +
+          " " +
+          beschreibung +
+          ";" +
+          regalId,
+        position: "bottom",
       });
 
       navigation.navigate("Home");
@@ -116,8 +127,8 @@ export default function IndexScreen() {
       console.error("Fehler beim Speichern:", error);
       Toast.show({
         type: "error",
-        text1: "Fehler",
-        text2: "Ein unerwarteter Fehler ist aufgetreten",
+        text1: ToastMessages.ERROR,
+        text2: ToastMessages.DEFAULT,
         position: "bottom",
       });
     } finally {

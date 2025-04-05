@@ -26,7 +26,7 @@ import ConfirmPopup from "../../../components/Modals/ConfirmPopUp";
 import Toast from "react-native-toast-message";
 import * as Progress from "react-native-progress";
 import { widthPercentageToDP } from "react-native-responsive-screen";
-
+import { ToastMessages } from "../../../components/enum";
 const ImportScreen = ({ navigation }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [jsonData, setJsonData] = useState(null);
@@ -47,8 +47,8 @@ const ImportScreen = ({ navigation }) => {
     } catch (error) {
       Toast.show({
         type: "error",
-        text1: "Fehler",
-        text2: "Dateiauswahl fehlgeschlagen",
+        text1: ToastMessages.ERROR,
+        text2: ToastMessages.DATEIFEHLER,
         position: "bottom",
         autoHide: false,
       });
@@ -298,8 +298,8 @@ const ImportScreen = ({ navigation }) => {
         } else {
           Toast.show({
             type: "error",
-            text1: "Fehler",
-            text2: "Keine Daten gefunden",
+            text1: ToastMessages.ERROR,
+            text2: ToastMessages.NO_DATEI,
             position: "bottom",
             autoHide: false,
           });
@@ -311,8 +311,8 @@ const ImportScreen = ({ navigation }) => {
       console.error("Excel parsing error:", error);
       Toast.show({
         type: "error",
-        text1: "Fehler",
-        text2: "Datei konnte nicht verarbeitet werden",
+        text1: ToastMessages.ERROR,
+        text2: ToastMessages.VERARBEITUNGSFEHLER,
         position: "bottom",
         autoHide: false,
       });
@@ -362,8 +362,8 @@ const ImportScreen = ({ navigation }) => {
     if (!jsonData) {
       Toast.show({
         type: "error",
-        text1: "Fehler",
-        text2: "Es gibt keine Daten zu importieren",
+        text1: ToastMessages.ERROR,
+        text2: ToastMessages.NO_DATA_FOR_IMPORT,
         position: "bottom",
         autoHide: false,
       });
@@ -406,20 +406,19 @@ const ImportScreen = ({ navigation }) => {
       console.log("Daten erfolgreich importiert!");
       Toast.show({
         type: "success",
-        text1: "Erfolg",
-        text2: "Daten wurden erfolgreich importiert",
+        text1: ToastMessages.ERFOLG,
+        text2: ToastMessages.DATA_SUCCESS,
         position: "bottom",
         autoHide: true,
       });
 
-    
       setSelectedFile(null);
       setJsonData(null);
     } catch (error) {
       console.error("Fehler beim Import:", error);
       Toast.show({
         type: "error",
-        text1: "Import Fehler",
+        text1: ToastMessages.ERROR,
         text2: error.message,
         position: "bottom",
         autoHide: false,
@@ -476,8 +475,8 @@ const ImportScreen = ({ navigation }) => {
       if (!Array.isArray(data.Regale)) {
         Toast.show({
           type: "error",
-          text1: "Fehler",
-          text2: "Keine Regale gefunden oder ungültiges Format",
+          text1: ToastMessages.ERROR,
+          text2: ToastMessages.REGAL_NOT_FOUND,
           position: "bottom",
           autoHide: false,
         });
@@ -537,8 +536,8 @@ const ImportScreen = ({ navigation }) => {
       if (!Array.isArray(data.Artikel)) {
         Toast.show({
           type: "error",
-          text1: "Fehler",
-          text2: "Keine Artikel gefunden oder ungültiges Format",
+          text1: ToastMessages.ERROR,
+          text2: ToastMessages.ARTICLE_NOT_FOUND,
           position: "bottom",
           autoHide: false,
         });
@@ -581,7 +580,7 @@ const ImportScreen = ({ navigation }) => {
             }
             if (!artikelData.firmenId) {
               throw new Error(
-                `Firmen ID ist erforderlich: ${JSON.stringify(artikel)}`
+                `FirmenID ist erforderlich: ${JSON.stringify(artikel)}`
               );
             }
 
@@ -617,8 +616,8 @@ const ImportScreen = ({ navigation }) => {
       if (!Array.isArray(data.Lagerplan)) {
         Toast.show({
           type: "error",
-          text1: "Fehler",
-          text2: "Kein Lagerplan gefunden oder ungültiges Format",
+          text1: ToastMessages.ERROR,
+          text2: ToastMessages.NO_LAGERPLAN,
           position: "bottom",
           autoHide: false,
         });
@@ -690,7 +689,7 @@ const ImportScreen = ({ navigation }) => {
       console.error("Import error:", error);
       Toast.show({
         type: "error",
-        text1: "Import Fehler",
+        text1: ToastMessages.ERROR,
         text2: error.message,
         position: "bottom",
         autoHide: false,
@@ -807,7 +806,7 @@ const ImportScreen = ({ navigation }) => {
                       </View>
                       <View style={localStyles.cell}>
                         <Text numberOfLines={1} style={localStyles.cellText}>
-                          {item["Firmen ID"]}
+                          {item["FirmenID"]}
                         </Text>
                       </View>
                       <View style={localStyles.cell}>
@@ -832,7 +831,7 @@ const ImportScreen = ({ navigation }) => {
               <View style={[localStyles.row, localStyles.rowBorder]}>
                 <View style={localStyles.cell}>
                   <Text numberOfLines={1} style={localStyles.tableContent}>
-                    Regal ID
+                    RegalID
                   </Text>
                 </View>
                 <View style={localStyles.cell}>
@@ -885,7 +884,7 @@ const ImportScreen = ({ navigation }) => {
               <View style={[localStyles.row, localStyles.rowBorder]}>
                 <View style={localStyles.cell}>
                   <Text numberOfLines={1} style={localStyles.tableContent}>
-                    Regal ID
+                    RegalID
                   </Text>
                 </View>
                 <View style={localStyles.cell}>

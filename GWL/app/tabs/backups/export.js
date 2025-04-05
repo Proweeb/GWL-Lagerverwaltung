@@ -8,7 +8,7 @@ import RegalService from "../../../database/datamapper/RegalHelper";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper";
 import { styles } from "../../../components/styles";
 import Toast from "react-native-toast-message";
-
+import { ToastMessages } from "../../../components/enum";
 import * as Progress from "react-native-progress";
 import { widthPercentageToDP } from "react-native-responsive-screen";
 import LogService from "../../../database/datamapper/LogHelper";
@@ -136,11 +136,9 @@ const ExportScreen = () => {
       console.error("Fehler beim Export:", error);
       Toast.show({
         type: "error",
-        text1: "Export",
-        text2: "Fehler beim Exportieren",
+        text1: ToastMessages.ERROR,
+        text2: ToastMessages.EXPORT_ERROR,
       });
-
-    
     } finally {
       setIsExporting(false);
 

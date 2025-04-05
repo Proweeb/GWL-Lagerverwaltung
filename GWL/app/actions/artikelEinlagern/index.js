@@ -11,6 +11,7 @@ import RegalTextInput from "../artikelNachfüllen/regalTextInput.js";
 import TextInputField from "../../../components/utils/TextInputs/textInputField.js";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import * as Progress from "react-native-progress";
+import { ToastMessages } from "../../../components/enum.js";
 
 export default function IndexScreen() {
   const navigation = useNavigation();
@@ -34,8 +35,8 @@ export default function IndexScreen() {
       } else {
         Toast.show({
           type: "error",
-          text1: "Error",
-          text2: "Artikel befindet sich im Regal",
+          text1: ToastMessages.ERROR,
+          text2: ToastMessages.ARTICLE_IN_REGAL,
           position: "bottom",
         });
         setLoading(false);
@@ -55,8 +56,8 @@ export default function IndexScreen() {
         setLoading(false);
         Toast.show({
           type: "error",
-          text1: "Error",
-          text2: "Regal existert nicht",
+          text1: ToastMessages.ERROR,
+          text2: ToastMessages.REGAL_NOT_FOUND,
           position: "bottom",
         });
       } else if (error.message == ErrorMessages.ARTIKELBESITZER_NOT_FOUND) {
@@ -67,9 +68,9 @@ export default function IndexScreen() {
         );
         Toast.show({
           type: "success",
-          text1: "Artikel: " + gwId,
-          text2: "Eingelagert",
-          position: "top",
+          text1: ToastMessages.ERFOLG,
+          text2: ToastMessages.ARTICLE_EINGELAGERT + " " + gwId,
+          position: "bottom",
         });
         setLoading(false);
         navigation.goBack();
@@ -85,8 +86,8 @@ export default function IndexScreen() {
       console.error("Fehler beim Finden:", error);
       Toast.show({
         type: "error",
-        text1: "Artikel",
-        text2: "Fehler beim Finden",
+        text1: ToastMessages.ERROR,
+        text2: ToastMessages.ARTICLE_NOT_FOUND,
         position: "bottom",
       });
     }

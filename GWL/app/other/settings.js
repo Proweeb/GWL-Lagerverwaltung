@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, Button,  StyleSheet } from "react-native";
+import { Text, View, Button, StyleSheet } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { database } from "../../database/database";
 import { styles } from "../../components/styles";
 import Toast from "react-native-toast-message";
 import { RFPercentage } from "react-native-responsive-fontsize";
+import { ToastMessages } from "../../components/enum";
 
 const defaultSettings = {
   TriggerDB: "wöchentlich",
@@ -25,7 +26,6 @@ export default function SettingsScreen() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-      
         const storedSettings = await database.localStorage.get("settings");
         let parsedSettings = storedSettings ? JSON.parse(storedSettings) : {};
 
@@ -53,18 +53,15 @@ export default function SettingsScreen() {
     const newSettings = { ...settings, [key]: value, LastSendDB: Date.now() };
     setSettings(newSettings);
     await database.localStorage.set("settings", JSON.stringify(newSettings));
-  
   };
 
   return (
-    <View style={{flex:1,backgroundColor: styles.backgroundColor }}>
+    <View style={{ flex: 1, backgroundColor: styles.backgroundColor }}>
       <View style={localStyles.settingsContainer}>
-     
- 
-    
         <View style={localStyles.settingSection}>
-    
-        <Text style={{ fontSize: RFPercentage(1.8) }}>Wann soll die Datenbank verschickt werden?</Text>
+          <Text style={{ fontSize: RFPercentage(1.8) }}>
+            Wann soll die Datenbank verschickt werden?
+          </Text>
           <View style={localStyles.pickerContainer}>
             <Picker
               selectedValue={settings.TriggerDB}
@@ -74,9 +71,9 @@ export default function SettingsScreen() {
               itemStyle={localStyles.pickerItem}
             >
               {triggerOptions.map((option) => (
-                <Picker.Item 
-                  key={option} 
-                  label={option} 
+                <Picker.Item
+                  key={option}
+                  label={option}
                   value={option}
                   color={styles.textColor}
                   style={localStyles.pickerItem}
@@ -87,19 +84,23 @@ export default function SettingsScreen() {
 
           <View style={localStyles.internalDivider} />
 
-          <Text style={{ fontSize: RFPercentage(1.8) }}>Wann soll die Trackliste verschickt werden?</Text>
+          <Text style={{ fontSize: RFPercentage(1.8) }}>
+            Wann soll die Trackliste verschickt werden?
+          </Text>
           <View style={localStyles.pickerContainer}>
             <Picker
               selectedValue={settings.TriggerTrackList}
-              onValueChange={(value) => updateSetting("TriggerTrackList", value)}
+              onValueChange={(value) =>
+                updateSetting("TriggerTrackList", value)
+              }
               style={localStyles.picker}
               dropdownIconColor={styles.textColor}
               itemStyle={localStyles.pickerItem}
             >
               {triggerOptions.map((option) => (
-                <Picker.Item 
-                  key={option} 
-                  label={option} 
+                <Picker.Item
+                  key={option}
+                  label={option}
                   value={option}
                   color={styles.textColor}
                   style={localStyles.pickerItem}
@@ -107,17 +108,14 @@ export default function SettingsScreen() {
               ))}
             </Picker>
           </View>
-       <View style={localStyles.buttonContainer}>
-        <Button  
-          title="Auf Standardwerte zurücksetzen"
-          onPress={() => updateSetting("TriggerDB", "wöchentlich")}
-          color={styles.blue}
-        />
-       </View>
+          <View style={localStyles.buttonContainer}>
+            <Button
+              title="Auf Standardwerte zurücksetzen"
+              onPress={() => updateSetting("TriggerDB", "wöchentlich")}
+              color={styles.blue}
+            />
+          </View>
         </View>
-
-        
-     
       </View>
     </View>
   );
@@ -144,18 +142,16 @@ const localStyles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 8,
     color: styles.textColor,
-
   },
   pickerContainer: {
     borderRadius: 8,
-    overflow: 'hidden',
+    overflow: "hidden",
     elevation: 4,
     backgroundColor: styles.white,
-   
   },
   picker: {
     height: 50,
-    width: '100%',
+    width: "100%",
     backgroundColor: styles.white,
     color: styles.textColor,
   },
