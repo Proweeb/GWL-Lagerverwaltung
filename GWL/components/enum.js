@@ -60,4 +60,7 @@ export const ToastMessages = {
   INVENTURLISTE_NICHT_GESENDET: "Inventurliste wurde nicht gesendet",
   LOGS_EXPORT: "Logs erfolgreich exportiert",
   LOGS_EXPORT_ERROR: "Logs konnten nicht exportiert werden",
+  SETTINGS_SAVED: "Einstellungen wurden gespeichert",
+  SETTINGS_RESET: "Einstellungen wurden zurückgesetzt",
+  SETTINGS_ERROR: "Fehler beim Speichern der Einstellungen",
 };
