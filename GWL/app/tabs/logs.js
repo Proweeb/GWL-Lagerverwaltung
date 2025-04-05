@@ -24,7 +24,7 @@ import LogService from "../../database/datamapper/LogHelper";
 import Toast from "react-native-toast-message";
 import CustomPopup from "../../components/Modals/CustomPopUp";
 import ConfirmPopup from "../../components/Modals/ConfirmPopUp";
-import { logTypes } from "../../components/enum";
+import { logTypes, ToastMessages } from "../../components/enum";
 
 export default function LogsScreen() {
   const [startDate, setStartDate] = useState(new Date());
@@ -94,9 +94,9 @@ export default function LogsScreen() {
   const exportLogs = async () => {
     try {
       const logsQuery = await LogService.getAllLogs();
-      
+
       // Filter logs based on date range
-      const filteredLogs = logsQuery.filter(log => {
+      const filteredLogs = logsQuery.filter((log) => {
         const logDate = new Date(log.createdAt);
         return logDate >= startDate && logDate <= endDate;
       });
@@ -105,7 +105,7 @@ export default function LogsScreen() {
         Alert.alert("Fehler", "Keine Logs im ausgewählten Zeitraum vorhanden.");
         return;
       }
-   
+
       const logsData = filteredLogs.map((log) => ({
         Beschreibung: log.beschreibung,
         "Gesamt Menge": log.gesamtMenge,
@@ -123,7 +123,9 @@ export default function LogsScreen() {
       XLSX.utils.book_append_sheet(workbook, logsSheet, "Trackingliste");
 
       // Define export file name with date range
-      const exportFileName = `trackingliste_${startDate.toLocaleDateString("de-DE")}_bis_${endDate.toLocaleDateString("de-DE")}.xlsx`;
+      const exportFileName = `trackingliste_${startDate.toLocaleDateString(
+        "de-DE"
+      )}_bis_${endDate.toLocaleDateString("de-DE")}.xlsx`;
       const fileUri = FileSystem.documentDirectory + exportFileName;
 
       // Convert workbook to base64 and save
@@ -146,16 +148,16 @@ export default function LogsScreen() {
       if (result) {
         Toast.show({
           type: "success",
-          text1: "Export",
-          text2: "Logs erfolgreich exportiert",
+          text1: ToastMessages.ERFOLG,
+          text2: ToastMessages.LOGS_EXPORT,
         });
       }
     } catch (error) {
       console.error("Fehler beim Export der Logs:", error);
       Toast.show({
         type: "error",
-        text1: "Export",
-        text2: "Fehler beim Exportieren der Logs",
+        text1: ToastMessages.ERROR,
+        text2: ToastMessages.LOGS_EXPORT_ERROR,
       });
     }
   };
