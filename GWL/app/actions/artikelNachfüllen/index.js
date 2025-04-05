@@ -65,7 +65,7 @@ export default function IndexScreen() {
         Toast.show({
           type: "error",
           text1: ToastMessages.ERROR,
-          text2: ToastMessages.ARTICLE_NOT_IN_REGALs,
+          text2: ToastMessages.ARTICLE_NOT_IN_REGAL,
           position: "bottom",
         });
       } else {
