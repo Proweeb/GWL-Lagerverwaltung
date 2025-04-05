@@ -276,6 +276,7 @@ const RegallisteScreen = () => {
                 confirm.gwId +
                 ";" +
                 confirm.regalId,
+              position: "bottom",
               visibilityTime: 1000,
             });
 
