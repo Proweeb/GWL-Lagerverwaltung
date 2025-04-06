@@ -22,9 +22,8 @@ const ExportScreen = () => {
   const [isExporting, setIsExporting] = useState(false);
 
   const getDefaultFileName = () => {
-
-    if(fileName!=""){
-      return fileName +".xlsx"
+    if (fileName != "") {
+      return fileName + ".xlsx";
     }
 
     const now = new Date();
@@ -66,7 +65,7 @@ const ExportScreen = () => {
       const artikelSheetData = artikel.map((a, index) => {
         return {
           GWID: a.gwId,
-          "Firmen ID": a.firmenId,
+          FirmenID: a.firmenId,
           Beschreibung: a.beschreibung,
           Gesamtmenge: a.menge,
           Mindestmenge: a.mindestMenge,
@@ -133,16 +132,16 @@ const ExportScreen = () => {
       );
       try {
         await composeEmailWithDefault({
-          subject: `Datenbank Export ${new Date().toLocaleDateString('de-DE')}`,
+          subject: `Datenbank Export ${new Date().toLocaleDateString("de-DE")}`,
           body: EmailBodies.DATABASE_EXPORT + EmailBodies.SIGNATURE,
-          attachments: [fileUri]
+          attachments: [fileUri],
         });
       } catch (error) {
         console.error("Error sending email:", error);
         Toast.show({
           type: "error",
           text1: ToastMessages.ERROR,
-          text2: ToastMessages.SEND_EMAIL_ERROR
+          text2: ToastMessages.SEND_EMAIL_ERROR,
         });
       }
     } catch (error) {

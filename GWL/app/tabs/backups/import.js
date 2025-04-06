@@ -10,7 +10,7 @@ import {
 import * as XLSX from "xlsx";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system";
-import * as MailComposer from 'expo-mail-composer';
+import * as MailComposer from "expo-mail-composer";
 import { styles } from "../../../components/styles";
 import RegalService from "../../../database/datamapper/RegalHelper";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper";
@@ -328,7 +328,8 @@ const ImportScreen = ({ navigation }) => {
     try {
       const regale = await RegalService.getAllRegal();
       const artikel = await ArtikelService.getAllArtikel();
-      const artikelBesitzer = await ArtikelBesitzerService.getAllArtikelOwners();
+      const artikelBesitzer =
+        await ArtikelBesitzerService.getAllArtikelOwners();
 
       if (!regale.length && !artikel.length && !artikelBesitzer.length) {
         throw new Error("Keine Daten zum Exportieren vorhanden.");
@@ -368,7 +369,9 @@ const ImportScreen = ({ navigation }) => {
             "Regal ID": regal.regalId,
             "Regal Name": regal.regalName,
             Menge: ab.menge,
-            "Zuletzt aktualisiert": new Date(ab.updatedAt).toLocaleDateString("de-DE"),
+            "Zuletzt aktualisiert": new Date(ab.updatedAt).toLocaleDateString(
+              "de-DE"
+            ),
           };
         })
       );
@@ -381,7 +384,7 @@ const ImportScreen = ({ navigation }) => {
       XLSX.utils.book_append_sheet(workbook, lagerplanSheet, "Lagerplan");
 
       // Define backup file name with timestamp
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
       const backupFileName = `backup_${timestamp}.xlsx`;
       const fileUri = FileSystem.documentDirectory + backupFileName;
 
@@ -390,7 +393,7 @@ const ImportScreen = ({ navigation }) => {
         bookType: "xlsx",
         type: "base64",
       });
-      
+
       await FileSystem.writeAsStringAsync(fileUri, excelBuffer, {
         encoding: FileSystem.EncodingType.Base64,
       });
@@ -405,11 +408,11 @@ const ImportScreen = ({ navigation }) => {
   const sendBackupEmail = async () => {
     try {
       const backupFileUri = await createBackupFile();
-      
+
       await composeEmailWithDefault({
-        subject: `Datenbank Backup ${new Date().toLocaleDateString('de-DE')}`,
+        subject: `Datenbank Backup ${new Date().toLocaleDateString("de-DE")}`,
         body: EmailBodies.DATABASE_BACKUP + EmailBodies.SIGNATURE,
-        attachments: [backupFileUri]
+        attachments: [backupFileUri],
       });
 
       return true;
@@ -418,7 +421,7 @@ const ImportScreen = ({ navigation }) => {
       Toast.show({
         type: "error",
         text1: ToastMessages.ERROR,
-        text2: ToastMessages.SEND_EMAIL_ERROR
+        text2: ToastMessages.SEND_EMAIL_ERROR,
       });
       return false;
     }
@@ -443,10 +446,10 @@ const ImportScreen = ({ navigation }) => {
       setShowConfirm(false); // Close the confirmation popup
       setIsImporting(true);
       setImportProgress(0);
-      
+
       // First try to send backup email
       await sendBackupEmail();
-      
+
       // Then proceed with import
       console.log("=== DEBUG: Full JSON Data Structure ===");
       console.log("Available sheets:", Object.keys(jsonData));
@@ -482,7 +485,6 @@ const ImportScreen = ({ navigation }) => {
         null,
         null
       );
-    
 
       console.log("Daten erfolgreich importiert!");
       Toast.show({
@@ -1020,10 +1022,11 @@ const ImportScreen = ({ navigation }) => {
       >
         <ConfirmPopup
           greenMode={true}
-          text={"Achtung: \nBeim Importieren werden alle aktuellen Daten gelöscht und ersetzt.\n Möchten Sie fortfahren?"}
+          text={
+            "Achtung: \nBeim Importieren werden alle aktuellen Daten gelöscht und ersetzt.\n Möchten Sie fortfahren?"
+          }
           greyCallback={() => setShowConfirm(false)}
           colorCallback={handleConfirmImport}
-          
         />
       </Modal>
 
