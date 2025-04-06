@@ -291,9 +291,8 @@ async function getArtikelOwnersByGwIdAndRegalId(artikelId, regalId) {
   let artikel = null;
   let regal = null;
 
-  artikel = await ArtikelService.getArtikelById(artikelId);
-
   regal = await RegalService.getRegalById(regalId);
+  artikel = await ArtikelService.getArtikelById(artikelId);
 
   const ArtikelBesitzer = await database
     .get("artikel_besitzer")

@@ -41,8 +41,9 @@ const InventurScreen = ({ setChangedMenge, changedMenge }) => {
     try {
       setLoadingState(true);
       const artikelData = await ArtikelBesitzerService.getAllArtikelOwners();
-      setLoadingState(false);
+
       setArtikelList(artikelData);
+      setLoadingState(false);
     } catch (error) {
       console.error("Fehler beim Laden der Artikel:", error);
       setLoadingState(false);
