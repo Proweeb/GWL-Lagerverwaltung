@@ -7,7 +7,7 @@ import { heightPercentageToDP } from "react-native-responsive-screen";
 import { Q } from "@nozbe/watermelondb";
 import * as Progress from "react-native-progress";
 import { useRoute } from "@react-navigation/native";
-
+import { MaterialIcons } from "@expo/vector-icons";
 import { database } from "../../../database/database";
 import ArtikelService from "../../../database/datamapper/ArtikelHelper";
 const LagerScreen = () => {
@@ -21,6 +21,21 @@ const LagerScreen = () => {
     let regaleSubscription;
     let artikelBesitzerSubscription;
 
+    navigation.setOptions({
+      headerLeft: ({ canGoBack, onPress }) =>
+        navigation.canGoBack() ? (
+          <MaterialIcons
+            name="arrow-back"
+            size={24}
+            color={styles.textColor}
+            style={{ marginLeft: 10 }}
+            onPress={() => {
+              console.log(navigation);
+              navigation.goBack();
+            }}
+          />
+        ) : null,
+    });
     const setupSubscriptions = async () => {
       if (gwId) {
         try {
@@ -41,8 +56,8 @@ const LagerScreen = () => {
                 // Get all regale that have this article
                 const regaleWithArtikel = await Promise.all(
                   artikelBesitzerData.map(async (besitzer) => {
-                    const regal = await besitzer.regal.fetch()
-                    
+                    const regal = await besitzer.regal.fetch();
+
                     return {
                       id: regal.id,
                       regalId: regal.regalId,
@@ -201,7 +216,8 @@ const LagerScreen = () => {
 
     return () => {
       if (regaleSubscription) regaleSubscription.unsubscribe();
-      if (artikelBesitzerSubscription) artikelBesitzerSubscription.unsubscribe();
+      if (artikelBesitzerSubscription)
+        artikelBesitzerSubscription.unsubscribe();
     };
   }, [gwId]);
 

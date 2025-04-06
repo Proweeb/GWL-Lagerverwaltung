@@ -21,16 +21,6 @@ export default function LagerNavigator() {
         headerTitleStyle: {
           fontWeight: "bold",
         },
-        headerLeft: ({ canGoBack, onPress }) =>
-          navigation.canGoBack() ? (
-            <MaterialIcons
-              name="arrow-back"
-              size={24}
-              color={styles.textColor}
-              style={{ marginLeft: 10 }}
-              onPress={() => navigation.goBack()}
-            />
-          ) : null,
       }}
     >
       <Stack.Screen
