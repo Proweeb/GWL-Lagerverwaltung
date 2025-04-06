@@ -10,7 +10,7 @@ export default function ArtikelPlatzHinzufügenNavigator() {
       <Stack.Screen
         name="ArtikelPlatzHinzufügen"
         options={{
-          title: "Lagerplatz&Artikel",
+          title: "Lagerplatz & Artikel",
           headerShown: true,
           statusBarBackgroundColor: styles.backgroundColor,
           statusBarStyle: "dark",
