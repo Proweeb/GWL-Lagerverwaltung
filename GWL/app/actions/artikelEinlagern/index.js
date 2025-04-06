@@ -49,7 +49,7 @@ export default function IndexScreen() {
           screen: "ArtikelEinlagernNavigator",
           params: {
             screen: "Next",
-            params: { regalId: regalId, gwId: gwId, menge: menge },
+            params: { regalId: regalId, gwId: gwId, menge: Number(menge) },
           },
         });
       } else if (error.message == ErrorMessages.REGAL_NOT_FOUND) {
@@ -61,8 +61,9 @@ export default function IndexScreen() {
           position: "bottom",
         });
       } else if (error.message == ErrorMessages.ARTIKELBESITZER_NOT_FOUND) {
+        console.log(menge);
         await ArtikelBesitzerService.createArtikelOwner(
-          { menge: menge },
+          { menge: Number(menge) },
           gwId,
           regalId
         );

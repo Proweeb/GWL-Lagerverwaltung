@@ -247,7 +247,7 @@ export default function EditScreen() {
         />
 
         <Text style={{ fontSize: RFPercentage(1.8), marginTop: 8 }}>
-          Firmen ID
+          FirmenID
         </Text>
         <TextInputField
           value={formData.firmen_id}

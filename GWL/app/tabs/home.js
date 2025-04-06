@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Dimensions, Keyboard, KeyboardAvoidingView, ScrollView, Platform, Modal } from "react-native";
+import {
+  View,
+  Text,
+  Dimensions,
+  Keyboard,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
+  Modal,
+} from "react-native";
 import Toast from "react-native-toast-message";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { styles } from "../../components/styles";
 
@@ -9,10 +18,16 @@ import ActionGrid from "../../components/utils/ActionGrid";
 import InventoryWidget from "../../components/utils/InventoryWidget";
 import HomeWidget from "../../components/utils/HomeWidget/homeWidget";
 import NotificationsWidget from "../../components/oneTimeUse/NotifcationsWidget";
-import { checkExpiredItems, sendExpiryNotification } from "../../components/utils/Functions/expiryCheck";
+import {
+  checkExpiredItems,
+  sendExpiryNotification,
+} from "../../components/utils/Functions/expiryCheck";
 import ConfirmPopup from "../../components/Modals/ConfirmPopUp";
-import { checkBackupNeeded, performBackup } from '../../components/utils/Functions/backupCheck';
-import { ToastMessages } from '../../components/enum';
+import {
+  checkBackupNeeded,
+  performBackup,
+} from "../../components/utils/Functions/backupCheck";
+import { ToastMessages } from "../../components/enum";
 import { useIsFocused } from "@react-navigation/native";
 const actions = [
   [
@@ -82,7 +97,7 @@ export default function HomeScreen() {
     try {
       const storedSettings = await AsyncStorage.getItem("settings");
       let parsedSettings = storedSettings ? JSON.parse(storedSettings) : {};
-      
+
       // Initialize last backup dates if they're null
       if (!parsedSettings.lastBackupDB) {
         parsedSettings.lastBackupDB = new Date().toISOString();
@@ -96,13 +111,19 @@ export default function HomeScreen() {
       // Check for needed backups after settings are loaded
       const checkBackups = async () => {
         try {
-          const needsDB = await checkBackupNeeded(parsedSettings.backUpDBReminder, parsedSettings.lastBackupDB);
-          const needsLogs = await checkBackupNeeded(parsedSettings.backupLogsReminder, parsedSettings.lastBackupLogs);
-          
+          const needsDB = await checkBackupNeeded(
+            parsedSettings.backUpDBReminder,
+            parsedSettings.lastBackupDB
+          );
+          const needsLogs = await checkBackupNeeded(
+            parsedSettings.backupLogsReminder,
+            parsedSettings.lastBackupLogs
+          );
+
           const types = [];
-          if (needsDB) types.push('DB');
-          if (needsLogs) types.push('Logs');
-          
+          if (needsDB) types.push("DB");
+          if (needsLogs) types.push("Logs");
+
           if (types.length > 0) {
             setBackupTypes(types);
             setShowBackupConfirm(true);
@@ -133,8 +154,6 @@ export default function HomeScreen() {
       }
     );
 
-
-
     // Cleanup listeners when component unmounts
     return () => {
       keyboardDidHideListener.remove();
@@ -163,14 +182,14 @@ export default function HomeScreen() {
         type: "success",
         text1: ToastMessages.ERFOLG,
         text2: ToastMessages.EXPIRED_ITEMS_SENT,
-        position: "bottom"
+        position: "bottom",
       });
     } catch (error) {
       Toast.show({
         type: "error",
         text1: ToastMessages.ERROR,
         text2: ToastMessages.SEND_EMAIL_ERROR,
-        position: "bottom"
+        position: "bottom",
       });
     }
   };
@@ -184,21 +203,21 @@ export default function HomeScreen() {
       let backupPerformed = false;
 
       if (backupTypes.length > 0) {
-        await performBackup(backupTypes.map(type => type.toLowerCase()));
-        
-        if (backupTypes.includes('DB')) {
+        await performBackup(backupTypes.map((type) => type.toLowerCase()));
+
+        if (backupTypes.includes("DB")) {
           newSettings.lastBackupDB = new Date().toISOString();
         }
-        if (backupTypes.includes('Logs')) {
+        if (backupTypes.includes("Logs")) {
           newSettings.lastBackupLogs = new Date().toISOString();
         }
-        
+
         backupPerformed = true;
       }
 
       if (backupPerformed) {
         setSettings(newSettings);
-        await AsyncStorage.setItem('settings', JSON.stringify(newSettings));
+        await AsyncStorage.setItem("settings", JSON.stringify(newSettings));
 
         Toast.show({
           type: "success",
@@ -235,7 +254,7 @@ export default function HomeScreen() {
       <HomeWidget
         flexValue={0.9}
         containerFlex={0.7}
-        title={"Benachrichtungen"}
+        title={"Ablaufwarnung"}
         containerStyle={[{ alignItems: "center", flex: 1, width: "100%" }]}
       >
         {!keyboardVisible && <NotificationsWidget />}
@@ -291,7 +310,14 @@ export default function HomeScreen() {
       >
         <ConfirmPopup
           title="Backup erforderlich"
-          text={`Es ist Zeit für ${backupTypes.length > 1 ? 'folgende Backups' : 'ein Backup'}:${backupTypes.map(type => `\n- ${type === 'DB' ? 'Datenbank' : 'Protokoll'} Backup`).join('')}\n\nMöchten Sie jetzt die Backups erstellen?`}
+          text={`Es ist Zeit für ${
+            backupTypes.length > 1 ? "folgende Backups" : "ein Backup"
+          }:${backupTypes
+            .map(
+              (type) =>
+                `\n- ${type === "DB" ? "Datenbank" : "Protokoll"} Backup`
+            )
+            .join("")}\n\nMöchten Sie jetzt die Backups erstellen?`}
           colorCallback={() => handleBackupConfirm(true)}
           greyCallback={() => handleBackupConfirm(false)}
         />

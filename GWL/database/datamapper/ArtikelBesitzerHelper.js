@@ -23,7 +23,7 @@ async function createArtikelOwner(artikelOwnerData, artikelId, regalId) {
 
   let text;
   if (artikelOwnerData.menge < 0) {
-    text =logTypes.artikelEntnehmen;
+    text = logTypes.artikelEntnehmen;
   } else {
     text = logTypes.artikelNachfüllen;
   }
@@ -38,13 +38,17 @@ async function createArtikelOwner(artikelOwnerData, artikelId, regalId) {
         artikelOwner.createdAt = artikelOwnerData.createdAt;
       }
     });
-    await LogService.createLog({
-      beschreibung: text,
-      menge: Number(artikelOwnerData.menge),
-      gesamtMenge: Number(artikel.menge),
-      regalId: regal.regalId,
-      createdAt: new Date()
-    }, artikel.gwId, regal.regalId);
+    await LogService.createLog(
+      {
+        beschreibung: text,
+        menge: Number(artikelOwnerData.menge),
+        gesamtMenge: Number(artikel.menge),
+        regalId: regal.regalId,
+        createdAt: new Date(),
+      },
+      artikel.gwId,
+      regal.regalId
+    );
     return owner;
   });
 }
@@ -115,25 +119,33 @@ async function deleteArtikelOwnerByArtikelIdAndRegalId(gwId, regalId) {
     }
 
     if (artikelOwner[0].menge > 0) {
-      await LogService.createLog({
-        beschreibung: logTypes.artikelEntnehmen,
-        menge: Number(artikelOwner[0].menge) * -1,
-        gesamtMenge: Number(artikel.menge),
-        regalId: regal.regalId,
-        createdAt: new Date()
-      }, artikel.gwId, regal.regalId);
+      await LogService.createLog(
+        {
+          beschreibung: logTypes.artikelEntnehmen,
+          menge: Number(artikelOwner[0].menge) * -1,
+          gesamtMenge: Number(artikel.menge),
+          regalId: regal.regalId,
+          createdAt: new Date(),
+        },
+        artikel.gwId,
+        regal.regalId
+      );
     }
     await artikel.update((artikel) => {
       artikel.menge -= artikelOwner[0].menge;
     });
     if (artikelOwner.length > 0) {
-      await LogService.createLog({
-        beschreibung: logTypes.artikelEntnehmen,
-        menge: Number(artikelOwner[0].menge) * -1,
-        gesamtMenge: Number(artikel.menge),
-        regalId: regal.regalId,
-        createdAt: new Date()
-      }, artikel.gwId, regal.regalId);
+      await LogService.createLog(
+        {
+          beschreibung: logTypes.artikelEntnehmen,
+          menge: Number(artikelOwner[0].menge) * -1,
+          gesamtMenge: Number(artikel.menge),
+          regalId: regal.regalId,
+          createdAt: new Date(),
+        },
+        artikel.gwId,
+        regal.regalId
+      );
       await database.batch(
         ...artikelOwner.map((artikel) => artikel.prepareDestroyPermanently())
       );
@@ -164,44 +176,48 @@ async function inventurUpdateArtikelBesitzerByGwIdAndRegalId(
   if (
     updatedArtikelBesitzer.menge !== null &&
     updatedArtikelBesitzer.menge !== undefined
-  ) 
-  return await database.write(async () => {
-    let text;
-    if (updatedArtikelBesitzer.menge < 0) {
-      text = logTypes.artikelEntnehmen;
-    } else {
-      text = logTypes.artikelNachfüllen;
-    }
-    await LogService.createLog({
-      beschreibung: text,
-      menge: Number(updatedArtikelBesitzer.menge),
-      gesamtMenge:
-        Number(artikelBesitzer[0].menge) + Number(updatedArtikelBesitzer.menge),
+  )
+    return await database.write(async () => {
+      let text;
+      if (updatedArtikelBesitzer.menge < 0) {
+        text = logTypes.artikelEntnehmen;
+      } else {
+        text = logTypes.artikelNachfüllen;
+      }
+      await LogService.createLog(
+        {
+          beschreibung: text,
+          menge: Number(updatedArtikelBesitzer.menge),
+          gesamtMenge:
+            Number(artikelBesitzer[0].menge) +
+            Number(updatedArtikelBesitzer.menge),
+        },
+        artikelId.gwId,
+        newRegalId.regalId
+      );
 
-    }, artikelId.gwId, newRegalId.regalId);
-
-    await artikelBesitzer[0].update((art) => {
-      if (
-        updatedArtikelBesitzer.gwId !== null &&
-        updatedArtikelBesitzer.gwId !== undefined
-      ) {
-        art.artikel.set(gwId);
-      }
-      if (
-        updatedArtikelBesitzer.menge !== null &&
-        updatedArtikelBesitzer.menge !== undefined
-      ) {
-        art.menge = updatedArtikelBesitzer.menge;
-      }
-      if (
-        updatedArtikelBesitzer.regalId !== null &&
-        updatedArtikelBesitzer.regalId !== undefined
-      ) {
-        art.regal.set(regalId);
-      }
+      await artikelBesitzer[0].update((art) => {
+        if (
+          updatedArtikelBesitzer.gwId !== null &&
+          updatedArtikelBesitzer.gwId !== undefined
+        ) {
+          art.artikel.set(gwId);
+        }
+        if (
+          updatedArtikelBesitzer.menge !== null &&
+          updatedArtikelBesitzer.menge !== undefined
+        ) {
+          art.menge = updatedArtikelBesitzer.menge;
+        }
+        if (
+          updatedArtikelBesitzer.regalId !== null &&
+          updatedArtikelBesitzer.regalId !== undefined
+        ) {
+          art.regal.set(regalId);
+        }
+      });
+      return artikelBesitzer[0];
     });
-    return artikelBesitzer[0];
-  });
 }
 
 async function updateArtikelBesitzerMengeByGwIdAndRegalId(
@@ -235,13 +251,17 @@ async function updateArtikelBesitzerMengeByGwIdAndRegalId(
     } else {
       text = logTypes.artikelNachfüllen;
     }
-    await LogService.createLog({
-      beschreibung: text,
-      menge: Number(updatedArtikelBesitzer.menge),
-      gesamtMenge: Number(artikelId.menge),
-      regalId: newRegalId.regalId,
-      createdAt: new Date()
-    }, artikelId.gwId, newRegalId.regalId);
+    await LogService.createLog(
+      {
+        beschreibung: text,
+        menge: Number(updatedArtikelBesitzer.menge),
+        gesamtMenge: Number(artikelId.menge),
+        regalId: newRegalId.regalId,
+        createdAt: new Date(),
+      },
+      artikelId.gwId,
+      newRegalId.regalId
+    );
 
     await artikelBesitzer[0].update((art) => {
       if (

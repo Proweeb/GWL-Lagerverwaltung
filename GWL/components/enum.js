@@ -68,9 +68,8 @@ export const ToastMessages = {
   SETTINGS_ERROR: "Fehler beim Speichern der Einstellungen",
   SEND_EMAIL_ERROR: "Fehler beim Senden der Email",
   BACKUP_SUCCESS: "Backup erfolgreich erstellt",
-  BACKUP_ERROR: "Fehler beim Erstellen des Backups",  
+  BACKUP_ERROR: "Fehler beim Erstellen des Backups",
   EXPIRED_ITEMS_SENT: "Abgelaufene Artikel wurden gesendet",
-  
 };
 
 export const Email = {
@@ -78,17 +77,23 @@ export const Email = {
 };
 
 export const EmailBodies = {
-  INVENTUR_EXPORT: "Hier ist die exportierte Inventur-Datei.\n\nLiebe Grüße\nGWL Lagerverwaltung",
-  EXPIRED_ITEMS: "Die folgenden Artikel haben ihr Ablaufdatum erreicht und sollten aus dem Lager entfernt werden:\n\n",
-  BACKUP_EXPORT: "Hier ist die exportierte Backup-Datei.\n\nLiebe Grüße\nGWL Lagerverwaltung",
+  INVENTUR_EXPORT:
+    "Hier ist die exportierte Inventur-Datei.\n\nLiebe Grüße\nGWL Lagerverwaltung",
+  EXPIRED_ITEMS:
+    "Die folgenden Artikel haben ihr Ablaufdatum erreicht und sollten aus dem Lager entfernt werden:\n\n",
+  BACKUP_EXPORT:
+    "Hier ist die exportierte Backup-Datei.\n\nLiebe Grüße\nGWL Lagerverwaltung",
   LOW_STOCK: "Die folgenden Artikel haben einen niedrigen Lagerbestand:\n\n",
-  SINGLE_LOW_STOCK: "Der Artikel \"{beschreibung}\" (GWID: {gwId}) hat einen niedrigen Lagerbestand.\n\n" +
-                   "Aktueller Bestand: {menge}\n" +
-                   "Mindestbestand: {mindestMenge}\n\n" +
-                   "Bitte veranlassen Sie die Nachproduktion.",
+  SINGLE_LOW_STOCK:
+    'Der Artikel "{beschreibung}" (GWID: {gwId}) hat einen niedrigen Lagerbestand.\n\n' +
+    "Aktueller Bestand: {menge}\n" +
+    "Mindestbestand: {mindestMenge}\n\n" +
+    "Bitte veranlassen Sie die Nachproduktion.",
   DATABASE_EXPORT: "Anbei finden Sie den Export der aktuellen Datenbank.",
-  DATABASE_BACKUP: "Anbei finden Sie das Backup der aktuellen Datenbank vor dem Import.",
-  TRACKING_LIST: "Anbei finden Sie die Trackingliste für den ausgewählten Zeitraum.",
+  DATABASE_BACKUP:
+    "Anbei finden Sie das Backup der aktuellen Datenbank vor dem Import.",
+  TRACKING_LIST:
+    "Anbei finden Sie die Trackingliste für den ausgewählten Zeitraum.",
   SIGNATURE: "\n\nLiebe Grüße\nGWL Lagerverwaltung",
   LOGS_BACKUP: "Anbei finden Sie das Backup der aktuellen Trackingliste.",
 };
