@@ -42,11 +42,12 @@ export default function OverviewWithQuantity({
     if (!foundArticle) return;
 
     const newMenge = Number(menge) + Number(nachfüllmenge);
-    if (newMenge < foundArticle.mindestMenge) {
+    if (newMenge <= foundArticle.mindestMenge) {
       Toast.show({
         type: "warning",
         text1: ToastMessages.WARNING,
-        text2: ToastMessages.ARTICLE_ALMOST_EMPTY + " " + foundArticle.beschreibung,
+        text2:
+          ToastMessages.ARTICLE_ALMOST_EMPTY + " " + foundArticle.beschreibung,
         position: "bottom",
         autoHide: false,
         topOffset: 50,
@@ -54,28 +55,30 @@ export default function OverviewWithQuantity({
       });
 
       // Wait for 1 second before sending email
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Send email notification for low stock
       try {
-        let body = EmailBodies.SINGLE_LOW_STOCK
-          .replace('{beschreibung}', foundArticle.beschreibung)
-          .replace('{gwId}', gwId)
-          .replace('{menge}', newMenge)
-          .replace('{mindestMenge}', foundArticle.mindestMenge);
-        
+        let body = EmailBodies.SINGLE_LOW_STOCK.replace(
+          "{beschreibung}",
+          foundArticle.beschreibung
+        )
+          .replace("{gwId}", gwId)
+          .replace("{menge}", newMenge)
+          .replace("{mindestMenge}", foundArticle.mindestMenge);
+
         body += EmailBodies.SIGNATURE;
 
         await composeEmailWithDefault({
           subject: `Niedriger Lagerbestand: ${foundArticle.beschreibung}`,
-          body
+          body,
         });
       } catch (error) {
         console.error("Error sending email:", error);
         Toast.show({
           type: "error",
           text1: ToastMessages.ERROR,
-          text2: ToastMessages.SEND_EMAIL_ERROR
+          text2: ToastMessages.SEND_EMAIL_ERROR,
         });
       }
     }
