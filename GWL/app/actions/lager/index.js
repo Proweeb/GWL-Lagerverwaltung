@@ -72,7 +72,12 @@ const LagerScreen = () => {
                   return acc;
                 }, {});
 
-                setGroupedRegale(Object.values(grouped));
+                // Sort regale by name
+                const sortedRegale = Object.values(grouped).sort((a, b) => {
+                  return a.regalName.localeCompare(b.regalName);
+                });
+
+                setGroupedRegale(sortedRegale);
                 setLoading(false);
               } catch (error) {
                 console.error("Error fetching observed data:", error);
@@ -126,12 +131,68 @@ const LagerScreen = () => {
                 return acc;
               }, {});
 
-              setGroupedRegale(Object.values(grouped));
+              // Sort regale by name
+              const sortedRegale = Object.values(grouped).sort((a, b) => {
+                return a.regalName.localeCompare(b.regalName);
+              });
+
+              setGroupedRegale(sortedRegale);
               setLoading(false);
             } catch (error) {
               console.error("Error fetching observed data:", error);
               setLoading(false);
             }
+          });
+
+        // Also subscribe to artikel_besitzer changes to update counts
+        artikelBesitzerSubscription = database
+          .get("artikel_besitzer")
+          .query()
+          .observe()
+          .subscribe(async () => {
+            // When artikel_besitzer changes, refetch all regale data
+            const regaleData = await database.get("regale").query().fetch();
+            const regaleWithArtikel = await Promise.all(
+              regaleData.map(async (regal) => {
+                const artikelList = await database
+                  .get("artikel_besitzer")
+                  .query(Q.where("regal_id", regal.id))
+                  .fetch();
+
+                return {
+                  id: regal.id,
+                  regalId: regal.regalId,
+                  regalName: regal.regalName,
+                  fachName: regal.fachName,
+                  artikelMenge: artikelList.length,
+                  hasTargetArticle: false,
+                };
+              })
+            );
+
+            const grouped = regaleWithArtikel.reduce((acc, regal) => {
+              if (!acc[regal.regalName]) {
+                acc[regal.regalName] = {
+                  regalName: regal.regalName,
+                  fachList: [],
+                };
+              }
+              acc[regal.regalName].fachList.push({
+                id: regal.id,
+                regalId: regal.regalId,
+                fachName: regal.fachName,
+                artikelMenge: regal.artikelMenge,
+                hasTargetArticle: regal.hasTargetArticle,
+              });
+              return acc;
+            }, {});
+
+            // Sort regale by name
+            const sortedRegale = Object.values(grouped).sort((a, b) => {
+              return a.regalName.localeCompare(b.regalName);
+            });
+
+            setGroupedRegale(sortedRegale);
           });
       }
     };

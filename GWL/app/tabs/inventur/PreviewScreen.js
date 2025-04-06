@@ -16,7 +16,7 @@ import ConfirmPopup from "../../../components/Modals/ConfirmPopUp.js";
 import { database } from "../../../database/database.js";
 import { Q } from "@nozbe/watermelondb/index.js";
 import Toast from "react-native-toast-message";
-import { ToastMessages, EmailBodies } from "../../../components/enum.js";
+import { ToastMessages, EmailBodies, logTypes } from "../../../components/enum.js";
 import * as Progress from "react-native-progress";
 import { widthPercentageToDP } from "react-native-responsive-screen";
 import { composeEmailWithDefault } from '../../../components/utils/Functions/emailUtils';
@@ -44,7 +44,7 @@ const PreviewScreen = ({ changedMenge, setChangedMenge }) => {
   const handleExportToEmail = async () => {
     try {
       await LogService.createLog(
-        { beschreibung: "Inventurliste gesendet" },
+        { beschreibung: logTypes.EndeInventur },
         null,
         null
       );

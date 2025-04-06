@@ -138,16 +138,7 @@ export async function testInsertAndFetch() {
     "A00.001" // regalId
   );
 
-  await LogService.createLog(
-    {
-      beschreibung: "Test Log 2",
-      menge: 5,
-      gesamtMenge: 15,
-      createdAt: new Date(2025, 4, 1) // May 1, 2025
-    },
-    "2", // gwId
-    "B00.002" // regalId
-  );
+
 
   await LogService.createLog(
     {

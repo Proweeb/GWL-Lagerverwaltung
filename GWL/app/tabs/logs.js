@@ -33,7 +33,7 @@ export default function LogsScreen() {
   const [minDate, setMinDate] = useState(new Date());
   const [maxDate, setMaxDate] = useState(new Date());
   const [modalVisible, setModalVisible] = useState(false);
-  const isFocused = useIsFocused();
+
 
   useEffect(() => {
     async function getEarliestAndLatestLogs() {
@@ -43,9 +43,15 @@ export default function LogsScreen() {
           const dates = logs.map((log) => new Date(log.createdAt));
           const minDateValue = new Date(Math.min(...dates));
           const maxDateValue = new Date(Math.max(...dates));
+          
+          // Set min date to start of day (00:00:00)
+          minDateValue.setHours(0, 0, 0, 0);
           setMinDate(minDateValue);
-          setMaxDate(maxDateValue);
           setStartDate(minDateValue);
+          
+          // Set max date to end of day (23:59:59)
+          maxDateValue.setHours(23, 59, 59, 999);
+          setMaxDate(maxDateValue);
           setEndDate(maxDateValue);
         }
       } catch (error) {
@@ -138,7 +144,7 @@ export default function LogsScreen() {
         encoding: FileSystem.EncodingType.Base64,
       });
       await LogService.createLog(
-        { beschreibung: logTypes.ExportLog },
+        { beschreibung: logTypes.ExportTrackingliste },
         null,
         null
       );

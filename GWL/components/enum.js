@@ -7,10 +7,11 @@ export const logTypes = {
   EndeInventur: "Inventurliste gesendet",
   StartImportDB: "Import gestartet",
   ImportDB: "Lagerliste  importiert",
-  ExportDB: "Lagerliste  gesendet",
+  ExportDB: "Lagerliste  exportiert",
   ExportLog: "Backup Trackingliste gesendet",
   BackupDB: "Backup Lagerliste gesendet",
   artikelGeloescht: "Gelöscht",
+  ExportTrackingliste: "Trackingliste exportiert",
 };
 
 export const ErrorMessages = {
@@ -68,6 +69,7 @@ export const ToastMessages = {
   SEND_EMAIL_ERROR: "Fehler beim Senden der Email",
   BACKUP_SUCCESS: "Backup erfolgreich erstellt",
   BACKUP_ERROR: "Fehler beim Erstellen des Backups",  
+  EXPIRED_ITEMS_SENT: "Abgelaufene Artikel wurden gesendet",
   
 };
 

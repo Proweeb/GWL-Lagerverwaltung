@@ -23,9 +23,9 @@ async function createArtikelOwner(artikelOwnerData, artikelId, regalId) {
 
   let text;
   if (artikelOwnerData.menge < 0) {
-    text = "Entnehmen";
+    text =logTypes.artikelEntnehmen;
   } else {
-    text = "Nachfüllen";
+    text = logTypes.artikelNachfüllen;
   }
 
   return await database.write(async () => {

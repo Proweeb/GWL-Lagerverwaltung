@@ -138,10 +138,22 @@ export const performBackup = async (types) => {
     for (const type of types) {
       let fileUri;
       if (type === 'logs') {
+        // Create log entry for logs backup
+        await LogService.createLog(
+          { beschreibung: logTypes.ExportLog },
+          null,
+          null
+        );
         fileUri = await createLogsBackupFile();
         subject += 'Logs ';
         body += EmailBodies.LOGS_BACKUP;
       } else {
+        // Create log entry for database backup
+        await LogService.createLog(
+          { beschreibung: logTypes.BackupDB },
+          null,
+          null
+        );
         fileUri = await createDatabaseBackupFile();
         subject += 'Datenbank ';
         body += EmailBodies.DATABASE_BACKUP;

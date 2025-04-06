@@ -4,13 +4,13 @@ import { FlashList } from "@shopify/flash-list";
 import useLogStore from "../../store/logStore";
 import { styles } from "../styles";
 
-const LogsWidget = ({startDate, endDate}) => {
+const LogsWidget = ({ startDate, endDate }) => {
   const { logs, loading, error, fetchLogs } = useLogStore();
   const [filteredLogs, setFilteredLogs] = useState([]);
 
   useEffect(() => {
     const filterLogs = () => {
-      const filtered = logs.filter(log => {
+      const filtered = logs.filter((log) => {
         const logDate = new Date(log.createdAt);
         return logDate >= startDate && logDate <= endDate;
       });
@@ -21,15 +21,8 @@ const LogsWidget = ({startDate, endDate}) => {
   }, [logs, startDate, endDate]);
 
   const renderLogItem = ({ item }) => {
-    const {
-      createdAt,
-      beschreibung,
-      gwId,
-      regalId,
-      menge,
-      gesamtMenge
-    } = item;
-    
+    const { createdAt, beschreibung, gwId, regalId, menge, gesamtMenge } = item;
+
     return (
       <View style={customStyles.logItem}>
         {createdAt && (
@@ -46,12 +39,8 @@ const LogsWidget = ({startDate, endDate}) => {
         {beschreibung && (
           <Text style={customStyles.beschreibung}>{beschreibung}</Text>
         )}
-        {gwId && (
-          <Text style={customStyles.artikel}>GWID: {gwId}</Text>
-        )}
-        {regalId && (
-          <Text style={customStyles.regal}>Regal: {regalId}</Text>
-        )}
+        {gwId && <Text style={customStyles.artikel}>GWID: {gwId}</Text>}
+        {regalId && <Text style={customStyles.regal}>Regal: {regalId}</Text>}
         {menge !== null && menge !== undefined && (
           <Text style={customStyles.menge}>Menge: {menge}</Text>
         )}
@@ -119,7 +108,7 @@ const customStyles = StyleSheet.create({
   artikel: { color: "#666" },
   regal: { color: "#666" },
   menge: { fontWeight: "bold" },
-  error: { color: "red" }
+  error: { color: "red" },
 });
 
 export default LogsWidget;

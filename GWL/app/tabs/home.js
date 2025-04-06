@@ -13,7 +13,7 @@ import { checkExpiredItems, sendExpiryNotification } from "../../components/util
 import ConfirmPopup from "../../components/Modals/ConfirmPopUp";
 import { checkBackupNeeded, performBackup } from '../../components/utils/Functions/backupCheck';
 import { ToastMessages } from '../../components/enum';
-
+import { useIsFocused } from "@react-navigation/native";
 const actions = [
   [
     {
@@ -70,6 +70,7 @@ export default function HomeScreen() {
   const [expiredItems, setExpiredItems] = useState(null);
   const [showBackupConfirm, setShowBackupConfirm] = useState(false);
   const [backupTypes, setBackupTypes] = useState([]);
+  const isFocused = useIsFocused();
   const [settings, setSettings] = useState({
     backUpDBReminder: "Alle 3 Wochen",
     backupLogsReminder: "Alle 3 Wochen",
@@ -132,6 +133,16 @@ export default function HomeScreen() {
       }
     );
 
+
+
+    // Cleanup listeners when component unmounts
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
+
+  useEffect(() => {
     const checkForExpiredItems = async () => {
       const items = await checkExpiredItems();
       if (items && items.length > 0) {
@@ -142,13 +153,7 @@ export default function HomeScreen() {
 
     checkForExpiredItems();
     loadSettings();
-
-    // Cleanup listeners when component unmounts
-    return () => {
-      keyboardDidHideListener.remove();
-      keyboardDidShowListener.remove();
-    };
-  }, []);
+  }, [isFocused]);
 
   const handleExpiryConfirm = async () => {
     try {
