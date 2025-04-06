@@ -30,7 +30,7 @@ export const ToastMessages = {
   ERFOLG: "Erfolg",
   ARTICLE_IN_REGAL: "Artikel befindet sich schon im Regal",
   REGAL_NOT_FOUND: "Regal existert nicht",
-  ARTICLE_EINGELAGERT: "Artikel wurde eingelagert",
+  ARTICLE_EINGELAGERT: "Artikel wurde eingelagert:",
   ARTICLE_NOT_FOUND: "Artikel existiert nicht",
   ARTICLE_EXISTS: "Artikel existiert bereits",
   ARTICLE_NOT_IN_REGAL: "Artikel ist nicht im Regal",
