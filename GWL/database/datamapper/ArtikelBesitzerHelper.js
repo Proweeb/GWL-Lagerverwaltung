@@ -179,7 +179,7 @@ async function inventurUpdateArtikelBesitzerByGwIdAndRegalId(
   )
     return await database.write(async () => {
       let text;
-      if (updatedArtikelBesitzer.menge < 0) {
+      if (updatedArtikelBesitzer.menge < artikelId.menge) {
         text = logTypes.artikelEntnehmen;
       } else {
         text = logTypes.artikelNachfüllen;
