@@ -4,10 +4,16 @@ import { View, Text } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { styles } from "./styles";
 
+const defaultToastProps = {
+  position: 'bottom',
+  bottomOffset: 20,
+};
+
 export const toastConfig = {
   success: ({ text1, text2, props }) => (
     <BaseToast
       {...props}
+      {...defaultToastProps}
       style={{ borderLeftColor: "#4CAF50", backgroundColor: "#E9F7EF" }}
       contentContainerStyle={{ backgroundColor: "#E9F7EF" }}
       text1Style={{
@@ -23,6 +29,7 @@ export const toastConfig = {
   warning: ({ text1, text2, props }) => (
     <BaseToast
       {...props}
+      {...defaultToastProps}
       style={{ borderLeftColor: "#FFC107", backgroundColor: "#FFF8E1" }}
       contentContainerStyle={{ backgroundColor: "#FFF8E1" }}
       text1Style={{
@@ -38,6 +45,7 @@ export const toastConfig = {
   error: ({ text1, text2, props }) => (
     <BaseToast
       {...props}
+      {...defaultToastProps}
       style={{ borderLeftColor: "#F44336", backgroundColor: "#FFEBEE" }}
       contentContainerStyle={{ backgroundColor: "#FFEBEE" }}
       text1Style={{
@@ -53,6 +61,7 @@ export const toastConfig = {
   default: ({ text1, text2, props }) => (
     <BaseToast
       {...props}
+      {...defaultToastProps}
       style={{
         borderLeftColor: styles.lightBlue,
         backgroundColor: "#F5F5F5",
