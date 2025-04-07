@@ -43,10 +43,10 @@ export default function OverviewWithQuantity({
     setAusgabeMenge(Number(menge) - Number(entnahmeMenge));
   }, [entnahmeMenge, menge]);
 
-  const showLowMenge = async () => {
+  const showLowMenge = async (entnahmeMenge) => {
     if (!foundArticle) return;
 
-    if (menge === 0) {
+    if ((Number(menge)-Number(entnahmeMenge)) === 0) {
       Toast.show({
         type: "error",
         text1: ToastMessages.ERROR,
@@ -56,7 +56,7 @@ export default function OverviewWithQuantity({
         topOffset: 50,
         swipeable: true,
       });
-    } else if (menge <= foundArticle.mindestMenge) {
+    } else if ((Number(menge)-Number(entnahmeMenge)) <= foundArticle.mindestMenge) {
       Toast.show({
         type: "warning",
         text1: ToastMessages.WARNING,
@@ -124,7 +124,7 @@ export default function OverviewWithQuantity({
 
         setRegalId("");
         setGwId("");
-        showLowMenge();
+        showLowMenge(entnahmeMenge);
       }
     } catch (error) {
       Toast.show({

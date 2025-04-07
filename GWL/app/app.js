@@ -17,6 +17,7 @@ import BarcodeScreen from "./scan/barcode";
 import QrCodeScreen from "./scan/qrcode";
 //import { testInsertAndFetch } from "../Old_Code/insertLogswithArtikel";
 import SettingsScreen from "./other/settings";
+//import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import EditScreen from "./other/edit";
 
@@ -32,21 +33,21 @@ export default function App() {
     StatusBar.setBarStyle("dark-content");
     NavigationBar.setButtonStyleAsync("dark");
 
-    /*    const checkFirstTimeAppOpen = async () => {
-      try {
-        const isFirstTime = await AsyncStorage.getItem("isFirstTimeAppOpen");
+    //  const checkFirstTimeAppOpen = async () => {
+    //   try {
+    //     const isFirstTime = await AsyncStorage.getItem("isFirstTimeAppOpen");
 
-        if (isFirstTime === null) {
-          // This is the first time the app is opened
-          await testInsertAndFetch();
-          await AsyncStorage.setItem("isFirstTimeAppOpen", "false");
-        }
-      } catch (error) {
-        console.error("Error checking first time app open:", error);
-      }
-    };
+    //     if (isFirstTime === null) {
+    //       // This is the first time the app is opened
+    //       await testInsertAndFetch();
+    //       await AsyncStorage.setItem("isFirstTimeAppOpen", "false");
+    //     }
+    //   } catch (error) {
+    //     console.error("Error checking first time app open:", error);
+    //   }
+    // };
 
-    checkFirstTimeAppOpen(); */
+    // checkFirstTimeAppOpen();
   }, []);
 
   return (

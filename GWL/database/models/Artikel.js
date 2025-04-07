@@ -33,11 +33,12 @@ class Artikel extends Model {
     const mindestMenge = parseFloat(this.mindestMenge); // Ensure mindestMenge is treated as a number
 
     if (isNaN(menge) || isNaN(mindestMenge)) {
-      return "unknown"; // Fallback for invalid values
+      return "ok"; // Fallback for invalid values
     }
 
     if (menge === 0) return "out"; // Explicit check for zero
     if (menge <= mindestMenge) return "low"; // Check if menge is less than or equal to mindestMenge
+    
     return "ok"; // Default case
   }
 
