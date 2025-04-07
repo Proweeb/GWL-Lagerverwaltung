@@ -74,6 +74,7 @@ export default function Storagemenu({
                   regalname: split[0],
                   fachname: split[1],
                 }));
+                setRegalIdValid(true);
               },
             });
           }}
