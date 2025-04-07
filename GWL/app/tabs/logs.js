@@ -25,6 +25,7 @@ import CustomPopup from "../../components/Modals/CustomPopUp";
 import ConfirmPopup from "../../components/Modals/ConfirmPopUp";
 import { logTypes, ToastMessages, EmailBodies } from "../../components/enum";
 import { composeEmailWithDefault } from "../../components/utils/Functions/emailUtils";
+import useLogStore from "../../store/logStore";
 
 export default function LogsScreen() {
   const [startDate, setStartDate] = useState(new Date());
@@ -32,32 +33,38 @@ export default function LogsScreen() {
   const [minDate, setMinDate] = useState(new Date());
   const [maxDate, setMaxDate] = useState(new Date());
   const [modalVisible, setModalVisible] = useState(false);
+  const { fetchLogs } = useLogStore();
+  const isFocused = useIsFocused();
 
+  // Set initial date range when component mounts or when screen is focused
   useEffect(() => {
-    async function getEarliestAndLatestLogs() {
-      try {
-        const logs = await LogService.getAllLogs();
-        if (logs.length > 0) {
-          const dates = logs.map((log) => new Date(log.createdAt));
-          const minDateValue = new Date(Math.min(...dates));
-          const maxDateValue = new Date(Math.max(...dates));
+    if (isFocused) {
+      async function initializeDateRange() {
+        try {
+          const allLogs = await LogService.getAllLogs();
+          if (allLogs.length > 0) {
+            const dates = allLogs.map((log) => new Date(log.createdAt));
+            const minDateValue = new Date(Math.min(...dates));
+            const maxDateValue = new Date(Math.max(...dates));
 
-          // Set min date to start of day (00:00:00)
-          minDateValue.setHours(0, 0, 0, 0);
-          setMinDate(minDateValue);
-          setStartDate(minDateValue);
+            // Set min date to start of day (00:00:00)
+            minDateValue.setHours(0, 0, 0, 0);
+            setMinDate(minDateValue);
+            setStartDate(minDateValue);
 
-          // Set max date to end of day (23:59:59)
-          maxDateValue.setHours(23, 59, 59, 999);
-          setMaxDate(maxDateValue);
-          setEndDate(maxDateValue);
+            // Set max date to end of day (23:59:59)
+            maxDateValue.setHours(23, 59, 59, 999);
+            setMaxDate(maxDateValue);
+            setEndDate(maxDateValue);
+          }
+        } catch (error) {
+          console.error("Error initializing date range:", error);
         }
-      } catch (error) {
-        console.error("Error getting log dates:", error);
       }
+
+      initializeDateRange();
     }
-    getEarliestAndLatestLogs();
-  }, []);
+  }, [isFocused]);
 
   const showDatePicker = (currentDate, setDate, isStart) => {
     DateTimePickerAndroid.open({

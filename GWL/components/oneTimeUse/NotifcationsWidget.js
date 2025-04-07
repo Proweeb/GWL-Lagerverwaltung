@@ -61,7 +61,7 @@ export default function NotificationsWidget() {
     <SafeAreaView style={notificationstyle.container}>
       {expiredArticles.length === 0 ? (
         <Text style={notificationstyle.noNotifications}>
-          Keine Benachrichtigungen
+          Keine Ablaufwarnungen
         </Text>
       ) : (
         <View
