@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Text, View, TouchableOpacity, TextInput, Alert } from "react-native";
 import * as FileSystem from "expo-file-system";
-import * as Sharing from "expo-sharing";
 import * as XLSX from "xlsx/xlsx.mjs";
 import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper";
 import RegalService from "../../../database/datamapper/RegalHelper";

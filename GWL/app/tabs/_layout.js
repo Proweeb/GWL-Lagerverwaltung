@@ -89,7 +89,7 @@ export default function BottomTabNavigator() {
               }}
             >
               <Image
-                source={require("../../assets/adaptive-icon.png")}
+                source={require("../../assets/logo.png")}
                 style={{
                   width: "100%",
                   height: "100%",

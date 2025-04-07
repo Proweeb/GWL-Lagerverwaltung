@@ -19,7 +19,6 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import * as XLSX from "xlsx";
 import * as FileSystem from "expo-file-system";
-import * as Sharing from "expo-sharing";
 import LogService from "../../database/datamapper/LogHelper";
 import Toast from "react-native-toast-message";
 import CustomPopup from "../../components/Modals/CustomPopUp";
@@ -34,7 +33,6 @@ export default function LogsScreen() {
   const [maxDate, setMaxDate] = useState(new Date());
   const [modalVisible, setModalVisible] = useState(false);
 
-
   useEffect(() => {
     async function getEarliestAndLatestLogs() {
       try {
@@ -43,12 +41,12 @@ export default function LogsScreen() {
           const dates = logs.map((log) => new Date(log.createdAt));
           const minDateValue = new Date(Math.min(...dates));
           const maxDateValue = new Date(Math.max(...dates));
-          
+
           // Set min date to start of day (00:00:00)
           minDateValue.setHours(0, 0, 0, 0);
           setMinDate(minDateValue);
           setStartDate(minDateValue);
-          
+
           // Set max date to end of day (23:59:59)
           maxDateValue.setHours(23, 59, 59, 999);
           setMaxDate(maxDateValue);
@@ -151,9 +149,11 @@ export default function LogsScreen() {
 
       try {
         await composeEmailWithDefault({
-          subject: `Trackingliste Export ${startDate.toLocaleDateString('de-DE')} - ${endDate.toLocaleDateString('de-DE')}`,
+          subject: `Trackingliste Export ${startDate.toLocaleDateString(
+            "de-DE"
+          )} - ${endDate.toLocaleDateString("de-DE")}`,
           body: EmailBodies.TRACKING_LIST + EmailBodies.SIGNATURE,
-          attachments: [fileUri]
+          attachments: [fileUri],
         });
 
         Toast.show({
@@ -167,7 +167,7 @@ export default function LogsScreen() {
         Toast.show({
           type: "error",
           text1: ToastMessages.ERROR,
-          text2: ToastMessages.SEND_EMAIL_ERROR
+          text2: ToastMessages.SEND_EMAIL_ERROR,
         });
       }
     } catch (error) {

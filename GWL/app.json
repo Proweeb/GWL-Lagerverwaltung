@@ -21,12 +21,6 @@
       }
     },
     "android": {
-      "foregroundService": {
-        "notificationTitle": "Läuft...",
-        "notificationBody": "Checkt das Ablaufdatum der Artikel.",
-        "notificationColor": "#38aae1",
-        "notificationPriority": "high"
-      },
       "jsEngine": "hermes",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
@@ -36,9 +30,7 @@
       "allowBackup": true,
       "permissions": [
         "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO",
         "android.permission.VIBRATE",
-        "android.permission.POST_NOTIFICATIONS",
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.RECEIVE_BOOT_COMPLETED",
         "android.permission.WAKE_LOCK",
@@ -46,9 +38,6 @@
         "android.permission.FOREGROUND_SERVICE_DATA_SYNC"
       ],
       "package": "com.Lagerverwaltung"
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
     },
     "plugins": [
       [
@@ -90,15 +79,6 @@
               }
             ]
           }
-        }
-      ],
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/notification_icon.png",
-          "color": "#38aae1",
-          "defaultChannel": "default",
-          "enableBackgroundRemoteNotifications": false
         }
       ]
     ],

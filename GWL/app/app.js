@@ -15,11 +15,10 @@ import AktionenNavigator from "./actions/_layout";
 import { toastConfig } from "../components/toastConfig";
 import BarcodeScreen from "./scan/barcode";
 import QrCodeScreen from "./scan/qrcode";
-import { testInsertAndFetch } from "../Old_Code/insertLogswithArtikel";
+//import { testInsertAndFetch } from "../Old_Code/insertLogswithArtikel";
 import SettingsScreen from "./other/settings";
 
 import EditScreen from "./other/edit";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Stack = createStackNavigator();
 LogBox.ignoreLogs([
@@ -33,7 +32,7 @@ export default function App() {
     StatusBar.setBarStyle("dark-content");
     NavigationBar.setButtonStyleAsync("dark");
 
-    const checkFirstTimeAppOpen = async () => {
+    /*    const checkFirstTimeAppOpen = async () => {
       try {
         const isFirstTime = await AsyncStorage.getItem("isFirstTimeAppOpen");
 
@@ -47,7 +46,7 @@ export default function App() {
       }
     };
 
-    checkFirstTimeAppOpen();
+    checkFirstTimeAppOpen(); */
   }, []);
 
   return (

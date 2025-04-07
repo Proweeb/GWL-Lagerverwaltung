@@ -1,15 +1,15 @@
-import * as FileSystem from 'expo-file-system';
-import * as XLSX from 'xlsx';
-import { composeEmailWithDefault } from './emailUtils';
-import { EmailBodies } from '../../enum';
-import LogService from '../../../database/datamapper/LogHelper';
-import RegalService from '../../../database/datamapper/RegalHelper';
-import ArtikelService from '../../../database/datamapper/ArtikelHelper';
-import ArtikelBesitzerService from '../../../database/datamapper/ArtikelBesitzerHelper';
+import * as FileSystem from "expo-file-system";
+import * as XLSX from "xlsx";
+import { composeEmailWithDefault } from "./emailUtils";
+import { EmailBodies, logTypes } from "../../enum";
+import LogService from "../../../database/datamapper/LogHelper";
+import RegalService from "../../../database/datamapper/RegalHelper";
+import ArtikelService from "../../../database/datamapper/ArtikelHelper";
+import ArtikelBesitzerService from "../../../database/datamapper/ArtikelBesitzerHelper";
 const createLogsBackupFile = async () => {
   try {
     const logsQuery = await LogService.getAllLogs();
-    
+
     if (!logsQuery.length) {
       throw new Error("Keine Logs zum Exportieren vorhanden.");
     }
@@ -31,7 +31,7 @@ const createLogsBackupFile = async () => {
     XLSX.utils.book_append_sheet(workbook, logsSheet, "Trackingliste");
 
     // Define export file name with timestamp
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
     const exportFileName = `logs_backup_${timestamp}.xlsx`;
     const fileUri = FileSystem.documentDirectory + exportFileName;
 
@@ -95,7 +95,9 @@ const createDatabaseBackupFile = async () => {
           "Regal ID": regal.regalId,
           "Regal Name": regal.regalName,
           Menge: ab.menge,
-          "Zuletzt aktualisiert": new Date(ab.updatedAt).toLocaleDateString("de-DE"),
+          "Zuletzt aktualisiert": new Date(ab.updatedAt).toLocaleDateString(
+            "de-DE"
+          ),
         };
       })
     );
@@ -108,7 +110,7 @@ const createDatabaseBackupFile = async () => {
     XLSX.utils.book_append_sheet(workbook, lagerplanSheet, "Lagerplan");
 
     // Define backup file name with timestamp
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
     const backupFileName = `db_backup_${timestamp}.xlsx`;
     const fileUri = FileSystem.documentDirectory + backupFileName;
 
@@ -117,7 +119,7 @@ const createDatabaseBackupFile = async () => {
       bookType: "xlsx",
       type: "base64",
     });
-    
+
     await FileSystem.writeAsStringAsync(fileUri, excelBuffer, {
       encoding: FileSystem.EncodingType.Base64,
     });
@@ -132,12 +134,12 @@ const createDatabaseBackupFile = async () => {
 export const performBackup = async (types) => {
   try {
     const attachments = [];
-    let subject = 'Backup ';
-    let body = '';
+    let subject = "Backup ";
+    let body = "";
 
     for (const type of types) {
       let fileUri;
-      if (type === 'logs') {
+      if (type === "logs") {
         // Create log entry for logs backup
         await LogService.createLog(
           { beschreibung: logTypes.ExportLog },
@@ -145,7 +147,7 @@ export const performBackup = async (types) => {
           null
         );
         fileUri = await createLogsBackupFile();
-        subject += 'Logs ';
+        subject += "Logs ";
         body += EmailBodies.LOGS_BACKUP;
       } else {
         // Create log entry for database backup
@@ -155,19 +157,19 @@ export const performBackup = async (types) => {
           null
         );
         fileUri = await createDatabaseBackupFile();
-        subject += 'Datenbank ';
+        subject += "Datenbank ";
         body += EmailBodies.DATABASE_BACKUP;
       }
       attachments.push(fileUri);
     }
 
-    subject += new Date().toLocaleDateString('de-DE');
+    subject += new Date().toLocaleDateString("de-DE");
     body += EmailBodies.SIGNATURE;
 
     await composeEmailWithDefault({
       subject,
       body,
-      attachments
+      attachments,
     });
 
     return true;
@@ -206,4 +208,4 @@ export const checkBackupNeeded = async (reminderSetting, lastBackupDate) => {
     default:
       return false;
   }
-}; 
+};

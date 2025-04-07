@@ -30,7 +30,6 @@ const LagerScreen = () => {
             color={styles.textColor}
             style={{ marginLeft: 10 }}
             onPress={() => {
-              console.log(navigation);
               navigation.goBack();
             }}
           />
