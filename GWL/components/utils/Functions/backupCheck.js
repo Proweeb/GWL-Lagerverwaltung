@@ -158,7 +158,7 @@ export const performBackup = async (types) => {
         );
         fileUri = await createDatabaseBackupFile();
         subject += "Datenbank ";
-        body += EmailBodies.DATABASE_BACKUP;
+        body += EmailBodies.DATABASE_BACKUP2;
       }
       attachments.push(fileUri);
     }

@@ -92,6 +92,7 @@ export const EmailBodies = {
   DATABASE_EXPORT: "Anbei finden Sie den Export der aktuellen Datenbank.",
   DATABASE_BACKUP:
     "Anbei finden Sie das Backup der aktuellen Datenbank vor dem Import.",
+  DATABASE_BACKUP2: "Anbei finden Sie das Backup der aktuellen Datenbank.",
   TRACKING_LIST:
     "Anbei finden Sie die Trackingliste für den ausgewählten Zeitraum.",
   SIGNATURE: "\n\nLiebe Grüße\nGWL Lagerverwaltung",

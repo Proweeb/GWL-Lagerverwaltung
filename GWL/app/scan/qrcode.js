@@ -3,6 +3,7 @@ import {
   Text,
   View,
   KeyboardAvoidingView,
+  TouchableOpacity,
 } from "react-native";
 import {
   Camera,
@@ -15,8 +16,9 @@ import ScannerFrame from "../../components/utils/ViewFinder/ScannerFrame";
 import { Audio } from "expo-av";
 import { heightPercentageToDP } from "react-native-responsive-screen";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-export default function BarcodeScreen() {
+export default function QrcodeScreen() {
   const route = useRoute();
   const navigation = useNavigation();
   const device = useCameraDevice("back");
@@ -25,6 +27,7 @@ export default function BarcodeScreen() {
   const scannedCodes = useRef(new Set());
   const [sound, setSound] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [torch, setTorch] = useState(false);
 
   const onScan = route.params?.onScan;
 
@@ -119,6 +122,7 @@ export default function BarcodeScreen() {
       <KeyboardAvoidingView style={screenStyles.scannerContainer}>
         <View style={screenStyles.cameraContainer}>
           <Camera
+            torch={torch ? "on" : "off"}
             style={screenStyles.camera}
             device={device}
             isActive={true}
@@ -128,6 +132,16 @@ export default function BarcodeScreen() {
           />
         </View>
         <View style={screenStyles.scannerFrameContainer}>
+          <TouchableOpacity
+            style={screenStyles.torchButton}
+            onPress={() => setTorch(!torch)}
+          >
+            <MaterialCommunityIcons
+              name={torch ? "flashlight-off" : "flashlight"}
+              size={30}
+              color="white"
+            />
+          </TouchableOpacity>
           <ScannerFrame
             heightMultiplier={1}
             borderColor="white"
@@ -146,6 +160,15 @@ const screenStyles = {
     backgroundColor: "#f8f8f8",
     paddingTop: heightPercentageToDP(2),
     flexDirection: "column",
+  },
+  torchButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    zIndex: 1,
+    padding: 10,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 25,
   },
   scannerContainer: {
     flex: 1,
@@ -172,6 +195,8 @@ const screenStyles = {
     borderRadius: 13,
     justifyContent: "center",
     alignItems: "center",
+    right: 0,
+    top: 0,
   },
   centeredView: {
     flex: 1,
