@@ -49,7 +49,7 @@ export default function IndexScreen() {
           screen: "ArtikelEinlagernNavigator",
           params: {
             screen: "Next",
-            params: { regalId: regalId, gwId: gwId, menge: Number(menge) },
+            params: { regalId: regalId, gwId: gwId, menge: menge },
           },
         });
       } else if (error.message == ErrorMessages.REGAL_NOT_FOUND) {

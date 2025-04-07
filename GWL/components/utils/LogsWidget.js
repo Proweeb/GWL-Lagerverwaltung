@@ -69,7 +69,7 @@ const LogsWidget = ({ startDate, endDate }) => {
 
   if (!filteredLogs || filteredLogs.length === 0) {
     return (
-      <View style={customStyles.container}>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Text>Keine Logs im ausgewählten Zeitraum vorhanden</Text>
       </View>
     );

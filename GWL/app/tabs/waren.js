@@ -141,6 +141,21 @@ const WarenScreen = () => {
     );
   };
 
+  if (!jsonData || jsonData.length === 0) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: styles.backgroundColor,
+        }}
+      >
+        <Text>Keine Artikel vorhanden</Text>
+      </View>
+    );
+  }
+
   return (
     <View
       style={{ flex: 1, padding: 10, backgroundColor: styles.backgroundColor }}
@@ -182,6 +197,18 @@ const WarenScreen = () => {
           renderItem={renderItem}
           contentContainerStyle={localStyles.listContainer}
           estimatedItemSize={37}
+          ListEmptyComponent={() => (
+            <View
+              style={{
+                height: "100%",
+                width: "100%",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text>Keine Artikel vorhanden</Text>
+            </View>
+          )}
         />
       </View>
       <Modal
@@ -195,8 +222,6 @@ const WarenScreen = () => {
           redButtonText="Löschen"
           yellowButtonText="Bearbeiten"
           greenButtonText="Lagerplätze"
-          
-       
           yellowCallback={() => {
             navigation.navigate("Bearbeiten", {
               gwId: action,

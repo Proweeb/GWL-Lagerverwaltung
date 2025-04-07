@@ -1,10 +1,4 @@
 package com.Lagerverwaltung
-import com.nozbe.watermelondb.jsi.WatermelonDBJSIPackage
-import com.facebook.react.bridge.JavaScriptContextHolder
-import com.facebook.react.bridge.ReactApplicationContext
-import com.facebook.react.bridge.JSIModulePackage
-import com.facebook.react.bridge.JSIModuleSpec
-import java.util.Arrays
 
 import android.app.Application
 import android.content.res.Configuration
@@ -29,12 +23,7 @@ class MainApplication : Application(), ReactApplication {
           override fun getPackages(): List<ReactPackage> {
             // Packages that cannot be autolinked yet can be added manually here, for example:
             // packages.add(new MyReactNativePackage());
-             
             return PackageList(this).packages
-// @generated begin @nozbe/watermelondb/jsi-package-tag - expo prebuild (DO NOT MODIFY) sync-2718128480131ddc058c0fe3cd0dd6dc11c420a1
-
-		
-// @generated end @nozbe/watermelondb/jsi-package-tag
           }
 
           override fun getJSMainModuleName(): String = ".expo/.virtual-metro-entry"

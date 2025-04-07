@@ -220,6 +220,21 @@ const LagerScreen = () => {
     };
   }, [gwId]);
 
+  if (!groupedRegale || groupedRegale.length === 0) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: styles.backgroundColor,
+        }}
+      >
+        <Text>Keine Lagerplätze vorhanden</Text>
+      </View>
+    );
+  }
+
   if (loading) {
     return (
       <View
