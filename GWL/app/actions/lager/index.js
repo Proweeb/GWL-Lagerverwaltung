@@ -86,9 +86,27 @@ const LagerScreen = () => {
                   return acc;
                 }, {});
 
-                // Sort regale by name
+                // Sort each fachList by fach number before sorting the regale
+                Object.values(grouped).forEach(regal => {
+                  regal.fachList.sort((a, b) => {
+                    const fachNumA = parseInt(a.regalId.split('.')[1]) || 0;
+                    const fachNumB = parseInt(b.regalId.split('.')[1]) || 0;
+                    return fachNumA - fachNumB;
+                  });
+                });
+
+                // Sort regale by name and then by first fach number
                 const sortedRegale = Object.values(grouped).sort((a, b) => {
-                  return a.regalName.localeCompare(b.regalName);
+                  // First sort by regalName
+                  const regalNameCompare = a.regalName.localeCompare(b.regalName);
+                  if (regalNameCompare !== 0) {
+                    return regalNameCompare;
+                  }
+                  
+                  // If regalNames are the same, sort by first fach number
+                  const fachNumA = parseInt(a.fachList[0]?.regalId.split('.')[1]) || 0;
+                  const fachNumB = parseInt(b.fachList[0]?.regalId.split('.')[1]) || 0;
+                  return fachNumA - fachNumB;
                 });
 
                 setGroupedRegale(sortedRegale);
@@ -145,9 +163,27 @@ const LagerScreen = () => {
                 return acc;
               }, {});
 
-              // Sort regale by name
+              // Sort each fachList by fach number before sorting the regale
+              Object.values(grouped).forEach(regal => {
+                regal.fachList.sort((a, b) => {
+                  const fachNumA = parseInt(a.regalId.split('.')[1]) || 0;
+                  const fachNumB = parseInt(b.regalId.split('.')[1]) || 0;
+                  return fachNumA - fachNumB;
+                });
+              });
+
+              // Sort regale by name and then by first fach number
               const sortedRegale = Object.values(grouped).sort((a, b) => {
-                return a.regalName.localeCompare(b.regalName);
+                // First sort by regalName
+                const regalNameCompare = a.regalName.localeCompare(b.regalName);
+                if (regalNameCompare !== 0) {
+                  return regalNameCompare;
+                }
+                
+                // If regalNames are the same, sort by first fach number
+                const fachNumA = parseInt(a.fachList[0]?.regalId.split('.')[1]) || 0;
+                const fachNumB = parseInt(b.fachList[0]?.regalId.split('.')[1]) || 0;
+                return fachNumA - fachNumB;
               });
 
               setGroupedRegale(sortedRegale);
@@ -201,9 +237,27 @@ const LagerScreen = () => {
               return acc;
             }, {});
 
-            // Sort regale by name
+            // Sort each fachList by fach number before sorting the regale
+            Object.values(grouped).forEach(regal => {
+              regal.fachList.sort((a, b) => {
+                const fachNumA = parseInt(a.regalId.split('.')[1]) || 0;
+                const fachNumB = parseInt(b.regalId.split('.')[1]) || 0;
+                return fachNumA - fachNumB;
+              });
+            });
+
+            // Sort regale by name and then by first fach number
             const sortedRegale = Object.values(grouped).sort((a, b) => {
-              return a.regalName.localeCompare(b.regalName);
+              // First sort by regalName
+              const regalNameCompare = a.regalName.localeCompare(b.regalName);
+              if (regalNameCompare !== 0) {
+                return regalNameCompare;
+              }
+              
+              // If regalNames are the same, sort by first fach number
+              const fachNumA = parseInt(a.fachList[0]?.regalId.split('.')[1]) || 0;
+              const fachNumB = parseInt(b.fachList[0]?.regalId.split('.')[1]) || 0;
+              return fachNumA - fachNumB;
             });
 
             setGroupedRegale(sortedRegale);
